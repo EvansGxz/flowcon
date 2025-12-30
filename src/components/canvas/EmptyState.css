@@ -1,0 +1,78 @@
+.empty-state {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1 !important;
+  cursor: pointer;
+  user-select: none;
+}
+
+.empty-state-content {
+  position: relative;
+  z-index: 1 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  background-color: var(--node-bg);
+  border: 2px dashed var(--node-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  max-width: 400px;
+  text-align: center;
+}
+
+.empty-state:hover .empty-state-content {
+  border-color: var(--node-border-selected);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.empty-state-icon {
+  margin-bottom: 24px;
+  animation: float 3s ease-in-out infinite;
+  color: var(--node-description-color);
+}
+
+.empty-state-icon svg {
+  width: 80px;
+  height: 80px;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.empty-state-description {
+  margin: 0;
+  font-size: 14px;
+  color: var(--node-description-color);
+  line-height: 1.6;
+}
+
+[data-theme='abyss'] .empty-state-content {
+  background-color: #1e293b;
+  border-color: #475569;
+}
+
+[data-theme='abyss'] .empty-state-button {
+  background-color: #60a5fa;
+}
+
+[data-theme='dark'] .empty-state-content {
+  background-color: #1f2937;
+  border-color: #4b5563;
+}
+
+[data-theme='dark'] .empty-state-button {
+  background-color: #6b7280;
+}
+

@@ -1,0 +1,76 @@
+.edge-controls-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.edge-controls-container.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: all;
+}
+
+.edge-control-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--node-border);
+  background-color: var(--node-bg);
+  color: var(--node-description-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: 0 2px 6px var(--node-shadow);
+  transition: all 0.2s ease;
+}
+
+.edge-control-button:hover {
+  box-shadow: 0 4px 8px var(--node-shadow);
+  transform: scale(1.1);
+}
+
+.edge-control-button:active {
+  transform: scale(0.95);
+}
+
+.edge-control-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.edge-add-button:hover {
+  background-color: #10b981;
+  color: white;
+  border-color: #10b981;
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.edge-delete-button:hover {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+[data-theme='dark'] .edge-control-button {
+  background-color: var(--node-bg);
+  border-color: var(--node-border);
+}
+
+[data-theme='dark'] .edge-add-button:hover {
+  background-color: #059669;
+  border-color: #059669;
+}
+
+[data-theme='dark'] .edge-delete-button:hover {
+  background-color: #dc2626;
+  border-color: #dc2626;
+}
+

@@ -1,0 +1,315 @@
+/* Variables CSS para Light Mode (por defecto) */
+:root {
+  --node-bg: #ffffff;
+  --node-border: #d1d5db;
+  --node-border-selected: #3b82f6;
+  --node-shadow: rgba(0, 0, 0, 0.1);
+  --node-shadow-hover: rgba(0, 0, 0, 0.1);
+  --node-shadow-selected: rgba(59, 130, 246, 0.1);
+  --node-title-color: #1f2937;
+  --node-description-color: #6b7280;
+  --node-badge-purple-bg: #f3e8ff;
+  --node-badge-purple-text: #7c3aed;
+  --node-badge-blue-bg: #dbeafe;
+  --node-badge-blue-text: #1e40af;
+  --handle-border: #ffffff;
+}
+
+/* Variables CSS para Abyss Theme (azulado) */
+[data-theme='abyss'] {
+  --node-bg: #1e293b;
+  --node-border: #334155;
+  --node-border-selected: #60a5fa;
+  --node-shadow: rgba(0, 0, 0, 0.3);
+  --node-shadow-hover: rgba(0, 0, 0, 0.4);
+  --node-shadow-selected: rgba(96, 165, 250, 0.2);
+  --node-title-color: #f1f5f9;
+  --node-description-color: #94a3b8;
+  --node-badge-purple-bg: #312e81;
+  --node-badge-purple-text: #a78bfa;
+  --node-badge-blue-bg: #1e3a8a;
+  --node-badge-blue-text: #93c5fd;
+  --handle-border: #1e293b;
+}
+
+/* Variables CSS para Dark Theme (monocromático) */
+[data-theme='dark'] {
+  --node-bg: #1f2937;
+  --node-border: #374151;
+  --node-border-selected: #6b7280;
+  --node-shadow: rgba(0, 0, 0, 0.3);
+  --node-shadow-hover: rgba(0, 0, 0, 0.4);
+  --node-shadow-selected: rgba(107, 114, 128, 0.2);
+  --node-title-color: #f9fafb;
+  --node-description-color: #9ca3af;
+  --node-badge-purple-bg: #374151;
+  --node-badge-purple-text: #d1d5db;
+  --node-badge-blue-bg: #374151;
+  --node-badge-blue-text: #d1d5db;
+  --handle-border: #1f2937;
+}
+
+.node-container {
+  padding: 12px 16px;
+  box-shadow: 0 4px 6px -1px var(--node-shadow), 0 2px 4px -1px var(--node-shadow);
+  border-radius: 8px;
+  border: 2px solid var(--node-border);
+  background: var(--node-bg);
+  transition: all 0.2s ease;
+}
+
+.node-container:hover {
+  box-shadow: 0 10px 15px -3px var(--node-shadow-hover), 0 4px 6px -2px var(--node-shadow-hover);
+}
+
+.node-selected {
+  border-color: var(--node-border-selected);
+  box-shadow: 0 0 0 3px var(--node-shadow-selected);
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.node-indicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: transparent;
+}
+
+.node-indicator svg {
+  width: 16px;
+  height: 16px;
+}
+
+.node-indicator-green {
+  color: #10b981;
+}
+
+.node-indicator-purple {
+  color: #a855f7;
+}
+
+.node-indicator-blue {
+  color: #3b82f6;
+}
+
+[data-theme='abyss'] .node-indicator-blue,
+[data-theme='dark'] .node-indicator-blue {
+  background-color: #60a5fa;
+}
+
+[data-theme='dark'] .node-indicator-blue {
+  background-color: #6b7280;
+}
+
+.node-title {
+  font-weight: 600;
+  color: var(--node-title-color);
+  font-size: 14px;
+}
+
+.node-description {
+  font-size: 12px;
+  color: var(--node-description-color);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.node-badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.node-badge-purple {
+  background-color: var(--node-badge-purple-bg);
+  color: var(--node-badge-purple-text);
+}
+
+.node-badge-blue {
+  background-color: var(--node-badge-blue-bg);
+  color: var(--node-badge-blue-text);
+}
+
+.node-handle {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--handle-border);
+  border-radius: 50%;
+}
+
+.node-handle-green {
+  background-color: #10b981;
+}
+
+.node-handle-purple {
+  background-color: #a855f7;
+}
+
+.node-handle-blue {
+  background-color: #3b82f6;
+}
+
+[data-theme='abyss'] .node-handle-blue {
+  background-color: #60a5fa;
+}
+
+[data-theme='dark'] .node-handle-blue {
+  background-color: #6b7280;
+}
+
+/* Estados de ejecución */
+.node-status-idle .node-indicator {
+  opacity: 1;
+}
+
+.node-status-running .node-indicator {
+  animation: pulse 1.5s ease-in-out infinite;
+  background-color: #f59e0b;
+}
+
+.node-status-success .node-indicator {
+  background-color: #10b981;
+}
+
+.node-status-error .node-indicator {
+  background-color: #ef4444;
+}
+
+.node-status-spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  font-size: 10px;
+}
+
+.node-status-check {
+  font-size: 10px;
+  color: white;
+}
+
+.node-status-error {
+  font-size: 10px;
+  color: white;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Badge de versión */
+.node-version {
+  font-size: 10px;
+  color: var(--node-description-color);
+  background-color: var(--bg-secondary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+/* Badge de información adicional */
+.node-badge-info {
+  background-color: var(--bg-secondary);
+  color: var(--node-description-color);
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.node-badge-green {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+[data-theme='abyss'] .node-badge-green {
+  background-color: #064e3b;
+  color: #6ee7b7;
+}
+
+[data-theme='dark'] .node-badge-green {
+  background-color: #374151;
+  color: #d1d5db;
+}
+
+/* Handle de error */
+.node-handle-error {
+  background-color: #ef4444;
+}
+
+[data-theme='abyss'] .node-handle-error,
+[data-theme='dark'] .node-handle-error {
+  background-color: #dc2626;
+}
+
+/* Vista icon: solo icono */
+.node-container.icon-view {
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px !important;
+  width: 48px;
+  height: 48px;
+}
+
+.node-container.icon-view .node-indicator {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.node-container.icon-view .node-header,
+.node-container.icon-view .node-description,
+.node-container.icon-view .node-badge,
+.node-container.icon-view .node-title,
+.node-container.icon-view .node-version {
+  display: none;
+}
+
+.node-container.icon-view .node-status-spinner,
+.node-container.icon-view .node-status-check,
+.node-container.icon-view .node-status-error {
+  font-size: 20px;
+  color: white;
+}
+
+/* Vista compact: solo header */
+.node-container.compact-view .node-description,
+.node-container.compact-view .node-badge {
+  display: none;
+}

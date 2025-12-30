@@ -1,0 +1,69 @@
+/* Estilos para React Flow adaptados al tema */
+
+/* Panel de controles */
+.react-flow__controls {
+  background-color: var(--node-bg);
+  border: 1px solid var(--node-border);
+  box-shadow: 0 2px 8px var(--node-shadow);
+}
+
+.react-flow__controls-button {
+  background-color: var(--node-bg);
+  border-bottom: 1px solid var(--node-border);
+  color: var(--node-title-color);
+}
+
+.react-flow__controls-button:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* Minimap */
+.react-flow__minimap {
+  background-color: var(--node-bg);
+  border: 1px solid var(--node-border);
+}
+
+/* Panel de atribución - Oculto */
+.react-flow__attribution {
+  display: none !important;
+}
+
+/* Handles de conexión */
+.react-flow__handle {
+  border: 2px solid var(--handle-border);
+}
+
+/* Nodos seleccionados */
+.react-flow__node.selected .node-container {
+  border-color: var(--node-border-selected);
+}
+
+/* Edges (conexiones) */
+.react-flow__edge-path {
+  stroke: var(--node-description-color);
+}
+
+[data-theme='abyss'] .react-flow__edge-path,
+[data-theme='dark'] .react-flow__edge-path {
+  stroke: #9ca3af;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--node-border-selected);
+}
+
+/* Texto de labels en edges */
+.react-flow__edge-text {
+  fill: var(--node-title-color);
+}
+
+/* Background pattern */
+.react-flow__background-pattern {
+  opacity: 0.3;
+}
+
+[data-theme='abyss'] .react-flow__background-pattern,
+[data-theme='dark'] .react-flow__background-pattern {
+  opacity: 0.2;
+}
+

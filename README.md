@@ -1,70 +1,99 @@
-# Getting Started with Create React App
+# React Flow - Agent AI Canvas
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Aplicación estilo n8n con canvas para nodos orientados a Agent AI construida con React Flow.
 
-## Available Scripts
+## 🚀 Características
 
-In the project directory, you can run:
+- **Canvas interactivo** con React Flow para crear flujos de trabajo de Agent AI
+- **Nodos personalizados**:
+  - **Trigger Node**: Nodo de inicio que activa el flujo
+  - **Agent Node**: Nodo de procesamiento con IA
+  - **Action Node**: Nodo de acción para ejecutar tareas
+- **Interfaz estilo n8n** con diseño moderno y limpio
+- **Controles de navegación**: Zoom, pan, minimap
+- **Conexiones animadas** entre nodos
 
-### `npm start`
+## 📦 Instalación
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+El proyecto ya tiene React Flow instalado. Para iniciar:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+npm install
+npm start
+```
 
-### `npm test`
+La aplicación se abrirá en [http://localhost:3000](http://localhost:3000)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🏗️ Estructura del Proyecto
 
-### `npm run build`
+```
+src/
+├── components/
+│   └── FlowCanvas.js      # Componente principal del canvas
+├── nodes/
+│   ├── TriggerNode.js     # Nodo de trigger
+│   ├── AgentNode.js       # Nodo de agente AI
+│   ├── ActionNode.js      # Nodo de acción
+│   └── NodeStyles.css     # Estilos para los nodos
+├── App.js                 # Componente principal
+└── index.js               # Punto de entrada
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🎨 Uso
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Nodos Disponibles
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. **Trigger Node** (Verde)
+   - Nodo de inicio del flujo
+   - Tiene un handle de salida (source)
+   - Ejemplo: Webhook Trigger
 
-### `npm run eject`
+2. **Agent Node** (Morado)
+   - Nodo de procesamiento con IA
+   - Tiene handles de entrada y salida
+   - Puede incluir información del modelo (ej: GPT-4)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3. **Action Node** (Azul)
+   - Nodo de acción final
+   - Tiene handles de entrada y salida
+   - Puede incluir tipo de acción
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Interacciones
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- **Arrastrar nodos**: Click y arrastra para mover nodos
+- **Conectar nodos**: Arrastra desde un handle de salida a un handle de entrada
+- **Seleccionar nodos**: Click en un nodo para seleccionarlo
+- **Zoom**: Usa la rueda del mouse o los controles
+- **Pan**: Click y arrastra en el canvas vacío
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🔧 Personalización
 
-## Learn More
+### Agregar Nuevos Nodos
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. Crea un nuevo componente en `src/nodes/`
+2. Importa `Handle` y `Position` de `@xyflow/react`
+3. Usa los estilos de `NodeStyles.css`
+4. Regístralo en `FlowCanvas.js` en el objeto `nodeTypes`
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Modificar Nodos Existentes
 
-### Code Splitting
+Edita los archivos en `src/nodes/` para personalizar la apariencia y funcionalidad de los nodos.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 📚 Documentación
 
-### Analyzing the Bundle Size
+- [React Flow Documentation](https://reactflow.dev/learn)
+- [React Flow API Reference](https://reactflow.dev/api-reference/react-flow)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🛠️ Tecnologías
 
-### Making a Progressive Web App
+- React 19
+- React Flow (@xyflow/react) 12.10.0
+- Create React App
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 📝 Próximos Pasos
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- [ ] Agregar panel lateral para agregar nuevos nodos
+- [ ] Implementar guardado/carga de flujos
+- [ ] Agregar validación de conexiones
+- [ ] Implementar ejecución de flujos
+- [ ] Agregar más tipos de nodos (Condition, Loop, etc.)

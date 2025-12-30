@@ -1,0 +1,544 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://redmind.local/schemas/graph.schema.json",
+  "title": "REDMIND GraphDefinition v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "start",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "start": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Node"
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Edge"
+      }
+    }
+  },
+  "$defs": {
+    "UI": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number"
+        },
+        "h": {
+          "type": "number"
+        }
+      }
+    },
+    "Edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source",
+        "target"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string"
+        }
+      }
+    },
+    "NodeBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "typeVersion",
+        "config"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "typeVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "label": {
+          "type": "string"
+        },
+        "ui": {
+          "$ref": "#/$defs/UI"
+        },
+        "config": {
+          "type": "object"
+        }
+      }
+    },
+    "Node": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/TriggerManualNode"
+        },
+        {
+          "$ref": "#/$defs/TriggerWebhookNode"
+        },
+        {
+          "$ref": "#/$defs/AgentCoreNode"
+        },
+        {
+          "$ref": "#/$defs/ConditionExprNode"
+        },
+        {
+          "$ref": "#/$defs/MemoryKVNode"
+        },
+        {
+          "$ref": "#/$defs/ModelLLMNode"
+        },
+        {
+          "$ref": "#/$defs/ToolHttpNode"
+        },
+        {
+          "$ref": "#/$defs/ToolPostgresNode"
+        },
+        {
+          "$ref": "#/$defs/ResponseChatNode"
+        }
+      ]
+    },
+    "TriggerManualNode": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/NodeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "config"
+          ],
+          "properties": {
+            "type": {
+              "const": "trigger.manual"
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "message"
+              ],
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "TriggerWebhookNode": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/NodeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "config"
+          ],
+          "properties": {
+            "type": {
+              "const": "trigger.webhook"
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "method"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "pattern": "^/"
+                },
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "GET",
+                    "POST",
+                    "PUT",
+                    "PATCH",
+                    "DELETE"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "AgentCoreNode": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/NodeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "config"
+          ],
+          "properties": {
+            "type": {
+              "const": "agent.core"
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "strategy",
+                "instructions"
+              ],
+              "properties": {
+                "strategy": {
+                  "type": "string",
+                  "enum": [
+                    "reactive"
+                  ]
+                },
+                "instructions": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ConditionExprNode": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/NodeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "config"
+          ],
+          "properties": {
+            "type": {
+              "const": "condition.expr"
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "engine",
+                "rules"
+              ],
+              "properties": {
+                "engine": {
+                  "type": "string",
+                  "enum": [
+                    "jexl",
+                    "jmespath"
+                  ]
+                },
+                "rules": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "if",
+                      "to"
+                    ],
+                    "properties": {
+                      "if": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "to": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "MemoryKVNode": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/NodeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "config"
+          ],
+          "properties": {
+            "type": {
+              "const": "memory.kv"
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "scope",
+                "backend"
+              ],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": [
+                    "load",
+                    "save"
+                  ]
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": [
+                    "conversation",
+                    "run"
+                  ]
+                },
+                "backend": {
+                  "type": "string",
+                  "enum": [
+                    "postgres",
+                    "memory"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ModelLLMNode": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/NodeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "config"
+          ],
+          "properties": {
+            "type": {
+              "const": "model.llm"
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "provider",
+                "model"
+              ],
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "enum": [
+                    "azure",
+                    "openai",
+                    "local"
+                  ]
+                },
+                "model": {
+                  "type": "string"
+                },
+                "temperature": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2,
+                  "default": 0.2
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ToolHttpNode": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/NodeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "config"
+          ],
+          "properties": {
+            "type": {
+              "const": "tool.http"
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "method",
+                "url"
+              ],
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": [
+                    "GET",
+                    "POST",
+                    "PUT",
+                    "PATCH",
+                    "DELETE"
+                  ]
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "headers": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "body": {}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ToolPostgresNode": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/NodeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "config"
+          ],
+          "properties": {
+            "type": {
+              "const": "tool.postgres"
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "connectionRef",
+                "query"
+              ],
+              "properties": {
+                "connectionRef": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "query": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ResponseChatNode": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/NodeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "config"
+          ],
+          "properties": {
+            "type": {
+              "const": "response.chat"
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "format"
+              ],
+              "properties": {
+                "format": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "json"
+                  ]
+                },
+                "template": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

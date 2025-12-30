@@ -1,0 +1,53 @@
+.add-node-button {
+  position: fixed;
+  top: 70px;
+  left: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: var(--node-bg);
+  border: 2px solid var(--node-border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--node-title-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.add-node-button:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  background-color: var(--bg-secondary);
+}
+
+.add-node-button:active {
+  transform: translateY(0);
+}
+
+.add-node-button-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.add-node-button-text {
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .add-node-button-text {
+    display: none;
+  }
+  
+  .add-node-button {
+    padding: 10px;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+  }
+}
+

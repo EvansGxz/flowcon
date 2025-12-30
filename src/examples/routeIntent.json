@@ -1,0 +1,83 @@
+{
+  "id": "route-intent",
+  "version": 1,
+  "start": "t1",
+  "nodes": [
+    {
+      "id": "t1",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "config": {
+        "message": "reporte ventas"
+      }
+    },
+    {
+      "id": "a1",
+      "type": "agent.core",
+      "typeVersion": 1,
+      "config": {
+        "strategy": "reactive",
+        "instructions": "If message includes 'reporte' return intent=report else intent=chat"
+      }
+    },
+    {
+      "id": "c1",
+      "type": "condition.expr",
+      "typeVersion": 1,
+      "config": {
+        "engine": "jexl",
+        "rules": [
+          {
+            "if": "intent == 'report'",
+            "to": "r_report"
+          },
+          {
+            "if": "intent == 'chat'",
+            "to": "r_chat"
+          }
+        ]
+      }
+    },
+    {
+      "id": "r_report",
+      "type": "response.chat",
+      "typeVersion": 1,
+      "config": {
+        "format": "text",
+        "template": "OK, generaré el reporte."
+      }
+    },
+    {
+      "id": "r_chat",
+      "type": "response.chat",
+      "typeVersion": 1,
+      "config": {
+        "format": "text",
+        "template": "OK, conversemos."
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "t1",
+      "target": "a1"
+    },
+    {
+      "id": "e2",
+      "source": "a1",
+      "target": "c1"
+    },
+    {
+      "id": "e3",
+      "source": "c1",
+      "target": "r_report"
+    },
+    {
+      "id": "e4",
+      "source": "c1",
+      "target": "r_chat"
+    }
+  ]
+}
+

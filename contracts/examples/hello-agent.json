@@ -1,0 +1,46 @@
+{
+  "id": "hello-agent",
+  "version": 1,
+  "start": "t1",
+  "nodes": [
+    {
+      "id": "t1",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "config": {
+        "message": "Hola"
+      }
+    },
+    {
+      "id": "a1",
+      "type": "agent.core",
+      "typeVersion": 1,
+      "config": {
+        "strategy": "reactive",
+        "instructions": "Return intent=chat"
+      }
+    },
+    {
+      "id": "r1",
+      "type": "response.chat",
+      "typeVersion": 1,
+      "config": {
+        "format": "text",
+        "template": "Hola, soy REDMIND."
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "t1",
+      "target": "a1"
+    },
+    {
+      "id": "e2",
+      "source": "a1",
+      "target": "r1"
+    }
+  ]
+}
+

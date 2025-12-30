@@ -1,0 +1,113 @@
+.custom-controls {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 4;
+  background-color: var(--node-bg);
+  border: 1px solid var(--node-border);
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.custom-control-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--node-title-color);
+  transition: all 0.2s ease;
+}
+
+.custom-control-button:hover:not(:disabled) {
+  background-color: var(--bg-secondary);
+  color: var(--node-border-selected);
+}
+
+.custom-control-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.custom-control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.custom-control-button svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.layout-spinner {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.custom-control-tooltip {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 8px;
+  padding: 6px 10px;
+  background-color: var(--node-title-color);
+  color: var(--node-bg);
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-weight: 500;
+}
+
+.custom-control-tooltip::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 4px solid transparent;
+  border-right-color: var(--node-title-color);
+}
+
+/* Abyss theme adjustments */
+[data-theme='abyss'] .custom-controls {
+  background-color: #1e293b;
+  border-color: #475569;
+}
+
+[data-theme='abyss'] .custom-control-button:hover:not(:disabled) {
+  background-color: #334155;
+}
+
+/* Dark theme adjustments */
+[data-theme='dark'] .custom-controls {
+  background-color: #1f2937;
+  border-color: #4b5563;
+}
+
+[data-theme='dark'] .custom-control-button:hover:not(:disabled) {
+  background-color: #374151;
+}
+

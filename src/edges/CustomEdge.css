@@ -1,0 +1,14 @@
+/* Estilos para el grupo del edge path */
+.edge-path-group {
+  cursor: pointer;
+}
+
+.edge-path-group.hovered .react-flow__edge-path {
+  stroke-width: 3;
+  transition: stroke-width 0.2s ease;
+}
+
+/* Wrapper para mantener el hover cuando el mouse está sobre los controles */
+.edge-controls-wrapper {
+  pointer-events: all;
+}
