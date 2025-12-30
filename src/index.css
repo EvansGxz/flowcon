@@ -21,12 +21,12 @@
 }
 
 [data-theme='dark'] {
-  --bg-primary: #111827;
-  --bg-secondary: #1f2937;
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #171717;
   --text-primary: #f9fafb;
-  --text-secondary: #9ca3af;
-  --border-color: #374151;
-  --background-pattern: #4b5563;
+  --text-secondary: #a3a3a3;
+  --border-color: #404040;
+  --background-pattern: #525252;
 }
 
 body {

@@ -34,19 +34,19 @@
 
 /* Variables CSS para Dark Theme (monocromático) */
 [data-theme='dark'] {
-  --node-bg: #1f2937;
-  --node-border: #374151;
-  --node-border-selected: #6b7280;
+  --node-bg: #171717;
+  --node-border: #404040;
+  --node-border-selected: #737373;
   --node-shadow: rgba(0, 0, 0, 0.3);
   --node-shadow-hover: rgba(0, 0, 0, 0.4);
-  --node-shadow-selected: rgba(107, 114, 128, 0.2);
+  --node-shadow-selected: rgba(115, 115, 115, 0.2);
   --node-title-color: #f9fafb;
-  --node-description-color: #9ca3af;
-  --node-badge-purple-bg: #374151;
-  --node-badge-purple-text: #d1d5db;
-  --node-badge-blue-bg: #374151;
-  --node-badge-blue-text: #d1d5db;
-  --handle-border: #1f2937;
+  --node-description-color: #a3a3a3;
+  --node-badge-purple-bg: #404040;
+  --node-badge-purple-text: #d4d4d4;
+  --node-badge-blue-bg: #404040;
+  --node-badge-blue-text: #d4d4d4;
+  --handle-border: #171717;
 }
 
 .node-container {

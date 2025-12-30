@@ -85,11 +85,11 @@
 
 /* Dark theme adjustments */
 [data-theme='dark'] .add-node-control {
-  background-color: #1f2937;
-  border-color: #4b5563;
+  background-color: #171717;
+  border-color: #404040;
 }
 
 [data-theme='dark'] .add-node-control-button:hover {
-  background-color: #374151;
+  background-color: #262626;
 }
 

@@ -213,7 +213,7 @@ function FlowCanvasInner() {
   const { theme } = useTheme();
   const backgroundColor = isDark ? '#4b5563' : '#aaa';
   const minimapMaskColor = isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)';
-  const minimapBgColor = theme === 'light' ? '#ffffff' : theme === 'abyss' ? '#1e293b' : '#1f2937';
+  const minimapBgColor = theme === 'light' ? '#ffffff' : theme === 'abyss' ? '#1e293b' : '#171717';
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>

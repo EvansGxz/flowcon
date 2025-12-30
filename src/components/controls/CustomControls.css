@@ -103,11 +103,11 @@
 
 /* Dark theme adjustments */
 [data-theme='dark'] .custom-controls {
-  background-color: #1f2937;
-  border-color: #4b5563;
+  background-color: #171717;
+  border-color: #404040;
 }
 
 [data-theme='dark'] .custom-control-button:hover:not(:disabled) {
-  background-color: #374151;
+  background-color: #262626;
 }
 
