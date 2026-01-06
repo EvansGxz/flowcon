@@ -1,4 +1,5 @@
 import { Handle, Position } from '@xyflow/react';
+import { Play, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { getNodeDefinition } from '../utils/nodeInstance';
 import { NodeStatus } from './definitions/types';
 import { useEditorStore } from '../store/editorStore';
@@ -20,23 +21,23 @@ const TriggerNode = ({ data, selected, id }) => {
   // Clase de estado para el indicador
   const statusClass = `node-status-${status}`;
 
-  // Vista icon: solo icono
+  // Vista icon: solo icono - Más grande
   if (nodeViewMode === 'icon') {
     return (
       <div
         className={`node-container trigger-node icon-view ${selected ? 'node-selected' : ''} ${statusClass}`}
-        style={{ width: '48px', height: '48px', minWidth: '48px' }}
+        style={{ width: '64px', height: '64px', minWidth: '64px' }}
       >
         <div className={`node-indicator node-indicator-green ${statusClass}`} style={{ width: '100%', height: '100%', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M8 5.14V19.14L19 12.14L8 5.14Z"
-              fill="currentColor"
-            />
-          </svg>
-          {status === NodeStatus.RUNNING && <span className="node-status-spinner">⟳</span>}
-          {status === NodeStatus.SUCCESS && <span className="node-status-check">✓</span>}
-          {status === NodeStatus.ERROR && <span className="node-status-error">✕</span>}
+          {status === NodeStatus.RUNNING ? (
+            <Loader2 size={32} className="animate-spin" />
+          ) : status === NodeStatus.SUCCESS ? (
+            <CheckCircle2 size={32} />
+          ) : status === NodeStatus.ERROR ? (
+            <XCircle size={32} />
+          ) : (
+            <Play size={32} />
+          )}
         </div>
         <Handle
           id="out"
@@ -57,15 +58,15 @@ const TriggerNode = ({ data, selected, id }) => {
       >
         <div className="node-header">
           <div className={`node-indicator node-indicator-green ${statusClass}`}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M8 5.14V19.14L19 12.14L8 5.14Z"
-                fill="currentColor"
-              />
-            </svg>
-            {status === NodeStatus.RUNNING && <span className="node-status-spinner">⟳</span>}
-            {status === NodeStatus.SUCCESS && <span className="node-status-check">✓</span>}
-            {status === NodeStatus.ERROR && <span className="node-status-error">✕</span>}
+            {status === NodeStatus.RUNNING ? (
+              <Loader2 size={22} className="animate-spin" />
+            ) : status === NodeStatus.SUCCESS ? (
+              <CheckCircle2 size={22} />
+            ) : status === NodeStatus.ERROR ? (
+              <XCircle size={22} />
+            ) : (
+              <Play size={22} />
+            )}
           </div>
           <div className="node-title">{displayName}</div>
           {version > 1 && (
@@ -90,15 +91,15 @@ const TriggerNode = ({ data, selected, id }) => {
     >
       <div className="node-header">
         <div className={`node-indicator node-indicator-green ${statusClass}`}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M8 5.14V19.14L19 12.14L8 5.14Z"
-              fill="currentColor"
-            />
-          </svg>
-          {status === NodeStatus.RUNNING && <span className="node-status-spinner">⟳</span>}
-          {status === NodeStatus.SUCCESS && <span className="node-status-check">✓</span>}
-          {status === NodeStatus.ERROR && <span className="node-status-error">✕</span>}
+          {status === NodeStatus.RUNNING ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : status === NodeStatus.SUCCESS ? (
+            <CheckCircle2 size={16} />
+          ) : status === NodeStatus.ERROR ? (
+            <XCircle size={16} />
+          ) : (
+            <Play size={16} />
+          )}
         </div>
         <div className="node-title">{displayName}</div>
         {version > 1 && (

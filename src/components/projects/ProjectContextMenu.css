@@ -54,7 +54,7 @@
 }
 
 .project-context-menu-item.danger:hover {
-  background: var(--error-bg, rgba(239, 68, 68, 0.1));
+  background: var(--error-bg);
 }
 
 .project-context-menu-item.danger svg {

@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { reactFlowToGraphDefinition, graphDefinitionToReactFlow } from '../utils/graphConverter';
 import { validateGraph } from '../contracts';
 import { checkHealth } from '../services/healthService';
-import { getFlows as getFlowsService, saveFlow as saveFlowService, getFlow as getFlowService, deleteFlow as deleteFlowService } from '../services/flowsService';
+import { getFlows as getFlowsService, saveFlow as saveFlowService, getFlow as getFlowService, deleteFlow as deleteFlowService, updateFlow as updateFlowService } from '../services/flowsService';
 import { getRuns, executeFlowTest, executeFlow as executeFlowService, rerunFlow as rerunFlowService, getRun as getRunService, cancelRun as cancelRunService } from '../services/runsService';
 import { validateGraphRemote } from '../services/validationService';
 import { createProject as createProjectService, getProjects as getProjectsService, deleteProject as deleteProjectService, getProject as getProjectService } from '../services/projectsService';
@@ -59,6 +59,10 @@ export const useEditorStore = create((set, get) => ({
   selectedProjectId: getInitialProjectId(), // Inicializar desde localStorage
   activeNodeId: null, // Nodo activo durante ejecución (para resaltar en canvas)
   pollingInterval: null, // Intervalo de polling para runs activos
+  // Estado para tabs de flows
+  openTabs: [], // Array de flowIds que están abiertos en tabs
+  flowSavedStates: {}, // { flowId: { nodes, edges, graphId } } - Estado guardado de cada flow
+  flowErrors: {}, // { flowId: { valid: boolean, errors: [] } } - Errores de validación por flow
 
   // Setters básicos
   setNodes: (nodesOrUpdater) => {
@@ -87,6 +91,67 @@ export const useEditorStore = create((set, get) => ({
   setSelectedFlowId: (flowId) => set({ selectedFlowId: flowId }),
   setSelectedRun: (run) => set({ selectedRun: run }),
   setConnectionStatus: (status) => set({ connectionStatus: status }),
+  setOpenTabs: (tabs) => set({ openTabs: tabs }),
+  setFlowSavedState: (flowId, state) => {
+    const { flowSavedStates } = get();
+    set({
+      flowSavedStates: {
+        ...flowSavedStates,
+        [flowId]: state,
+      },
+    });
+  },
+  checkFlowHasUnsavedChanges: (flowId, currentNodes, currentEdges) => {
+    const { flowSavedStates, selectedFlowId } = get();
+    
+    // Solo verificar cambios si el flow está activo
+    if (selectedFlowId !== flowId) {
+      return false;
+    }
+    
+    const savedState = flowSavedStates[flowId];
+    
+    if (!savedState) {
+      // Si no hay estado guardado, no hay cambios (el flow no se ha guardado aún)
+      return false;
+    }
+    
+    // Comparar nodes y edges de forma más precisa
+    // Normalizar para comparación (ordenar por id para evitar falsos positivos)
+    const normalizeNodes = (nodes) => {
+      return nodes.map(n => ({
+        id: n.id,
+        type: n.type,
+        position: n.position,
+        data: n.data,
+      })).sort((a, b) => a.id.localeCompare(b.id));
+    };
+    
+    const normalizeEdges = (edges) => {
+      return edges.map(e => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        sourceHandle: e.sourceHandle,
+        targetHandle: e.targetHandle,
+      })).sort((a, b) => a.id.localeCompare(b.id));
+    };
+    
+    const savedNodesNormalized = normalizeNodes(savedState.nodes || []);
+    const currentNodesNormalized = normalizeNodes(currentNodes || []);
+    const savedEdgesNormalized = normalizeEdges(savedState.edges || []);
+    const currentEdgesNormalized = normalizeEdges(currentEdges || []);
+    
+    const nodesChanged = JSON.stringify(savedNodesNormalized) !== JSON.stringify(currentNodesNormalized);
+    const edgesChanged = JSON.stringify(savedEdgesNormalized) !== JSON.stringify(currentEdgesNormalized);
+    
+    return nodesChanged || edgesChanged;
+  },
+  checkFlowHasErrors: (flowId) => {
+    const { flowErrors } = get();
+    const errors = flowErrors[flowId];
+    return errors && !errors.valid;
+  },
   selectProject: async (projectId) => {
     // Guardar en localStorage según REDMIND_Projects_System.md
     if (projectId) {
@@ -109,7 +174,7 @@ export const useEditorStore = create((set, get) => ({
       }
     } else {
       // Si no hay proyecto, limpiar todo
-      set({ runs: [], selectedRun: null, flows: [], selectedFlowId: null, nodes: [], edges: [] });
+      set({ runs: [], selectedRun: null, flows: [], selectedFlowId: null, nodes: [], edges: [], openTabs: [], flowSavedStates: {}, flowErrors: {} });
     }
   },
 
@@ -171,9 +236,22 @@ export const useEditorStore = create((set, get) => ({
 
   // Validación
   validateLocal: () => {
-    const { nodes, edges, graphId } = get();
+    const { nodes, edges, graphId, selectedFlowId } = get();
     const graphDefinition = reactFlowToGraphDefinition(nodes, edges, graphId);
-    return validateGraph(graphDefinition);
+    const validation = validateGraph(graphDefinition);
+    
+    // Actualizar errores del flow actual si hay uno seleccionado
+    if (selectedFlowId) {
+      const { flowErrors } = get();
+      set({
+        flowErrors: {
+          ...flowErrors,
+          [selectedFlowId]: validation,
+        },
+      });
+    }
+    
+    return validation;
   },
 
   validateRemote: async () => {
@@ -329,6 +407,12 @@ export const useEditorStore = create((set, get) => ({
   loadFlows: async () => {
     try {
       const { selectedProjectId } = get();
+      const localStorageProjectId = localStorage.getItem('redmind_currentProjectId');
+      
+      // Asegurar que el selectedProjectId esté en localStorage para que apiService lo use
+      if (selectedProjectId && selectedProjectId !== localStorageProjectId) {
+        localStorage.setItem('redmind_currentProjectId', selectedProjectId);
+      }
       
       // Usar /flows con X-Project-Id header si hay proyecto seleccionado
       // Si no hay proyecto, llamar sin X-Project-Id para obtener todos los flows
@@ -388,6 +472,23 @@ export const useEditorStore = create((set, get) => ({
       
       // Si no hay graphData, inicializar con canvas vacío
       if (!graphData) {
+        // Guardar el estado inicial como estado guardado
+        const { setFlowSavedState } = get();
+        setFlowSavedState(flowId, {
+          nodes: [],
+          edges: [],
+          graphId: flow.id || flowId,
+        });
+        
+        // No validar automáticamente - solo validar cuando se ejecute
+        const { flowErrors } = get();
+        set({
+          flowErrors: {
+            ...flowErrors,
+            [flowId]: { valid: true, errors: [] },
+          },
+        });
+        
         set({
           nodes: [],
           edges: [],
@@ -398,6 +499,25 @@ export const useEditorStore = create((set, get) => ({
       }
       
       const { nodes, edges } = graphDefinitionToReactFlow(graphData);
+      
+      // Guardar el estado inicial como estado guardado
+      const { setFlowSavedState } = get();
+      setFlowSavedState(flowId, {
+        nodes: JSON.parse(JSON.stringify(nodes)), // Deep copy
+        edges: JSON.parse(JSON.stringify(edges)), // Deep copy
+        graphId: flow.id || flowId,
+      });
+      
+      // No validar automáticamente al cargar - solo validar cuando se ejecute
+      // Limpiar errores previos al cargar un flow
+      const { flowErrors } = get();
+      set({
+        flowErrors: {
+          ...flowErrors,
+          [flowId]: { valid: true, errors: [] },
+        },
+      });
+      
       set({
         nodes,
         edges,
@@ -452,6 +572,24 @@ export const useEditorStore = create((set, get) => ({
       // El backend puede retornar id o flow_id
       const flowId = savedFlow.id || savedFlow.flow_id;
       
+      // Actualizar el estado guardado con el estado actual
+      const { setFlowSavedState } = get();
+      setFlowSavedState(flowId, {
+        nodes: JSON.parse(JSON.stringify(nodes)), // Deep copy
+        edges: JSON.parse(JSON.stringify(edges)), // Deep copy
+        graphId: flowId,
+      });
+      
+      // No validar automáticamente al guardar - solo validar cuando se ejecute
+      // Limpiar errores previos al guardar
+      const { flowErrors } = get();
+      set({
+        flowErrors: {
+          ...flowErrors,
+          [flowId]: { valid: true, errors: [] },
+        },
+      });
+      
       // Actualizar estado
       set({
         selectedFlowId: flowId,
@@ -486,19 +624,34 @@ export const useEditorStore = create((set, get) => ({
     try {
       const { nodes, edges, graphId, selectedFlowId } = get();
       
-      console.log('🚀 [editorStore] executeFlow llamado:', { 
-        selectedFlowId, 
-        timeoutSeconds, 
-        nodesCount: nodes.length,
-        edgesCount: edges.length 
-      });
+      // Validar el flow antes de ejecutar y guardar errores
+      const graphDefinition = reactFlowToGraphDefinition(nodes, edges, graphId);
+      const validation = validateGraph(graphDefinition);
+      const { flowErrors } = get();
+      
+      if (selectedFlowId) {
+        set({
+          flowErrors: {
+            ...flowErrors,
+            [selectedFlowId]: validation,
+          },
+        });
+      }
+      
+      // Si hay errores de validación, no ejecutar
+      if (!validation.valid) {
+        return { 
+          success: false, 
+          error: `El flow tiene errores de validación: ${validation.errors.join(', ')}` 
+        };
+      }
       
       let result;
       
       // Si hay un flowId persistido, usar POST /api/v1/runs (asíncrono según Semana 3)
       // Si no, usar POST /api/v1/runs/test (in-memory, puede ser síncrono)
       if (selectedFlowId) {
-        console.log('📝 [editorStore] Ejecutando flow persistido:', selectedFlowId);
+        console.log('[editorStore] Ejecutando flow persistido:', selectedFlowId);
         // Para flows persistidos, extraer input del grafo actual si hay trigger manual
         const graphDefinition = reactFlowToGraphDefinition(nodes, edges, graphId);
         const startNodeId = graphDefinition.start;
@@ -510,13 +663,13 @@ export const useEditorStore = create((set, get) => ({
           input = {
             message: startNode.config.message || '',
           };
-          console.log('📥 [editorStore] Input extraído del trigger manual:', input);
+          console.log('[editorStore] Input extraído del trigger manual:', input);
         }
         
         // POST /api/v1/runs ahora retorna inmediatamente con {runId, status: "running"}
         result = await executeFlowService(selectedFlowId, input, timeoutSeconds);
         
-        console.log('✅ [editorStore] Respuesta inmediata del backend:', result);
+        console.log('[editorStore] Respuesta inmediata del backend:', result);
         
         // El backend retorna inmediatamente: {runId, status: "running"}
         const runId = result.runId || result.id || result.run_id;
@@ -547,12 +700,12 @@ export const useEditorStore = create((set, get) => ({
         
         return { success: true, run: { id: runId, status: initialStatus } };
       } else {
-        console.log('🧪 [editorStore] Ejecutando flow de prueba (in-memory)');
+        console.log('[editorStore] Ejecutando flow de prueba (in-memory)');
         // Ejecutar in-memory sin persistir (puede seguir siendo síncrono)
         const graphDefinition = reactFlowToGraphDefinition(nodes, edges, graphId);
         result = await executeFlowTest(graphDefinition, timeoutSeconds);
         
-        console.log('✅ [editorStore] Resultado de ejecución test:', result);
+        console.log('[editorStore] Resultado de ejecución test:', result);
         
         // Actualizar trace y run seleccionado
         const traceArray = result.trace || result.node_runs || [];
@@ -573,7 +726,7 @@ export const useEditorStore = create((set, get) => ({
         return { success: true, run: result };
       }
     } catch (error) {
-      console.error('❌ [editorStore] Error al ejecutar flow:', error);
+      console.error('[editorStore] Error al ejecutar flow:', error);
       return { success: false, error: error.message };
     }
   },
@@ -587,7 +740,7 @@ export const useEditorStore = create((set, get) => ({
       clearInterval(pollingInterval);
     }
     
-    console.log('🔄 [editorStore] Iniciando polling para run:', runId);
+    console.log('[editorStore] Iniciando polling para run:', runId);
     
     // Polling cada 1.5 segundos (recomendado: 1-2 segundos según documentación)
     const interval = setInterval(async () => {
@@ -616,7 +769,7 @@ export const useEditorStore = create((set, get) => ({
         // Si el run terminó (completed, error, cancelled, timeout), detener polling
         const finalStatuses = ['completed', 'error', 'cancelled', 'timeout'];
         if (finalStatuses.includes(run.status)) {
-          console.log('✅ [editorStore] Run terminado, deteniendo polling:', run.status);
+          console.log('[editorStore] Run terminado, deteniendo polling:', run.status);
           clearInterval(interval);
           set({ pollingInterval: null, activeNodeId: null });
           
@@ -627,7 +780,7 @@ export const useEditorStore = create((set, get) => ({
           }
         }
       } catch (error) {
-        console.error('❌ [editorStore] Error en polling:', error);
+        console.error('[editorStore] Error en polling:', error);
         // Si hay error, detener polling
         clearInterval(interval);
         set({ pollingInterval: null });
@@ -723,6 +876,92 @@ export const useEditorStore = create((set, get) => ({
       return { success: true };
     } catch (error) {
       console.error('Error al eliminar flow:', error);
+      throw error;
+    }
+  },
+
+  // Actualizar solo el nombre de un flow
+  updateFlowName: async (flowId, newName) => {
+    try {
+      // El backend requiere el campo 'graph' en el PUT request
+      // Necesitamos obtener el graph actual del flow
+      let graphData = null;
+      
+      // Intentar obtener el graph del estado guardado si está disponible
+      const { flowSavedStates, nodes, edges, graphId, selectedFlowId } = get();
+      const savedState = flowSavedStates[flowId];
+      
+      if (savedState && savedState.nodes && savedState.edges) {
+        // Usar el estado guardado para construir el graph
+        graphData = reactFlowToGraphDefinition(savedState.nodes, savedState.edges, savedState.graphId || flowId);
+      } else if (selectedFlowId === flowId && nodes && edges) {
+        // Si el flow está actualmente cargado, usar los nodes/edges actuales
+        graphData = reactFlowToGraphDefinition(nodes, edges, graphId || flowId);
+      } else {
+        // Si no hay estado guardado ni está cargado, obtener el flow del backend
+        try {
+          const flow = await getFlowService(flowId);
+          graphData = flow.graph_json || flow.graph;
+          
+          // Si graph_json es un string, parsearlo
+          if (typeof graphData === 'string') {
+            try {
+              graphData = JSON.parse(graphData);
+            } catch (parseError) {
+              console.error('Error al parsear graph_json:', parseError);
+              graphData = null;
+            }
+          }
+          
+          // Si no hay graphData, crear uno vacío
+          if (!graphData) {
+            graphData = {
+              id: flowId,
+              version: 1,
+              start: '',
+              nodes: [],
+              edges: [],
+            };
+          }
+        } catch (fetchError) {
+          console.error('Error al obtener flow para actualizar nombre:', fetchError);
+          // Si no se puede obtener el flow, crear un graph vacío
+          graphData = {
+            id: flowId,
+            version: 1,
+            start: '',
+            nodes: [],
+            edges: [],
+          };
+        }
+      }
+      
+      // Actualizar el nombre incluyendo el graph actual
+      const flowData = {
+        name: newName,
+        graph: graphData,
+      };
+      
+      const updatedFlow = await updateFlowService(flowId, flowData);
+      
+      // Actualizar el flow en la lista local
+      const { flows } = get();
+      const updatedFlows = flows.map(flow => {
+        const id = flow.id || flow.flow_id;
+        if (id === flowId) {
+          return {
+            ...flow,
+            name: newName,
+          };
+        }
+        return flow;
+      });
+      
+      set({ flows: updatedFlows });
+      
+      return { success: true, flow: updatedFlow };
+    } catch (error) {
+      console.error('Error al actualizar nombre del flow:', error);
       throw error;
     }
   },

@@ -1,10 +1,9 @@
-.confirm-modal-overlay {
+.alert-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  /* Usar overlay semi-transparente que se adapta al tema */
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
@@ -14,9 +13,9 @@
 }
 
 /* Overlay más oscuro en temas oscuros para mejor contraste */
-[data-theme='abyss'] .confirm-modal-overlay,
-[data-theme='dark'] .confirm-modal-overlay,
-[data-theme='midnight-sakura'] .confirm-modal-overlay {
+[data-theme='abyss'] .alert-modal-overlay,
+[data-theme='dark'] .alert-modal-overlay,
+[data-theme='midnight-sakura'] .alert-modal-overlay {
   background-color: rgba(0, 0, 0, 0.7);
 }
 
@@ -29,7 +28,7 @@
   }
 }
 
-.confirm-modal {
+.alert-modal {
   background-color: var(--bg-primary);
   border-radius: 12px;
   padding: 24px;
@@ -50,35 +49,36 @@
   }
 }
 
-.confirm-modal-header {
+.alert-modal-header {
   margin-bottom: 16px;
 }
 
-.confirm-modal-title {
+.alert-modal-title {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.confirm-modal-body {
+.alert-modal-body {
   margin-bottom: 24px;
 }
 
-.confirm-modal-message {
+.alert-modal-message {
   margin: 0;
   font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.6;
+  white-space: pre-line;
 }
 
-.confirm-modal-actions {
+.alert-modal-actions {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
 }
 
-.confirm-modal-button {
+.alert-modal-button {
   padding: 10px 20px;
   border: none;
   border-radius: 6px;
@@ -86,30 +86,18 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-.confirm-modal-button.cancel {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-}
-
-.confirm-modal-button.cancel:hover {
-  background-color: var(--bg-tertiary);
-}
-
-.confirm-modal-button.confirm {
   background-color: var(--accent-color);
   color: white;
 }
 
-.confirm-modal-button.confirm:hover {
+.alert-modal-button:hover {
   opacity: 0.9;
 }
 
-.confirm-modal-button.confirm.warning {
-  background-color: var(--warning-color);
-}
-
-.confirm-modal-button.confirm.danger {
-  background-color: var(--error-color);
+/* El botón siempre usa el color accent, el tipo solo afecta otros elementos visuales si es necesario */
+.alert-modal-button.info,
+.alert-modal-button.success,
+.alert-modal-button.warning,
+.alert-modal-button.error {
+  background-color: var(--accent-color);
 }

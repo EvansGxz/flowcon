@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Plus, Minus, Maximize2, VectorSquare, Loader2 } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 import './CustomControls.css';
 
@@ -42,15 +43,7 @@ const CustomControls = ({ onLayout }) => {
         onMouseLeave={() => setShowTooltip(null)}
         aria-label="Zoom in"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M12 5V19M5 12H19"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Plus size={18} />
         {showTooltip === 'zoom-in' && (
           <div className="custom-control-tooltip">Zoom In</div>
         )}
@@ -64,15 +57,7 @@ const CustomControls = ({ onLayout }) => {
         onMouseLeave={() => setShowTooltip(null)}
         aria-label="Zoom out"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M5 12H19"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Minus size={18} />
         {showTooltip === 'zoom-out' && (
           <div className="custom-control-tooltip">Zoom Out</div>
         )}
@@ -86,15 +71,7 @@ const CustomControls = ({ onLayout }) => {
         onMouseLeave={() => setShowTooltip(null)}
         aria-label="Fit view"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M8 3H5C3.89543 3 3 3.89543 3 5V8M21 8V5C21 3.89543 20.1046 3 19 3H16M16 21H19C20.1046 21 21 20.1046 21 19V16M3 16V19C3 20.1046 3.89543 21 5 21H8"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Maximize2 size={18} />
         {showTooltip === 'fit-view' && (
           <div className="custom-control-tooltip">Fit View</div>
         )}
@@ -110,69 +87,9 @@ const CustomControls = ({ onLayout }) => {
         aria-label="Auto Layout"
       >
         {isLayouting ? (
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="layout-spinner"
-          >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeDasharray="32"
-              strokeDashoffset="32"
-            >
-              <animate
-                attributeName="stroke-dasharray"
-                dur="2s"
-                values="0 32;16 16;0 32;0 32"
-                repeatCount="indefinite"
-              />
-              <animate
-                attributeName="stroke-dashoffset"
-                dur="2s"
-                values="0;-16;-32;-32"
-                repeatCount="indefinite"
-              />
-            </circle>
-          </svg>
+          <Loader2 size={18} className="layout-spinner animate-spin" />
         ) : (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M3 3H10V10H3V3Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M14 3H21V10H14V3Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M14 14H21V21H14V14Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M3 14H10V21H3V14Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <VectorSquare size={18} />
         )}
         {showTooltip === 'layout' && (
           <div className="custom-control-tooltip">Auto Layout</div>

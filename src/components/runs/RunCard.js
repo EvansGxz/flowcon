@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useEditorStore } from '../../store/editorStore';
 import { useNavigate } from 'react-router-dom';
+import { getStatusColor } from '../../utils/colorHelpers';
 import ConfirmModal from '../modals/ConfirmModal';
 import './RunCard.css';
 
@@ -40,19 +41,8 @@ const RunCard = ({ run }) => {
     });
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'completed':
-        return '#10b981';
-      case 'error':
-        return '#ef4444';
-      case 'running':
-        return '#f59e0b';
-      case 'pending':
-        return '#6366f1';
-      default:
-        return '#6b7280';
-    }
+  const getStatusColorLocal = (status) => {
+    return getStatusColor(status);
   };
 
   const getStatusLabel = (status) => {
@@ -89,7 +79,7 @@ const RunCard = ({ run }) => {
           <div className="run-card-status">
             <div
               className={`run-card-status-dot ${isActive ? 'pulsing' : ''}`}
-              style={{ backgroundColor: getStatusColor(run.status) }}
+              style={{ backgroundColor: getStatusColorLocal(run.status) }}
             />
             <span className="run-card-status-label">{getStatusLabel(run.status)}</span>
             {isActive && (

@@ -67,6 +67,15 @@
   background-color: #60a5fa;
 }
 
+[data-theme='blossom'] .empty-state-content {
+  background-color: #ffffff;
+  border-color: #fce7f3;
+}
+
+[data-theme='blossom'] .empty-state-button {
+  background-color: #ec4899;
+}
+
 [data-theme='dark'] .empty-state-content {
   background-color: #171717;
   border-color: #404040;
@@ -76,3 +85,11 @@
   background-color: #737373;
 }
 
+[data-theme='midnight-sakura'] .empty-state-content {
+  background-color: #1a0f1a;
+  border-color: #4a2d3a;
+}
+
+[data-theme='midnight-sakura'] .empty-state-button {
+  background-color: #ec4899;
+}

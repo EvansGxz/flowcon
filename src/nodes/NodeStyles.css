@@ -32,6 +32,23 @@
   --handle-border: #1e293b;
 }
 
+/* Variables CSS para Blossom Theme (rosa) */
+[data-theme='blossom'] {
+  --node-bg: #ffffff;
+  --node-border: #fce7f3;
+  --node-border-selected: #ec4899;
+  --node-shadow: rgba(236, 72, 153, 0.1);
+  --node-shadow-hover: rgba(236, 72, 153, 0.15);
+  --node-shadow-selected: rgba(236, 72, 153, 0.2);
+  --node-title-color: #1f2937;
+  --node-description-color: #6b7280;
+  --node-badge-purple-bg: #fce7f3;
+  --node-badge-purple-text: #ec4899;
+  --node-badge-blue-bg: #fdf2f8;
+  --node-badge-blue-text: #db2777;
+  --handle-border: #ffffff;
+}
+
 /* Variables CSS para Dark Theme (monocromático) */
 [data-theme='dark'] {
   --node-bg: #171717;
@@ -49,13 +66,30 @@
   --handle-border: #171717;
 }
 
+/* Variables CSS para Midnight Sakura Theme (oscuro con rosas) */
+[data-theme='midnight-sakura'] {
+  --node-bg: #1a0f1a;
+  --node-border: #4a2d3a;
+  --node-border-selected: #ec4899;
+  --node-shadow: rgba(236, 72, 153, 0.2);
+  --node-shadow-hover: rgba(236, 72, 153, 0.3);
+  --node-shadow-selected: rgba(236, 72, 153, 0.25);
+  --node-title-color: #f9fafb;
+  --node-description-color: #d1a3c4;
+  --node-badge-purple-bg: #4a2d3a;
+  --node-badge-purple-text: #f9a8d4;
+  --node-badge-blue-bg: #4a2d3a;
+  --node-badge-blue-text: #f9a8d4;
+  --handle-border: #1a0f1a;
+}
+
 .node-container {
   padding: 12px 16px;
   box-shadow: 0 4px 6px -1px var(--node-shadow), 0 2px 4px -1px var(--node-shadow);
   border-radius: 8px;
   border: 2px solid var(--node-border);
   background: var(--node-bg);
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .node-container:hover {
@@ -84,11 +118,13 @@
   justify-content: center;
   position: relative;
   background-color: transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .node-indicator svg {
   width: 16px;
   height: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .node-indicator-green {
@@ -103,6 +139,10 @@
   color: #3b82f6;
 }
 
+[data-theme='blossom'] .node-indicator-blue {
+  color: #ec4899;
+}
+
 [data-theme='abyss'] .node-indicator-blue,
 [data-theme='dark'] .node-indicator-blue {
   background-color: #60a5fa;
@@ -110,6 +150,10 @@
 
 [data-theme='dark'] .node-indicator-blue {
   background-color: #6b7280;
+}
+
+[data-theme='midnight-sakura'] .node-indicator-blue {
+  color: #ec4899;
 }
 
 .node-title {
@@ -162,12 +206,20 @@
   background-color: #3b82f6;
 }
 
+[data-theme='blossom'] .node-handle-blue {
+  background-color: #ec4899;
+}
+
 [data-theme='abyss'] .node-handle-blue {
   background-color: #60a5fa;
 }
 
 [data-theme='dark'] .node-handle-blue {
   background-color: #6b7280;
+}
+
+[data-theme='midnight-sakura'] .node-handle-blue {
+  background-color: #ec4899;
 }
 
 /* Estados de ejecución */
@@ -272,15 +324,16 @@
   background-color: #dc2626;
 }
 
-/* Vista icon: solo icono */
+/* Vista icon: solo icono - Más grande */
 .node-container.icon-view {
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 48px !important;
-  width: 48px;
-  height: 48px;
+  min-width: 64px !important;
+  width: 64px;
+  height: 64px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .node-container.icon-view .node-indicator {
@@ -291,6 +344,7 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .node-container.icon-view .node-header,
@@ -304,12 +358,41 @@
 .node-container.icon-view .node-status-spinner,
 .node-container.icon-view .node-status-check,
 .node-container.icon-view .node-status-error {
-  font-size: 20px;
+  font-size: 32px;
   color: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Vista compact: solo header */
+/* Iconos en vista icon más grandes */
+.node-container.icon-view svg {
+  width: 32px !important;
+  height: 32px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Vista compact: solo header - Icono un poco más grande */
+.node-container.compact-view {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .node-container.compact-view .node-description,
 .node-container.compact-view .node-badge {
   display: none;
+}
+
+.node-container.compact-view .node-indicator {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.node-container.compact-view .node-indicator svg {
+  width: 22px !important;
+  height: 22px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.node-container.compact-view .node-status-spinner,
+.node-container.compact-view .node-status-check,
+.node-container.compact-view .node-status-error {
+  font-size: 22px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEditorStore } from '../../store/editorStore';
+import { getStatusColor } from '../../utils/colorHelpers';
 import TraceView from './TraceView';
 import ConfirmModal from '../modals/ConfirmModal';
+import AlertModal from '../modals/AlertModal';
 import './RunDetail.css';
 
 const RunDetail = () => {
@@ -12,6 +14,8 @@ const RunDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showRerunConfirm, setShowRerunConfirm] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', type: 'error' });
 
   useEffect(() => {
     const initialize = async () => {
@@ -78,17 +82,19 @@ const RunDetail = () => {
     }
   };
 
-  const handleCancelClick = async () => {
+  const handleCancelClick = () => {
+    setShowCancelConfirm(true);
+  };
+
+  const handleCancelConfirm = async () => {
+    setShowCancelConfirm(false);
     if (!runId) return;
-    if (!window.confirm('¿Estás seguro de que deseas cancelar esta ejecución?')) {
-      return;
-    }
     const result = await cancelRun(runId);
     if (result.success) {
       // Recargar el run para ver el estado actualizado
       await loadRun(runId);
     } else {
-      alert(`Error al cancelar: ${result.error}`);
+      setAlertModal({ isOpen: true, message: `Error al cancelar: ${result.error}`, type: 'error' });
     }
   };
 
@@ -109,22 +115,12 @@ const RunDetail = () => {
            (typeof selectedRun?.error === 'object' && selectedRun.error?.code === 'RUN_TIMEOUT');
   };
 
-  const getStatusColor = (status) => {
-    // Si es timeout del run completo, usar color naranja
+  const getStatusColorLocal = (status) => {
+    // Si es timeout del run completo, usar color warning
     if (isRunTimeout()) {
-      return '#f59e0b';
+      return getStatusColor(status, 'RUN_TIMEOUT');
     }
-    
-    switch (status) {
-      case 'completed':
-        return '#10b981';
-      case 'error':
-        return '#ef4444';
-      case 'running':
-        return '#f59e0b';
-      default:
-        return '#6b7280';
-    }
+    return getStatusColor(status);
   };
 
   const getStatusLabel = (status) => {
@@ -185,7 +181,7 @@ const RunDetail = () => {
           <div className="run-detail-status">
             <div
               className="run-detail-status-dot"
-              style={{ backgroundColor: getStatusColor(selectedRun.status) }}
+              style={{ backgroundColor: getStatusColorLocal(selectedRun.status) }}
             />
             <h1 className="run-detail-title">{getStatusLabel(selectedRun.status)}</h1>
           </div>
@@ -257,7 +253,7 @@ const RunDetail = () => {
             </svg>
           )}
           <div>
-            <strong>{isRunTimeout() ? '⏱️ Timeout de Ejecución:' : 'Error:'}</strong>
+            <strong>{isRunTimeout() ? 'Timeout de Ejecución:' : 'Error:'}</strong>
             {isRunTimeout() ? (
               <div className="run-detail-timeout-message">
                 <p>
@@ -296,6 +292,23 @@ const RunDetail = () => {
         confirmText="Re-ejecutar"
         cancelText="Cancelar"
         type="default"
+      />
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        onClose={() => setShowCancelConfirm(false)}
+        onConfirm={handleCancelConfirm}
+        title="Cancelar Ejecución"
+        message="¿Estás seguro de que deseas cancelar esta ejecución? Esta acción no se puede deshacer."
+        confirmText="Cancelar ejecución"
+        cancelText="No cancelar"
+        type="danger"
+      />
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, message: '', type: 'error' })}
+        title="Error"
+        message={alertModal.message}
+        type={alertModal.type}
       />
     </div>
   );

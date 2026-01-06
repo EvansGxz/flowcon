@@ -100,9 +100,9 @@
 }
 
 .trace-view-entry-error .trace-view-entry-data {
-  background-color: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #ef4444;
+  background-color: var(--error-bg);
+  border-color: var(--error-border);
+  color: var(--error-color);
 }
 
 .trace-view-entry-duration {
@@ -113,8 +113,8 @@
 }
 
 .trace-view-entry-timeout {
-  border-left: 3px solid #f59e0b;
-  background-color: rgba(245, 158, 11, 0.05);
+  border-left: 3px solid var(--warning-color);
+  background-color: var(--warning-bg);
 }
 
 .trace-view-entry-timeout-badge {
@@ -124,20 +124,20 @@
 }
 
 .trace-view-entry-error-timeout {
-  color: #f59e0b;
-  border-left-color: #f59e0b;
+  color: var(--warning-color);
+  border-left-color: var(--warning-color);
 }
 
 .trace-view-entry-error-timeout .trace-view-entry-error-header {
-  color: #f59e0b;
+  color: var(--warning-color);
 }
 
 .trace-view-entry-timeout-message {
-  background-color: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background-color: var(--warning-bg);
+  border: 1px solid var(--warning-border);
   border-radius: 6px;
   padding: 12px;
-  color: #f59e0b;
+  color: var(--warning-color);
 }
 
 .trace-view-entry-timeout-message p {

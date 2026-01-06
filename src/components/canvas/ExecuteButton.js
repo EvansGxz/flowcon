@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { Play } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import ExecuteFlowModal from '../modals/ExecuteFlowModal';
+import AlertModal from '../modals/AlertModal';
 import './ExecuteButton.css';
 
 const ExecuteButton = () => {
   const { nodes, selectedFlowId, executeFlow, validateLocal } = useEditorStore();
   const [showExecuteModal, setShowExecuteModal] = useState(false);
+  const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', type: 'error' });
 
   // Verificar si hay un nodo Trigger Manual
   // El nodo puede tener typeId en data o el tipo puede ser 'manual_trigger'
@@ -35,7 +38,7 @@ const ExecuteButton = () => {
     // Validar primero
     const validation = validateLocal();
     if (!validation.valid) {
-      alert(`❌ El flow no es válido:\n${validation.errors.join('\n')}`);
+      setAlertModal({ isOpen: true, message: `El flow no es válido:\n${validation.errors.join('\n')}`, type: 'error' });
       return;
     }
     setShowExecuteModal(true);
@@ -44,9 +47,9 @@ const ExecuteButton = () => {
   const handleExecuteConfirm = async (timeoutSeconds = null) => {
     setShowExecuteModal(false);
     try {
-      console.log('🚀 [ExecuteButton] Iniciando ejecución con timeout:', timeoutSeconds);
+      console.log('[ExecuteButton] Iniciando ejecución con timeout:', timeoutSeconds);
       const result = await executeFlow(timeoutSeconds);
-      console.log('✅ [ExecuteButton] Resultado de ejecución:', result);
+      console.log('[ExecuteButton] Resultado de ejecución:', result);
       
       if (result.success) {
         // Para flows persistidos, el backend retorna inmediatamente y el polling se inicia automáticamente
@@ -68,11 +71,11 @@ const ExecuteButton = () => {
           }, 500);
         }
       } else {
-        alert(`❌ Error al ejecutar: ${result.error}`);
+        setAlertModal({ isOpen: true, message: `Error al ejecutar: ${result.error}`, type: 'error' });
       }
     } catch (error) {
-      console.error('❌ [ExecuteButton] Error al ejecutar:', error);
-      alert(`❌ Error al ejecutar: ${error.message}`);
+      console.error('[ExecuteButton] Error al ejecutar:', error);
+      setAlertModal({ isOpen: true, message: `Error al ejecutar: ${error.message}`, type: 'error' });
     }
   };
 
@@ -84,12 +87,7 @@ const ExecuteButton = () => {
         title="Ejecutar flow"
         aria-label="Ejecutar flow"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M8 5V19L19 12L8 5Z"
-            fill="currentColor"
-          />
-        </svg>
+        <Play size={20} />
         <span className="execute-button-text">Ejecutar</span>
       </button>
       <ExecuteFlowModal
@@ -97,6 +95,13 @@ const ExecuteButton = () => {
         onClose={() => setShowExecuteModal(false)}
         onConfirm={handleExecuteConfirm}
         defaultTimeout={300}
+      />
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, message: '', type: 'error' })}
+        title="Error"
+        message={alertModal.message}
+        type={alertModal.type}
       />
     </>
   );

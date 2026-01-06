@@ -31,16 +31,18 @@ export const ThemeProvider = ({ children }) => {
   }, [theme]);
 
   const toggleTheme = () => {
-    // Ciclar entre: light -> abyss -> dark -> light
+    // Ciclar entre: light -> blossom -> abyss -> dark -> midnight-sakura -> light
     setTheme((prevTheme) => {
-      if (prevTheme === 'light') return 'abyss';
+      if (prevTheme === 'light') return 'blossom';
+      if (prevTheme === 'blossom') return 'abyss';
       if (prevTheme === 'abyss') return 'dark';
+      if (prevTheme === 'dark') return 'midnight-sakura';
       return 'light';
     });
   };
 
   const setThemeDirect = (newTheme) => {
-    if (['light', 'abyss', 'dark'].includes(newTheme)) {
+    if (['light', 'blossom', 'abyss', 'dark', 'midnight-sakura'].includes(newTheme)) {
       setTheme(newTheme);
     }
   };
@@ -49,10 +51,12 @@ export const ThemeProvider = ({ children }) => {
     theme,
     setTheme: setThemeDirect,
     toggleTheme,
-    isDark: theme === 'abyss' || theme === 'dark', // Para compatibilidad
-    isLight: theme === 'light',
+    isDark: theme === 'abyss' || theme === 'dark' || theme === 'midnight-sakura', // Para compatibilidad
+    isLight: theme === 'light' || theme === 'blossom',
     isAbyss: theme === 'abyss',
-    isDarkTheme: theme === 'dark',
+    isDarkTheme: theme === 'dark' || theme === 'midnight-sakura',
+    isBlossom: theme === 'blossom',
+    isMidnightSakura: theme === 'midnight-sakura',
   };
 
   return (

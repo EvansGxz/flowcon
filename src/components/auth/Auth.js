@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register, login, getMe } from '../../services/authService';
+import AlertModal from '../modals/AlertModal';
 import './Auth.css';
 
 const Auth = () => {
@@ -8,6 +9,7 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', type: 'success' });
 
   // Estado del formulario
   const [formData, setFormData] = useState({
@@ -88,7 +90,7 @@ const Auth = () => {
         });
         setError(null);
         // Mostrar mensaje de éxito
-        alert('Registro exitoso. Por favor inicia sesión.');
+        setAlertModal({ isOpen: true, message: 'Registro exitoso. Por favor inicia sesión.', type: 'success' });
       }
     } catch (err) {
       // Manejar errores del backend
@@ -225,6 +227,13 @@ const Auth = () => {
           </p>
         </div>
       </div>
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, message: '', type: 'success' })}
+        title={alertModal.type === 'success' ? 'Éxito' : 'Información'}
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </div>
   );
 };

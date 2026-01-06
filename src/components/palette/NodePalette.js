@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, X, ChevronRight } from 'lucide-react';
 import { nodeRegistry, NodeCategory } from '../../nodes/definitions';
 import { getCategoryMetadata } from '../../utils/categoryIcons';
 import { getNodeIcon } from '../../utils/nodeIcons';
@@ -126,16 +127,12 @@ const NodePalette = ({ onAddNode, isOpen, onClose }) => {
         <div className="node-palette-header">
           {!showCategories && (
             <button className="node-palette-back" onClick={handleBackClick} title="Volver a categorías">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <ChevronLeft size={20} />
             </button>
           )}
           <h3>{showCategories ? 'Categorías' : selectedCategory}</h3>
           <button className="node-palette-close" onClick={onClose} title="Cerrar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <X size={20} />
           </button>
         </div>
 
@@ -170,9 +167,7 @@ const NodePalette = ({ onAddNode, isOpen, onClose }) => {
                     <div className="node-palette-category-description">{description}</div>
                   </div>
                   <div className="node-palette-category-count">{count}</div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="node-palette-category-arrow">
-                    <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <ChevronRight size={16} className="node-palette-category-arrow" />
                 </button>
               ))}
             </div>

@@ -15,7 +15,7 @@ export class NodeDefinition {
     description = '',
     category = NodeCategory.AGENT,
     tags = [],
-    icon = '⚙️',
+    icon = 'settings',
     color = '#6366f1',
     inputs = [],
     outputs = [],

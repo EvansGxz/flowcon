@@ -1,4 +1,5 @@
 import { Handle, Position } from '@xyflow/react';
+import { Zap, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { getNodeDefinition } from '../utils/nodeInstance';
 import { NodeStatus } from './definitions/types';
 import { useEditorStore } from '../store/editorStore';
@@ -19,23 +20,23 @@ const ActionNode = ({ data, selected, id }) => {
   // Clase de estado para el indicador
   const statusClass = `node-status-${status}`;
 
-  // Vista icon: solo icono
+  // Vista icon: solo icono - Más grande
   if (nodeViewMode === 'icon') {
     return (
       <div
         className={`node-container action-node icon-view ${selected ? 'node-selected' : ''} ${statusClass}`}
-        style={{ width: '48px', height: '48px', minWidth: '48px' }}
+        style={{ width: '64px', height: '64px', minWidth: '64px' }}
       >
         <div className={`node-indicator node-indicator-blue ${statusClass}`} style={{ width: '100%', height: '100%', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M22.7 19L13.6 9.9C14.5 7.6 14 4.9 12.1 3C10.1 1 7.1 0.6 4.7 1.7L9 6L6 9L1.6 4.7C0.4 7.1 0.9 10.1 2.9 12.1C4.8 14 7.5 14.5 9.8 13.6L18.9 22.7C19.3 23.1 19.9 23.1 20.3 22.7L22.6 20.4C23.1 20 23.1 19.3 22.7 19Z"
-              fill="currentColor"
-            />
-          </svg>
-          {status === NodeStatus.RUNNING && <span className="node-status-spinner">⟳</span>}
-          {status === NodeStatus.SUCCESS && <span className="node-status-check">✓</span>}
-          {status === NodeStatus.ERROR && <span className="node-status-error">✕</span>}
+          {status === NodeStatus.RUNNING ? (
+            <Loader2 size={32} className="animate-spin" />
+          ) : status === NodeStatus.SUCCESS ? (
+            <CheckCircle2 size={32} />
+          ) : status === NodeStatus.ERROR ? (
+            <XCircle size={32} />
+          ) : (
+            <Zap size={32} />
+          )}
         </div>
         <Handle
           id="in"
@@ -70,15 +71,15 @@ const ActionNode = ({ data, selected, id }) => {
       >
         <div className="node-header">
           <div className={`node-indicator node-indicator-blue ${statusClass}`}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M22.7 19L13.6 9.9C14.5 7.6 14 4.9 12.1 3C10.1 1 7.1 0.6 4.7 1.7L9 6L6 9L1.6 4.7C0.4 7.1 0.9 10.1 2.9 12.1C4.8 14 7.5 14.5 9.8 13.6L18.9 22.7C19.3 23.1 19.9 23.1 20.3 22.7L22.6 20.4C23.1 20 23.1 19.3 22.7 19Z"
-                fill="currentColor"
-              />
-            </svg>
-            {status === NodeStatus.RUNNING && <span className="node-status-spinner">⟳</span>}
-            {status === NodeStatus.SUCCESS && <span className="node-status-check">✓</span>}
-            {status === NodeStatus.ERROR && <span className="node-status-error">✕</span>}
+            {status === NodeStatus.RUNNING ? (
+              <Loader2 size={22} className="animate-spin" />
+            ) : status === NodeStatus.SUCCESS ? (
+              <CheckCircle2 size={22} />
+            ) : status === NodeStatus.ERROR ? (
+              <XCircle size={22} />
+            ) : (
+              <Zap size={22} />
+            )}
           </div>
           <div className="node-title">{displayName}</div>
           {version > 1 && (
@@ -117,15 +118,15 @@ const ActionNode = ({ data, selected, id }) => {
     >
       <div className="node-header">
         <div className={`node-indicator node-indicator-blue ${statusClass}`}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M22.7 19L13.6 9.9C14.5 7.6 14 4.9 12.1 3C10.1 1 7.1 0.6 4.7 1.7L9 6L6 9L1.6 4.7C0.4 7.1 0.9 10.1 2.9 12.1C4.8 14 7.5 14.5 9.8 13.6L18.9 22.7C19.3 23.1 19.9 23.1 20.3 22.7L22.6 20.4C23.1 20 23.1 19.3 22.7 19Z"
-              fill="currentColor"
-            />
-          </svg>
-          {status === NodeStatus.RUNNING && <span className="node-status-spinner">⟳</span>}
-          {status === NodeStatus.SUCCESS && <span className="node-status-check">✓</span>}
-          {status === NodeStatus.ERROR && <span className="node-status-error">✕</span>}
+          {status === NodeStatus.RUNNING ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : status === NodeStatus.SUCCESS ? (
+            <CheckCircle2 size={16} />
+          ) : status === NodeStatus.ERROR ? (
+            <XCircle size={16} />
+          ) : (
+            <Zap size={16} />
+          )}
         </div>
         <div className="node-title">{displayName}</div>
         {version > 1 && (

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEditorStore } from '../../store/editorStore';
 import { getFlows } from '../../services/flowsService';
 import ProjectContextMenu from './ProjectContextMenu';
+import ConfirmModal from '../modals/ConfirmModal';
 import './ProjectsList.css';
 
 
@@ -27,6 +28,8 @@ const ProjectsList = () => {
   const [projectDescription, setProjectDescription] = useState('');
   const [contextMenu, setContextMenu] = useState({ isOpen: false, position: null, project: null });
   const [flowsByProject, setFlowsByProject] = useState({}); // { projectId: [flows] }
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState(null);
 
   // Helper para obtener flows de un proyecto específico
   const fetchFlowsForProject = useCallback(async (projectId) => {
@@ -199,15 +202,8 @@ const ProjectsList = () => {
         break;
       case 'delete':
         if (project) {
-          if (window.confirm(`¿Estás seguro de eliminar el proyecto "${project.name}"? Esta acción eliminará todos los flows y runs asociados.`)) {
-            const result = await deleteProject(project.id);
-            if (result.success) {
-              await loadProjects();
-              // Los flows se recargarán automáticamente cuando projects cambie en el useEffect
-            } else {
-              setError(result.error || 'Error al eliminar proyecto');
-            }
-          }
+          setProjectToDelete(project);
+          setShowDeleteConfirm(true);
         }
         break;
       case 'export':
@@ -226,6 +222,20 @@ const ProjectsList = () => {
         break;
       default:
         break;
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    setShowDeleteConfirm(false);
+    if (projectToDelete) {
+      const result = await deleteProject(projectToDelete.id);
+      if (result.success) {
+        await loadProjects();
+        // Los flows se recargarán automáticamente cuando projects cambie en el useEffect
+      } else {
+        setError(result.error || 'Error al eliminar proyecto');
+      }
+      setProjectToDelete(null);
     }
   };
 
@@ -362,9 +372,22 @@ const ProjectsList = () => {
                 </div>
               </div>
             </div>
-          ))}
+          )          )}
         </div>
       )}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setProjectToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Eliminar Proyecto"
+        message={projectToDelete ? `¿Estás seguro de eliminar el proyecto "${projectToDelete.name}"? Esta acción eliminará todos los flows y runs asociados.` : ''}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
     </div>
   );
 };

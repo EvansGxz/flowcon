@@ -91,6 +91,16 @@
   border-right-color: var(--node-title-color);
 }
 
+/* Blossom theme adjustments */
+[data-theme='blossom'] .custom-controls {
+  background-color: var(--node-bg);
+  border-color: var(--node-border);
+}
+
+[data-theme='blossom'] .custom-control-button:hover:not(:disabled) {
+  background-color: var(--bg-secondary);
+}
+
 /* Abyss theme adjustments */
 [data-theme='abyss'] .custom-controls {
   background-color: #1e293b;
@@ -111,3 +121,12 @@
   background-color: #262626;
 }
 
+/* Midnight Sakura theme adjustments */
+[data-theme='midnight-sakura'] .custom-controls {
+  background-color: var(--node-bg);
+  border-color: var(--node-border);
+}
+
+[data-theme='midnight-sakura'] .custom-control-button:hover:not(:disabled) {
+  background-color: var(--bg-secondary);
+}

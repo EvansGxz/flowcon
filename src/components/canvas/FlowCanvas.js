@@ -17,7 +17,6 @@ import {
 import '@xyflow/react/dist/style.css';
 import '../../styles/ReactFlowTheme.css';
 
-import { useTheme } from '../../context/ThemeContext';
 import { useEditorStore } from '../../store/editorStore';
 import TriggerNode from '../../nodes/TriggerNode';
 import AgentNode from '../../nodes/AgentNode';
@@ -30,9 +29,9 @@ import PropertiesPanel from '../modals/PropertiesPanel';
 import EmptyState from './EmptyState';
 import NoProjectState from './NoProjectState';
 import ContextMenu from './ContextMenu';
-import ExecuteButton from './ExecuteButton';
 import { applyElkLayout, ELK_PRESETS } from '../../utils/elkLayout';
 import { createNodeInstance, migrateNodeIfNeeded, getNodeDefinition } from '../../utils/nodeInstance';
+import { NodeStatus } from '../../nodes/definitions/types';
 import { ulid } from 'ulid';
 import '../../nodes/definitions/registry'; // Cargar definiciones
 
@@ -62,7 +61,6 @@ const edgeTypes = {
 
 function FlowCanvasInner() {
   const { workflowId } = useParams();
-  const { isDark } = useTheme();
   const { fitView, screenToFlowPosition } = useReactFlow();
   const nodeInternals = useStore((store) => store.nodeInternals);
   
@@ -74,6 +72,7 @@ function FlowCanvasInner() {
     selectedProjectId,
     selectedFlowId,
     trace,
+    nodeViewMode,
     setNodes,
     setEdges,
     setSelectedNodeId,
@@ -82,9 +81,12 @@ function FlowCanvasInner() {
   } = useEditorStore();
   
   // Cargar el workflow cuando cambie el workflowId de la URL
+  // Solo cargar si la URL tiene un workflowId diferente al seleccionado
+  // Si selectedFlowId ya está establecido (por ejemplo, desde tabs), no forzar carga desde URL
   useEffect(() => {
     if (workflowId && workflowId !== selectedFlowId) {
       // Si el workflowId en la URL es diferente al seleccionado, cargar el flow
+      // Esto puede pasar cuando se navega directamente a una URL o cuando se abre un flow desde fuera
       loadFlow(workflowId).catch((error) => {
         // Si el flow no existe (es un nuevo workflow), no hacer nada
         // El canvas se inicializará vacío
@@ -92,6 +94,75 @@ function FlowCanvasInner() {
       });
     }
   }, [workflowId, selectedFlowId, loadFlow]);
+  
+  // Actualizar estados de los nodos desde el trace durante la ejecución
+  useEffect(() => {
+    if (!trace || trace.length === 0) {
+      // Si no hay trace, resetear todos los nodos a IDLE
+      setNodes((currentNodes) =>
+        currentNodes.map((node) => ({
+          ...node,
+          data: {
+            ...node.data,
+            status: NodeStatus.IDLE,
+          },
+        }))
+      );
+      return;
+    }
+
+    // Crear un mapa de estados por nodeId desde el trace
+    const traceStatusMap = new Map();
+    trace.forEach((entry) => {
+      const nodeId = entry.nodeId || entry.node_id;
+      if (nodeId) {
+        // Mapear estados del trace a NodeStatus
+        let nodeStatus = NodeStatus.IDLE;
+        if (entry.status === 'running') {
+          nodeStatus = NodeStatus.RUNNING;
+        } else if (entry.status === 'completed' || entry.status === 'success') {
+          nodeStatus = NodeStatus.SUCCESS;
+        } else if (entry.status === 'error') {
+          nodeStatus = NodeStatus.ERROR;
+        } else if (entry.status === 'skipped') {
+          nodeStatus = NodeStatus.SKIPPED;
+        }
+        traceStatusMap.set(String(nodeId), nodeStatus);
+      }
+    });
+
+    // Actualizar nodos que tienen entrada en el trace
+    setNodes((currentNodes) =>
+      currentNodes.map((node) => {
+        const traceStatus = traceStatusMap.get(String(node.id));
+        if (traceStatus !== undefined) {
+          // Solo actualizar si el estado cambió para evitar renders innecesarios
+          if (node.data?.status !== traceStatus) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                status: traceStatus,
+              },
+            };
+          }
+        } else {
+          // Si el nodo no está en el trace y tenía un estado de ejecución, resetearlo a IDLE
+          // Solo resetear si estaba en un estado de ejecución (no IDLE)
+          if (node.data?.status && node.data.status !== NodeStatus.IDLE) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                status: NodeStatus.IDLE,
+              },
+            };
+          }
+        }
+        return node;
+      })
+    );
+  }, [trace, setNodes]);
   
   // Identificar nodo activo desde el trace
   const getActiveNodeId = () => {
@@ -115,7 +186,6 @@ function FlowCanvasInner() {
   
   // Menú contextual
   const [contextMenu, setContextMenu] = useState({ isOpen: false, position: null });
-  const autoLayoutEnabled = useRef(true);
   const layoutTimeoutRef = useRef(null);
   const previousEdgesLength = useRef(edges.length);
   const isApplyingLayout = useRef(false);
@@ -135,9 +205,9 @@ function FlowCanvasInner() {
     [screenToFlowPosition, upsertNode]
   );
 
-  // Función para aplicar layout automáticamente
+  // Función para aplicar layout manualmente (solo desde el botón)
   const applyAutoLayout = useCallback(async () => {
-    if (!autoLayoutEnabled.current || isApplyingLayout.current) return;
+    if (isApplyingLayout.current) return;
     if (nodes.length === 0) return;
 
     isApplyingLayout.current = true;
@@ -151,10 +221,29 @@ function FlowCanvasInner() {
         return nodeInternals[id] || null;
       };
 
+      // Ajustar spacing según el modo de vista
+      let layoutOptions = { ...ELK_PRESETS.N8N_WORKFLOW };
+      
+      if (nodeViewMode === 'icon') {
+        // Modo "Solo Icono": distancia muy reducida (20/30)
+        layoutOptions = {
+          ...layoutOptions,
+          nodeSpacing: '20',   // Mitad de 40
+          layerSpacing: '30',  // Mitad de 60
+        };
+      } else {
+        // Modos "Completo" e "Informativo": reducir un tercio (80/133)
+        layoutOptions = {
+          ...layoutOptions,
+          nodeSpacing: '80',   // 120 - (120/3) = 80
+          layerSpacing: '133', // 200 - (200/3) ≈ 133
+        };
+      }
+
       const layoutedNodes = await applyElkLayout(
         nodes,
         edges,
-        ELK_PRESETS.N8N_WORKFLOW,
+        layoutOptions,
         getInternal
       );
 
@@ -165,7 +254,7 @@ function FlowCanvasInner() {
     } finally {
       isApplyingLayout.current = false;
     }
-  }, [nodes, edges, nodeInternals, setNodes, fitView]);
+  }, [nodes, edges, nodeInternals, nodeViewMode, setNodes, fitView]);
 
   const onNodesChange = useCallback(
     (changes) => {
@@ -219,7 +308,8 @@ function FlowCanvasInner() {
     [edges, setEdges]
   );
 
-  // Auto-layout cuando se agregan edges (después del mount inicial)
+  // Auto-layout deshabilitado automáticamente - solo se aplica manualmente desde el botón
+  // Se mantiene el efecto para tracking pero sin aplicar layout automático
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -227,32 +317,17 @@ function FlowCanvasInner() {
       return;
     }
 
-    const currentEdgesLength = edges.length;
-    if (currentEdgesLength > previousEdgesLength.current && autoLayoutEnabled.current) {
-      if (layoutTimeoutRef.current) {
-        clearTimeout(layoutTimeoutRef.current);
-      }
-      layoutTimeoutRef.current = setTimeout(() => {
-        if (!isApplyingLayout.current) {
-          applyAutoLayout();
-        }
-      }, 500);
-    }
+    previousEdgesLength.current = edges.length;
+  }, [edges.length]);
 
-    previousEdgesLength.current = currentEdgesLength;
+  // Auto-layout cuando cambia el modo de vista DESHABILITADO
+  // El layout solo se aplica manualmente desde el botón
+  // El spacing se ajustará la próxima vez que se presione el botón de Auto Layout
 
-    return () => {
-      if (layoutTimeoutRef.current) {
-        clearTimeout(layoutTimeoutRef.current);
-      }
-    };
-  }, [edges.length, applyAutoLayout]);
-
-  // Colores adaptados al tema
-  const { theme } = useTheme();
-  const backgroundColor = isDark ? '#4b5563' : '#aaa';
-  const minimapMaskColor = isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)';
-  const minimapBgColor = theme === 'light' ? '#ffffff' : theme === 'abyss' ? '#1e293b' : '#171717';
+  // Colores adaptados al tema usando variables CSS
+  const backgroundColor = 'var(--background-pattern)';
+  const minimapMaskColor = 'var(--react-flow-minimap-mask)';
+  const minimapBgColor = 'var(--react-flow-minimap-bg)';
 
   // Bloquear editor si no hay proyecto activo
   if (!selectedProjectId) {
@@ -286,8 +361,9 @@ function FlowCanvasInner() {
         position={contextMenu.position}
         onClose={() => setContextMenu({ isOpen: false, position: null })}
         onAddNote={() => {
-          // Por ahora solo muestra un alert, después se implementará la funcionalidad
-          alert('Funcionalidad de agregar nota próximamente');
+          // Por ahora solo muestra un mensaje, después se implementará la funcionalidad
+          // TODO: Implementar funcionalidad de agregar nota
+          console.log('Funcionalidad de agregar nota próximamente');
         }}
       />
       <ReactFlow
@@ -298,8 +374,8 @@ function FlowCanvasInner() {
           style: activeNodeId === node.id 
             ? { 
                 ...node.style, 
-                boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.4)',
-                border: '2px solid #3b82f6',
+                boxShadow: '0 0 0 3px var(--accent-color)',
+                border: '2px solid var(--accent-color)',
                 zIndex: 1000,
               }
             : node.style,
@@ -340,7 +416,7 @@ function FlowCanvasInner() {
         <MiniMap
           nodeColor={(node) => {
             const def = getNodeDefinition(node);
-            return def?.color || (isDark ? '#64748b' : '#94a3b8');
+            return def?.color || 'var(--text-secondary)';
           }}
           maskColor={minimapMaskColor}
           style={{
@@ -348,7 +424,6 @@ function FlowCanvasInner() {
           }}
         />
       </ReactFlow>
-      <ExecuteButton />
     </div>
   );
 }

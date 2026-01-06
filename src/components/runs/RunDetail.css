@@ -76,9 +76,9 @@
   gap: 8px;
   padding: 8px 16px;
   background-color: var(--bg-secondary);
-  border: 1px solid #ef4444;
+  border: 1px solid var(--error-color);
   border-radius: 6px;
-  color: #ef4444;
+  color: var(--error-color);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -86,8 +86,8 @@
 }
 
 .run-detail-cancel-button:hover {
-  background-color: #ef4444;
-  color: white;
+  background-color: var(--error-color);
+  color: var(--text-on-accent);
 }
 
 .run-detail-rerun-button {
@@ -115,11 +115,11 @@
   display: flex;
   gap: 12px;
   padding: 16px;
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: var(--error-bg);
+  border: 1px solid var(--error-border);
   border-radius: 8px;
   margin-bottom: 24px;
-  color: #ef4444;
+  color: var(--error-color);
 }
 
 .run-detail-error-box svg {
@@ -138,9 +138,9 @@
 }
 
 .run-detail-error-box-timeout {
-  background-color: rgba(245, 158, 11, 0.1);
-  border-color: rgba(245, 158, 11, 0.3);
-  color: #f59e0b;
+  background-color: var(--warning-bg);
+  border-color: var(--warning-border);
+  color: var(--warning-color);
 }
 
 .run-detail-timeout-message {
@@ -166,7 +166,7 @@
 .run-detail-timeout-suggestion {
   margin-top: 12px !important;
   padding-top: 12px;
-  border-top: 1px solid rgba(245, 158, 11, 0.2);
+  border-top: 1px solid var(--warning-border);
   font-size: 13px;
   opacity: 0.9;
 }

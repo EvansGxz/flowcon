@@ -82,7 +82,7 @@ nodeRegistry.register(
     description: 'Entrada para pruebas locales',
     category: NodeCategory.TRIGGER,
     tags: ['trigger', 'manual', 'test'],
-    icon: '👆',
+    icon: 'hand',
     color: '#10b981',
     inputs: [],
     outputs: [
@@ -120,7 +120,7 @@ nodeRegistry.register(
     description: 'Inicia el flujo cuando se recibe una petición HTTP',
     category: NodeCategory.TRIGGER,
     tags: ['trigger', 'webhook', 'http'],
-    icon: '🌐',
+    icon: 'globe',
     color: '#10b981',
     inputs: [],
     outputs: [
@@ -167,7 +167,7 @@ nodeRegistry.register(
     description: 'Valida y estructura datos de entrada (punto de entrada del flujo)',
     category: NodeCategory.TRIGGER,
     tags: ['trigger', 'input', 'validation'],
-    icon: '📥',
+    icon: 'download',
     color: '#10b981',
     inputs: [],
     outputs: [
@@ -205,7 +205,7 @@ nodeRegistry.register(
     description: 'Decisión semántica (intent/params)',
     category: NodeCategory.AGENT,
     tags: ['agent', 'core', 'intent'],
-    icon: '🤖',
+    icon: 'bot',
     color: '#a855f7',
     inputs: [
       {
@@ -261,7 +261,7 @@ nodeRegistry.register(
     description: 'Ruteo por expresión',
     category: NodeCategory.ROUTER,
     tags: ['condition', 'router', 'expr'],
-    icon: '🔀',
+    icon: 'shuffle',
     color: '#f59e0b',
     inputs: [
       {
@@ -317,7 +317,7 @@ nodeRegistry.register(
     description: 'Cargar/guardar contexto',
     category: NodeCategory.AGENT,
     tags: ['memory', 'kv', 'storage', 'agent'],
-    icon: '💾',
+    icon: 'save',
     color: '#8b5cf6',
     inputs: [
       {
@@ -384,7 +384,7 @@ nodeRegistry.register(
     description: 'LLM provider (placeholder)',
     category: NodeCategory.AGENT,
     tags: ['model', 'llm', 'ai'],
-    icon: '🧠',
+    icon: 'brain',
     color: '#6366f1',
     inputs: [
       {
@@ -458,7 +458,7 @@ nodeRegistry.register(
     description: 'Tool HTTP (placeholder)',
     category: NodeCategory.AGENT,
     tags: ['tool', 'http', 'api', 'agent'],
-    icon: '📡',
+    icon: 'radio',
     color: '#3b82f6',
     inputs: [
       {
@@ -544,7 +544,7 @@ nodeRegistry.register(
     description: 'Tool DB read-only (placeholder)',
     category: NodeCategory.AGENT,
     tags: ['tool', 'postgres', 'database', 'agent'],
-    icon: '🗄️',
+    icon: 'database',
     color: '#059669',
     inputs: [
       {
@@ -599,7 +599,7 @@ nodeRegistry.register(
     description: 'Salida al usuario',
     category: NodeCategory.OUTPUT,
     tags: ['response', 'chat', 'output'],
-    icon: '💬',
+    icon: 'messageSquare',
     color: '#06b6d4',
     inputs: [
       {
@@ -647,7 +647,7 @@ nodeRegistry.register(
     description: 'Finaliza ejecución y establece output final',
     category: NodeCategory.OUTPUT,
     tags: ['response', 'end', 'output', 'final'],
-    icon: '🏁',
+    icon: 'checkCircle2',
     color: '#06b6d4',
     inputs: [
       {
@@ -685,7 +685,7 @@ nodeRegistry.register(
     description: 'Envía una petición HTTP y retorna la respuesta',
     category: NodeCategory.AGENT,
     tags: ['action', 'http', 'api', 'request', 'agent'],
-    icon: '📡',
+    icon: 'radio',
     color: '#3b82f6',
     inputs: [
       {

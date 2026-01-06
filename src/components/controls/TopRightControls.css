@@ -4,13 +4,12 @@
   right: 15px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   z-index: 4;
-  background-color: var(--node-bg);
-  border: 1px solid var(--node-border);
-  border-radius: 8px;
-  padding: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
 }
 
 .top-right-control-wrapper {
@@ -22,31 +21,35 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   padding: 0;
-  background-color: transparent;
-  border: none;
-  border-radius: 4px;
+  background-color: var(--node-bg);
+  border: 1px solid var(--node-border);
+  border-radius: 8px;
   cursor: pointer;
   color: var(--node-title-color);
   transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .top-right-control-button:hover {
   background-color: var(--bg-secondary);
   color: var(--node-border-selected);
+  border-color: var(--node-border-selected);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .top-right-control-button:active {
-  transform: scale(0.95);
+  transform: translateY(0) scale(0.98);
 }
 
 .top-right-control-button svg {
   width: 18px;
   height: 18px;
   stroke: currentColor;
-  fill: currentColor;
+  fill: none;
 }
 
 .top-right-control-menu {
@@ -57,7 +60,7 @@
   background-color: var(--node-bg);
   border: 1px solid var(--node-border);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
   min-width: 150px;
   z-index: 1000;
   overflow: hidden;
@@ -107,13 +110,13 @@
   right: 20px;
   z-index: 2000;
   background-color: var(--node-bg);
-  border: 2px solid #ef4444;
+  border: 2px solid var(--error-color);
   border-radius: 8px;
   padding: 16px;
   max-width: 400px;
   max-height: 300px;
   overflow-y: auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
 }
 
 .validation-errors-header {
@@ -121,14 +124,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-  color: #ef4444;
+  color: var(--error-color);
   font-size: 14px;
 }
 
 .validation-errors-header button {
   background: none;
   border: none;
-  color: #ef4444;
+  color: var(--error-color);
   cursor: pointer;
   padding: 0;
   width: 24px;
@@ -146,7 +149,7 @@
 }
 
 .validation-errors-header button:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background-color: var(--error-bg);
 }
 
 .validation-errors-popup ul {
@@ -161,48 +164,50 @@
 }
 
 /* Abyss theme adjustments */
-[data-theme='abyss'] .top-right-controls {
-  background-color: #1e293b;
-  border-color: #475569;
+[data-theme='abyss'] .top-right-control-button {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
 }
 
 [data-theme='abyss'] .top-right-control-button:hover {
-  background-color: #334155;
+  background-color: var(--bg-tertiary, var(--bg-secondary));
+  border-color: var(--accent-color);
 }
 
 [data-theme='abyss'] .top-right-control-menu {
-  background-color: #1e293b;
-  border-color: #475569;
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
 }
 
 [data-theme='abyss'] .top-right-control-menu-item {
-  border-bottom-color: #475569;
+  border-bottom-color: var(--border-color);
 }
 
 [data-theme='abyss'] .top-right-control-menu-item:hover {
-  background-color: #334155;
+  background-color: var(--bg-tertiary, var(--bg-secondary));
 }
 
 /* Dark theme adjustments */
-[data-theme='dark'] .top-right-controls {
-  background-color: #171717;
-  border-color: #404040;
+[data-theme='dark'] .top-right-control-button {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
 }
 
 [data-theme='dark'] .top-right-control-button:hover {
-  background-color: #262626;
+  background-color: var(--bg-tertiary, var(--bg-secondary));
+  border-color: var(--accent-color);
 }
 
 [data-theme='dark'] .top-right-control-menu {
-  background-color: #171717;
-  border-color: #404040;
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
 }
 
 [data-theme='dark'] .top-right-control-menu-item {
-  border-bottom-color: #404040;
+  border-bottom-color: var(--border-color);
 }
 
 [data-theme='dark'] .top-right-control-menu-item:hover {
-  background-color: #262626;
+  background-color: var(--bg-tertiary, var(--bg-secondary));
 }
 

@@ -48,12 +48,12 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background-color: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: var(--error-bg);
+  border: 1px solid var(--error-border);
   border-radius: 6px;
   margin-bottom: 12px;
   font-size: 12px;
-  color: #ef4444;
+  color: var(--error-color);
 }
 
 .run-card-error svg {
@@ -108,7 +108,7 @@
 
 .run-card-active {
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 2px var(--accent-color);
 }
 
 .run-card-status-dot.pulsing {

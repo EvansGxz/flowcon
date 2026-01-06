@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useEditorStore } from '../../store/editorStore';
 import JsonModal from '../modals/JsonModal';
+import AlertModal from '../modals/AlertModal';
 import './Toolbar.css';
 
 const Toolbar = () => {
@@ -8,6 +9,7 @@ const Toolbar = () => {
   const [isJsonModalOpen, setIsJsonModalOpen] = useState(false);
   const [jsonMode, setJsonMode] = useState('export'); // 'export' | 'import'
   const [validationResult, setValidationResult] = useState(null);
+  const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', type: 'info' });
 
   const handleExport = () => {
     setJsonMode('export');
@@ -24,9 +26,9 @@ const Toolbar = () => {
     setValidationResult(result);
     
     if (result.valid) {
-      alert('✅ El grafo es válido');
+      setAlertModal({ isOpen: true, message: 'El grafo es válido', type: 'success' });
     } else {
-      alert(`❌ Errores encontrados:\n${result.errors.join('\n')}`);
+      setAlertModal({ isOpen: true, message: `Errores encontrados:\n${result.errors.join('\n')}`, type: 'error' });
     }
   };
 
@@ -38,10 +40,10 @@ const Toolbar = () => {
   const handleJsonImport = (jsonString) => {
     const result = importGraph(jsonString);
     if (result.success) {
-      alert('✅ Grafo importado correctamente');
+      setAlertModal({ isOpen: true, message: 'Grafo importado correctamente', type: 'success' });
       setIsJsonModalOpen(false);
     } else {
-      alert(`❌ Error al importar:\n${result.errors.join('\n')}`);
+      setAlertModal({ isOpen: true, message: `Error al importar:\n${result.errors.join('\n')}`, type: 'error' });
     }
   };
 
@@ -50,13 +52,13 @@ const Toolbar = () => {
       <div className="toolbar">
         <div className="toolbar-section">
           <button className="toolbar-button" onClick={handleExport} title="Exportar grafo">
-            📥 Exportar
+            Exportar
           </button>
           <button className="toolbar-button" onClick={handleImport} title="Importar grafo">
-            📤 Importar
+            Importar
           </button>
           <button className="toolbar-button" onClick={handleValidate} title="Validar grafo">
-            ✓ Validar
+            Validar
           </button>
         </div>
         {validationResult && !validationResult.valid && (
@@ -78,6 +80,13 @@ const Toolbar = () => {
           initialJson={jsonMode === 'export' ? exportGraph() : ''}
         />
       )}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, message: '', type: 'info' })}
+        title={alertModal.type === 'error' ? 'Error' : alertModal.type === 'success' ? 'Éxito' : 'Información'}
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </>
   );
 };

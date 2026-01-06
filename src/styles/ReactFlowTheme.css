@@ -44,7 +44,8 @@
 }
 
 [data-theme='abyss'] .react-flow__edge-path,
-[data-theme='dark'] .react-flow__edge-path {
+[data-theme='dark'] .react-flow__edge-path,
+[data-theme='midnight-sakura'] .react-flow__edge-path {
   stroke: #9ca3af;
 }
 
@@ -63,7 +64,8 @@
 }
 
 [data-theme='abyss'] .react-flow__background-pattern,
-[data-theme='dark'] .react-flow__background-pattern {
+[data-theme='dark'] .react-flow__background-pattern,
+[data-theme='midnight-sakura'] .react-flow__background-pattern {
   opacity: 0.2;
 }
 

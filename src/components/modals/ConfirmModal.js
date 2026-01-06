@@ -1,6 +1,10 @@
+import { useTheme } from '../../context/ThemeContext';
 import './ConfirmModal.css';
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirmar', cancelText = 'Cancelar', type = 'default' }) => {
+  // Asegurar que el modal está dentro del ThemeContext
+  useTheme();
+  
   if (!isOpen) return null;
 
   return (

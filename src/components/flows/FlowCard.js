@@ -1,11 +1,16 @@
+import { useState } from 'react';
 import { useEditorStore } from '../../store/editorStore';
 import { useNavigate } from 'react-router-dom';
+import ConfirmModal from '../modals/ConfirmModal';
+import AlertModal from '../modals/AlertModal';
 import './FlowCard.css';
 import { deleteFlow as deleteFlowService } from '../../services/flowsService';
 
 const FlowCard = ({ flow }) => {
   const navigate = useNavigate();
   const { loadFlow, executeFlow, loadFlows } = useEditorStore();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', type: 'error' });
 
   const handleOpen = async () => {
     // Usar id o flow_id como fallback
@@ -29,14 +34,17 @@ const FlowCard = ({ flow }) => {
     }
   };
 
-  const handleDelete = async () => {
-    if (window.confirm(`¿Estás seguro de eliminar el flow "${flow.name}"?`)) {
-      try {
-        await deleteFlowService(flow.id);
-        await loadFlows();
-      } catch (error) {
-        alert(`Error al eliminar: ${error.message}`);
-      }
+  const handleDelete = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setShowDeleteConfirm(false);
+    try {
+      await deleteFlowService(flow.id);
+      await loadFlows();
+    } catch (error) {
+      setAlertModal({ isOpen: true, message: `Error al eliminar: ${error.message}`, type: 'error' });
     }
   };
 
@@ -119,6 +127,23 @@ const FlowCard = ({ flow }) => {
           Ejecutar
         </button>
       </div>
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Eliminar Flow"
+        message={`¿Estás seguro de eliminar el flow "${flow.name}"?`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, message: '', type: 'error' })}
+        title="Error"
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </div>
   );
 };

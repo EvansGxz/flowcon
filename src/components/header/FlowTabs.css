@@ -1,0 +1,265 @@
+.flow-tabs-container {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  margin: 0 16px;
+  border-bottom: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.flow-tabs-scroll {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.flow-tabs-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.flow-tabs-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.flow-tabs-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.flow-tabs-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+.flow-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-bottom: none;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 120px;
+  max-width: 200px;
+  position: relative;
+  user-select: none;
+}
+
+.flow-tab:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.flow-tab.active {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--accent-color);
+  border-bottom-color: var(--bg-primary);
+  z-index: 1;
+  margin-bottom: -1px;
+}
+
+.flow-tab.has-errors {
+  border-color: var(--error-color);
+}
+
+.flow-tab.has-errors.active {
+  border-color: var(--error-color);
+  border-bottom-color: var(--bg-primary);
+}
+
+.flow-tab-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-tab.editing {
+  background: var(--bg-primary);
+}
+
+.flow-tab-name-input {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 4px;
+  background: var(--bg-primary);
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+
+.flow-tab-name-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 0, 122, 255), 0.2);
+}
+
+.flow-tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.flow-tab-error-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--error-color);
+  flex-shrink: 0;
+}
+
+.flow-tab-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.flow-tab:hover .flow-tab-close {
+  opacity: 1;
+}
+
+.flow-tab-close:hover {
+  background: var(--bg-tertiary);
+  color: var(--error-color);
+}
+
+.flow-tab-close:active {
+  transform: scale(0.9);
+}
+
+.flow-tabs-dropdown {
+  position: relative;
+  margin-left: 4px;
+}
+
+.flow-tabs-dropdown-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.flow-tabs-dropdown-button:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.flow-tabs-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 200px;
+  max-width: 300px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+}
+
+.flow-tabs-dropdown:hover .flow-tabs-dropdown-menu {
+  display: flex;
+}
+
+.flow-tabs-dropdown-item {
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flow-tabs-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.flow-tabs-dropdown-item:hover {
+  background: var(--bg-secondary);
+  color: var(--accent-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .flow-tabs-container {
+    margin: 0 8px;
+  }
+
+  .flow-tab {
+    min-width: 100px;
+    max-width: 150px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .flow-tab-name {
+    display: none;
+  }
+
+  .flow-tab-dot,
+  .flow-tab-error-indicator {
+    margin: 0 auto;
+  }
+}

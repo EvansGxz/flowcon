@@ -64,14 +64,14 @@ export async function executeFlowTest(graphDefinition, timeoutSeconds = null) {
       payload.timeout_seconds = timeoutSeconds;
     }
     
-    console.log('🚀 [runsService] Ejecutando flow de prueba (test):', { payload });
+    console.log('[runsService] Ejecutando flow de prueba (test):', { payload });
     
     // POST /api/v1/runs/test no requiere autenticación según la documentación
     const result = await apiPost('/runs/test', payload, {}, false, false);
-    console.log('✅ [runsService] Resultado de ejecución test:', result);
+    console.log('[runsService] Resultado de ejecución test:', result);
     return result;
   } catch (error) {
-    console.error('❌ [runsService] Error al ejecutar flow de prueba:', error);
+    console.error('[runsService] Error al ejecutar flow de prueba:', error);
     throw error;
   }
 }
@@ -98,16 +98,16 @@ export async function executeFlow(flowId, input = null, timeoutSeconds = null) {
       payload.timeout_seconds = timeoutSeconds;
     }
     
-    console.log('🚀 [runsService] Ejecutando flow persistido:', { flowId, payload });
+    console.log('[runsService] Ejecutando flow persistido:', { flowId, payload });
     
     // POST /api/v1/runs requiere autenticación y X-Project-Id es opcional según la documentación
     // requireProjectId=true para incluir X-Project-Id si está disponible (es opcional pero se incluye si existe)
     // requireAuth=true porque requiere autenticación
     const result = await apiPost('/runs', payload, {}, true, true);
-    console.log('✅ [runsService] Resultado de ejecución:', result);
+    console.log('[runsService] Resultado de ejecución:', result);
     return result;
   } catch (error) {
-    console.error('❌ [runsService] Error al ejecutar flow persistido:', error);
+    console.error('[runsService] Error al ejecutar flow persistido:', error);
     throw error;
   }
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Home, ChevronLeft, ChevronRight, ChevronDown, LogOut, Key } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { getUser, logout } from '../../services/authService';
 import './Sidebar.css';
@@ -64,24 +65,7 @@ const Sidebar = () => {
       id: 'credenciales',
       name: 'Credenciales',
       path: '/credentials',
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M12 15C15.866 15 19 11.866 19 8C19 4.13401 15.866 1 12 1C8.13401 1 5 4.13401 5 8C5 11.866 8.13401 15 12 15Z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M8.21 13.89L7 23L12 20L17 23L15.79 13.88"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ),
+      icon: <Key size={16} />,
     },
   ];
 
@@ -121,25 +105,7 @@ const Sidebar = () => {
             onClick={() => setIsExpanded(!isExpanded)}
             aria-label={isExpanded ? 'Colapsar sidebar' : 'Expandir sidebar'}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {isExpanded ? (
-                <path
-                  d="M15 18L9 12L15 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              ) : (
-                <path
-                  d="M9 18L15 12L9 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              )}
-            </svg>
+            {isExpanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </button>
           <div className={`sidebar-title-wrapper ${isExpanded ? 'visible' : 'hidden'}`}>
             <h2 className="sidebar-title">Navegación</h2>
@@ -161,36 +127,16 @@ const Sidebar = () => {
                 title={isExpanded ? 'Proyectos' : 'Proyectos'}
               >
                 <div className="sidebar-category-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <Home size={16} />
                 </div>
                 <span className={`sidebar-category-name ${isExpanded ? 'visible' : 'hidden'}`}>
                   Proyectos
                 </span>
                 {isExpanded && (
-                  <svg
+                  <ChevronDown 
+                    size={14}
                     className={`sidebar-dropdown-arrow ${projectsExpanded ? 'expanded' : ''}`}
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M6 9L12 15L18 9"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  />
                 )}
               </button>
               {isExpanded && projectsExpanded && (
@@ -203,15 +149,7 @@ const Sidebar = () => {
                         onClick={() => handleProjectClick(project.id)}
                         title={project.name}
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path
-                            d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
+                        <Home size={14} />
                         <span className="sidebar-project-name">{project.name}</span>
                       </button>
                     ))
@@ -277,22 +215,10 @@ const Sidebar = () => {
                 </span>
               )}
               {isExpanded && (
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+                <ChevronDown 
+                  size={14}
                   className={`sidebar-user-arrow ${showUserMenu ? 'expanded' : ''}`}
-                >
-                  <path
-                    d="M6 9L12 15L18 9"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                />
               )}
             </button>
 
@@ -311,29 +237,7 @@ const Sidebar = () => {
                     className="sidebar-user-menu-item"
                     onClick={handleLogout}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M16 17L21 12L16 7"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M21 12H9"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <LogOut size={16} />
                     <span>Cerrar sesión</span>
                   </button>
                 </div>

@@ -95,7 +95,7 @@
 }
 
 .properties-required {
-  color: #ef4444;
+  color: var(--error-color);
   margin-left: 4px;
 }
 

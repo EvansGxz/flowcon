@@ -1,10 +1,9 @@
-.confirm-modal-overlay {
+.prompt-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  /* Usar overlay semi-transparente que se adapta al tema */
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
@@ -14,9 +13,9 @@
 }
 
 /* Overlay más oscuro en temas oscuros para mejor contraste */
-[data-theme='abyss'] .confirm-modal-overlay,
-[data-theme='dark'] .confirm-modal-overlay,
-[data-theme='midnight-sakura'] .confirm-modal-overlay {
+[data-theme='abyss'] .prompt-modal-overlay,
+[data-theme='dark'] .prompt-modal-overlay,
+[data-theme='midnight-sakura'] .prompt-modal-overlay {
   background-color: rgba(0, 0, 0, 0.7);
 }
 
@@ -29,7 +28,7 @@
   }
 }
 
-.confirm-modal {
+.prompt-modal {
   background-color: var(--bg-primary);
   border-radius: 12px;
   padding: 24px;
@@ -50,35 +49,52 @@
   }
 }
 
-.confirm-modal-header {
+.prompt-modal-header {
   margin-bottom: 16px;
 }
 
-.confirm-modal-title {
+.prompt-modal-title {
   margin: 0;
   font-size: 20px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.confirm-modal-body {
+.prompt-modal-body {
   margin-bottom: 24px;
 }
 
-.confirm-modal-message {
-  margin: 0;
+.prompt-modal-message {
+  margin: 0 0 12px 0;
   font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.6;
 }
 
-.confirm-modal-actions {
+.prompt-modal-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  transition: all 0.2s ease;
+}
+
+.prompt-modal-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.prompt-modal-actions {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
 }
 
-.confirm-modal-button {
+.prompt-modal-button {
   padding: 10px 20px;
   border: none;
   border-radius: 6px;
@@ -88,28 +104,20 @@
   transition: all 0.2s ease;
 }
 
-.confirm-modal-button.cancel {
+.prompt-modal-button.cancel {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
 }
 
-.confirm-modal-button.cancel:hover {
+.prompt-modal-button.cancel:hover {
   background-color: var(--bg-tertiary);
 }
 
-.confirm-modal-button.confirm {
+.prompt-modal-button.confirm {
   background-color: var(--accent-color);
   color: white;
 }
 
-.confirm-modal-button.confirm:hover {
+.prompt-modal-button.confirm:hover {
   opacity: 0.9;
-}
-
-.confirm-modal-button.confirm.warning {
-  background-color: var(--warning-color);
-}
-
-.confirm-modal-button.confirm.danger {
-  background-color: var(--error-color);
 }

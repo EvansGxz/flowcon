@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import AlertModal from './AlertModal';
 import './ExecuteFlowModal.css';
 
 const ExecuteFlowModal = ({ isOpen, onClose, onConfirm, defaultTimeout = 300 }) => {
   const [timeoutSeconds, setTimeoutSeconds] = useState(defaultTimeout.toString());
   const [useCustomTimeout, setUseCustomTimeout] = useState(false);
+  const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', type: 'warning' });
 
   if (!isOpen) return null;
 
@@ -14,11 +16,11 @@ const ExecuteFlowModal = ({ isOpen, onClose, onConfirm, defaultTimeout = 300 }) 
     if (useCustomTimeout) {
       const timeoutNum = parseInt(timeoutSeconds, 10);
       if (isNaN(timeoutNum) || timeoutNum < 10) {
-        alert('El timeout debe ser al menos 10 segundos');
+        setAlertModal({ isOpen: true, message: 'El timeout debe ser al menos 10 segundos', type: 'warning' });
         return;
       }
       if (timeoutNum > 3600) {
-        alert('El timeout no puede exceder 3600 segundos (1 hora)');
+        setAlertModal({ isOpen: true, message: 'El timeout no puede exceder 3600 segundos (1 hora)', type: 'warning' });
         return;
       }
     }
@@ -93,6 +95,13 @@ const ExecuteFlowModal = ({ isOpen, onClose, onConfirm, defaultTimeout = 300 }) 
           </button>
         </div>
       </div>
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, message: '', type: 'warning' })}
+        title="Validación"
+        message={alertModal.message}
+        type={alertModal.type}
+      />
     </div>
   );
 };

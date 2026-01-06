@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0;
   z-index: 1000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -32,6 +32,8 @@
   display: flex;
   align-items: center;
   gap: 24px;
+  padding: 0 24px;
+  flex-shrink: 0;
 }
 
 .header-logo {
@@ -61,6 +63,20 @@
   border-radius: 6px;
   color: var(--text-secondary);
   font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-family: inherit;
+}
+
+.header-project:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-color);
+  color: var(--text-primary);
+}
+
+.header-project:active {
+  transform: scale(0.98);
 }
 
 .header-project svg {
@@ -78,31 +94,276 @@
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
+  padding: 0 24px;
+  flex-shrink: 0;
 }
 
-.header-theme-toggle {
+.header-control-wrapper {
+  position: relative;
+}
+
+.header-control-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border: 1px solid var(--border-color);
   background: var(--bg-secondary);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
+  padding: 0;
 }
 
-.header-theme-toggle:hover {
+.header-control-button:hover {
   background: var(--bg-tertiary);
   border-color: var(--accent-color);
   color: var(--accent-color);
 }
 
-.header-theme-toggle:active {
+.header-control-button:active {
   transform: scale(0.95);
+}
+
+.header-control-button svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.header-control-button.save-success {
+  background-color: var(--success-color, #10b981);
+  border-color: var(--success-color, #10b981);
+  color: white;
+  animation: savePulse 0.3s ease;
+}
+
+.header-control-button.save-error {
+  background-color: var(--error-color);
+  border-color: var(--error-color);
+  color: white;
+  animation: savePulse 0.3s ease;
+}
+
+@keyframes savePulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.header-control-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  margin-right: 0;
+  background-color: var(--node-bg);
+  border: 1px solid var(--node-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  min-width: 150px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.header-control-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--node-border);
+  color: var(--node-title-color);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: left;
+}
+
+.header-control-menu-item svg {
+  flex-shrink: 0;
+}
+
+.header-control-menu-item:last-child {
+  border-bottom: none;
+}
+
+.header-control-menu-item:hover {
+  background-color: var(--bg-secondary);
+}
+
+.header-control-menu-item:active {
+  background-color: var(--node-border);
+}
+
+.header-flows-menu {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  background-color: var(--node-bg);
+  border: 1px solid var(--node-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  min-width: 250px;
+  max-width: 400px;
+  max-height: 400px;
+  z-index: 1000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-flows-menu-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--node-border);
+  color: var(--node-title-color);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.header-flows-menu-list {
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.header-flows-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 16px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--node-border);
+  color: var(--node-title-color);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: left;
+}
+
+.header-flows-menu-item:last-child {
+  border-bottom: none;
+}
+
+.header-flows-menu-item:hover {
+  background-color: var(--bg-secondary);
+  color: var(--accent-color);
+}
+
+.header-flows-menu-item.is-active {
+  background-color: var(--bg-tertiary);
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
+.header-flows-menu-item.is-open {
+  position: relative;
+}
+
+.header-flows-menu-item.is-open::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent-color);
+}
+
+.header-flows-menu-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-flows-menu-item-badge {
+  padding: 2px 8px;
+  background: var(--accent-color);
+  color: white;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.header-flows-menu-empty {
+  padding: 20px 16px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.validation-errors-popup {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 2000;
+  background-color: var(--node-bg);
+  border: 2px solid var(--error-color);
+  border-radius: 8px;
+  padding: 16px;
+  max-width: 400px;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.validation-errors-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  color: var(--error-color);
+  font-size: 14px;
+}
+
+.validation-errors-header button {
+  background: none;
+  border: none;
+  color: var(--error-color);
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.validation-errors-header button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.validation-errors-header button:hover {
+  background-color: var(--error-bg);
+}
+
+.validation-errors-popup ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--node-title-color);
+  font-size: 12px;
+}
+
+.validation-errors-popup li {
+  margin: 4px 0;
 }
 
 .header-user-menu {

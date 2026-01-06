@@ -32,15 +32,15 @@
 }
 
 .connection-status.connected {
-  color: #10b981;
+  color: var(--success-color);
 }
 
 .connection-status.offline {
-  color: #ef4444;
+  color: var(--error-color);
 }
 
 .connection-status.mismatch {
-  color: #f59e0b;
+  color: var(--warning-color);
 }
 
 .flows-list-create-button {

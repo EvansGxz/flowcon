@@ -42,7 +42,7 @@
 
 .flow-card-delete:hover {
   background-color: var(--bg-secondary);
-  color: #ef4444;
+  color: var(--error-color);
 }
 
 .flow-card-info {
