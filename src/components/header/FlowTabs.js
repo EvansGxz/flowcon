@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { getFlow as getFlowService } from '../../services/flowsService';
@@ -7,7 +7,11 @@ import './FlowTabs.css';
 
 const FlowTabs = () => {
   const navigate = useNavigate();
-  const { workflowId } = useParams();
+  const location = useLocation();
+  
+  // Extraer workflowId de la URL manualmente ya que FlowTabs está fuera de la ruta /workflow/:workflowId
+  const workflowIdMatch = location.pathname.match(/\/workflow\/([^/]+)/);
+  const workflowId = workflowIdMatch ? workflowIdMatch[1] : null;
   const {
     flows,
     selectedFlowId,
@@ -59,7 +63,7 @@ const FlowTabs = () => {
               console.log('[FlowTabs] Flow obtenido del backend:', flow.name || flow.id);
               
               // Actualizar el array flows con el flow obtenido
-              const { flows: currentFlows, loadFlows } = useEditorStore.getState();
+              const { flows: currentFlows } = useEditorStore.getState();
               // Verificar si el flow ya fue agregado (por si loadFlows se ejecutó mientras tanto)
               const alreadyExists = currentFlows.find(f => (f.id || f.flow_id) === workflowId);
               
@@ -73,9 +77,14 @@ const FlowTabs = () => {
                 console.log('[FlowTabs] Flow ya fue agregado mientras se hacía el fetch');
               }
             } catch (error) {
-              // Si hay error al obtener el flow, agregar el tab de todas formas
+              // Si hay error al obtener el flow (404 = flow nuevo que aún no existe),
+              // agregar el tab de todas formas con nombre por defecto
               // El nombre se mostrará como "Flow {id}" por defecto
-              console.log('[FlowTabs] Error al obtener flow, usando nombre por defecto:', error.message || error);
+              if (error.status === 404 || error.message?.includes('not found') || error.message?.includes('Not found')) {
+                console.log('[FlowTabs] Flow nuevo (aún no guardado), usando nombre por defecto');
+              } else {
+                console.log('[FlowTabs] Error al obtener flow, usando nombre por defecto:', error.message || error);
+              }
             }
           }
           
@@ -180,15 +189,6 @@ const FlowTabs = () => {
     }
   };
 
-  const handleOpenFlow = async (flowId) => {
-    if (!openTabs.includes(flowId)) {
-      setOpenTabs([...openTabs, flowId]);
-    }
-    const result = await loadFlow(flowId);
-    if (result?.success) {
-      navigate(`/workflow/${flowId}`);
-    }
-  };
 
   const handleTabDoubleClick = (e, flowId, currentName) => {
     e.stopPropagation();
@@ -319,31 +319,6 @@ const FlowTabs = () => {
           </div>
         ))}
       </div>
-      
-      {/* Lista de flows disponibles para abrir */}
-      {projectFlows.length > tabsData.length && (
-        <div className="flow-tabs-dropdown">
-          <button className="flow-tabs-dropdown-button" title="Abrir flow">
-            +
-          </button>
-          <div className="flow-tabs-dropdown-menu">
-            {projectFlows
-              .filter(flow => !openTabs.includes(flow.id || flow.flow_id))
-              .map(flow => {
-                const flowId = flow.id || flow.flow_id;
-                return (
-                  <button
-                    key={flowId}
-                    className="flow-tabs-dropdown-item"
-                    onClick={() => handleOpenFlow(flowId)}
-                  >
-                    {flow.name || `Flow ${flowId}`}
-                  </button>
-                );
-              })}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

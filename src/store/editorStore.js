@@ -550,14 +550,31 @@ export const useEditorStore = create((set, get) => ({
       // Si es un flow nuevo (no tiene selectedFlowId o es 'default'), generar un UUID v4
       let flowIdToUse = selectedFlowId;
       let graphIdToUse = graphId;
+      let isNewFlow = false;
       
       if (!selectedFlowId || selectedFlowId === 'default') {
         // Generar nuevo UUID v4 para el flow
         flowIdToUse = null; // null indica que es un nuevo flow
         graphIdToUse = uuidv4(); // Generar UUID v4 para el graphId
+        isNewFlow = true;
       } else {
-        // Usar el ID existente
-        graphIdToUse = selectedFlowId;
+        // Verificar si el flow existe en el backend
+        // Si no existe, tratarlo como nuevo flow
+        try {
+          await getFlowService(selectedFlowId);
+          // El flow existe, usar PUT
+          graphIdToUse = selectedFlowId;
+        } catch (error) {
+          // Si el flow no existe (404), tratarlo como nuevo flow
+          if (error.status === 404 || error.message?.includes('not found') || error.message?.includes('Not found')) {
+            flowIdToUse = null; // null indica que es un nuevo flow
+            graphIdToUse = selectedFlowId; // Mantener el UUID generado para el graphId
+            isNewFlow = true;
+          } else {
+            // Otro tipo de error, lanzarlo
+            throw error;
+          }
+        }
       }
       
       const graphDefinition = reactFlowToGraphDefinition(nodes, edges, graphIdToUse);

@@ -186,7 +186,6 @@ function FlowCanvasInner() {
   
   // Menú contextual
   const [contextMenu, setContextMenu] = useState({ isOpen: false, position: null });
-  const layoutTimeoutRef = useRef(null);
   const previousEdgesLength = useRef(edges.length);
   const isApplyingLayout = useRef(false);
   const isInitialMount = useRef(true);
