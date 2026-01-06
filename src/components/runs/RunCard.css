@@ -1,0 +1,138 @@
+.run-card {
+  background-color: var(--node-bg);
+  border: 1px solid var(--node-border);
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px var(--node-shadow);
+}
+
+.run-card:hover {
+  box-shadow: 0 4px 8px var(--node-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.run-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.run-card-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.run-card-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.run-card-status-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--node-title-color);
+  text-transform: capitalize;
+}
+
+.run-card-date {
+  font-size: 12px;
+  color: var(--node-description-color);
+}
+
+.run-card-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #ef4444;
+}
+
+.run-card-error svg {
+  flex-shrink: 0;
+}
+
+.run-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.run-card-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--node-border);
+  border-radius: 6px;
+  background-color: var(--node-bg);
+  color: var(--node-title-color);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.run-card-button:hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--node-border-selected);
+}
+
+.run-card-button-primary {
+  background-color: var(--node-border-selected);
+  color: white;
+  border-color: var(--node-border-selected);
+}
+
+.run-card-button-primary:hover {
+  background-color: var(--node-border-selected);
+  opacity: 0.9;
+}
+
+.run-card-button svg {
+  flex-shrink: 0;
+}
+
+.run-card-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.run-card-active {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.run-card-status-dot.pulsing {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
+.run-card-status-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  background: var(--accent-color);
+  color: white;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

@@ -9,9 +9,13 @@ contracts/
 ├── schemas/
 │   └── graph.schema.json    # JSON Schema v1 para validación
 ├── examples/
-│   ├── hello-agent.json     # Ejemplo: Hello Agent
-│   └── route-intent.json    # Ejemplo: Route Intent
+│   ├── hello-agent.json        # Ejemplo: Hello Agent (trigger → agent → response)
+│   ├── route-intent.json         # Ejemplo: Route Intent (con condition.expr)
+│   ├── http-api-call.json       # Ejemplo: HTTP GET request
+│   ├── http-post-example.json  # Ejemplo: HTTP POST con agent
+│   └── input-llm-end-flow.json  # Ejemplo: Flujo completo con trigger.input → model.llm → response.end
 ├── CHANGELOG.md             # Historial de cambios
+├── MIGRATION_GUIDE_v1.0.2.md  # Guía de migración v1.0.1 → v1.0.2
 └── README.md                # Este archivo
 ```
 
@@ -75,9 +79,51 @@ Además del schema, el backend (y opcionalmente el frontend) valida integridad:
 
 ## Versionado
 
-- Taggear releases: v1.0.0, v1.0.1…
+- Taggear releases: v1.0.0, v1.0.1, v1.0.2…
 - Cambios no breaking (agregar campos opcionales) → patch/minor.
 - Cambios breaking (renombrar/eliminar, cambiar required) → major (v2).
+
+### Versión Actual: v1.0.2
+
+Ver `CHANGELOG.md` para detalles completos de cambios. Principales cambios en v1.0.2:
+- ✅ Nuevos nodos: `trigger.input`, `response.end`
+- ✅ `model.llm` actualizado con soporte para `prompt`
+- ✅ Nomenclatura unificada (todos los nodos usan notación de puntos)
+
+## Tipos de Nodos Disponibles
+
+### Triggers (Punto de Entrada)
+- `trigger.manual` - Dispara flujo manualmente
+- `trigger.webhook` - Dispara flujo con webhook
+- `trigger.input` ⭐ - Valida y estructura datos de entrada (nuevo en v1.0.2)
+
+### Agentes y Modelos
+- `agent.core` - Agente core con estrategia
+- `model.llm` - Modelo LLM (actualizado en v1.0.2: ahora soporta `prompt`)
+
+### Herramientas (Tools)
+- `tool.http` - Request HTTP
+- `tool.postgres` - Query PostgreSQL
+
+### Control de Flujo
+- `condition.expr` - Condición por expresión
+
+### Respuestas
+- `response.chat` - Genera respuesta en formato chat
+- `response.end` ⭐ - Finaliza flujo y establece output (nuevo en v1.0.2)
+
+### Memoria
+- `memory.kv` - Almacenamiento clave-valor
+
+## ⚠️ Cambios de Nomenclatura (v1.0.2)
+
+**IMPORTANTE:** Se ha unificado la nomenclatura de nodos. Si estás migrando desde una versión anterior:
+
+- ❌ `input` → ✅ `trigger.input`
+- ❌ `end` → ✅ `response.end`
+- ❌ `llm` → ✅ `model.llm` (con campos `provider` y `model` requeridos, y `prompt` opcional)
+
+**Razón:** Todos los nodos ahora usan notación de puntos consistente (`trigger.*`, `response.*`, `tool.*`, `model.*`).
 
 ## Checklist para Integración
 
@@ -86,4 +132,10 @@ Además del schema, el backend (y opcionalmente el frontend) valida integridad:
 - [ ] Back: validar schema con fastjsonschema y luego integridad; devolver errores con path.
 - [ ] Mantener ejemplos sincronizados: cualquier cambio del schema requiere actualizar examples.
 - [ ] No romper compatibilidad: cambios breaking → v2 o typeVersion.
+- [ ] **v1.0.2+:** Si migras desde v1.0.1, consulta `MIGRATION_GUIDE_v1.0.2.md` para actualizar referencias
+
+## Documentación Adicional
+
+- **`CHANGELOG.md`**: Historial completo de cambios versionados
+- **`MIGRATION_GUIDE_v1.0.2.md`**: Guía detallada para migrar desde v1.0.1 a v1.0.2
 

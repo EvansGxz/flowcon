@@ -1,0 +1,87 @@
+.runs-list-container {
+  width: 100%;
+  height: 100vh;
+  padding: 24px;
+  overflow-y: auto;
+  background-color: var(--bg-primary);
+}
+
+.runs-list-header {
+  margin-bottom: 24px;
+}
+
+.runs-list-back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  background-color: transparent;
+  border: 1px solid var(--node-border);
+  border-radius: 6px;
+  color: var(--node-title-color);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.runs-list-back-button:hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--node-border-selected);
+}
+
+.runs-list-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.runs-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.runs-list-loading,
+.runs-list-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--text-secondary);
+}
+
+.runs-list-error {
+  gap: 16px;
+}
+
+.runs-list-error button {
+  padding: 8px 16px;
+  background-color: var(--node-border-selected);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.runs-list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 24px;
+  color: var(--text-secondary);
+}
+
+.runs-list-empty svg {
+  opacity: 0.5;
+}
+
+.runs-list-empty p {
+  font-size: 18px;
+  margin: 0;
+}
+

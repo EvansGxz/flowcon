@@ -1,30 +1,18 @@
 /**
  * Servicio de validación remota
- * POST /graphs/validate
+ * POST /api/v1/graphs/validate
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://192.168.103.10:8000';
+import { apiPost } from './apiService';
 
 /**
  * Valida un grafo en el servidor
  * @param {Object} graphDefinition - GraphDefinition a validar
- * @returns {Promise<{valid: boolean, errors: string[]}>}
+ * @returns {Promise<{valid: boolean, errors: string[], warnings?: string[]}>}
  */
 export async function validateGraphRemote(graphDefinition) {
   try {
-    const response = await fetch(`${API_BASE_URL}/graphs/validate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(graphDefinition),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
+    const result = await apiPost('/graphs/validate', graphDefinition);
     return {
       valid: result.valid || false,
       errors: result.errors || [],

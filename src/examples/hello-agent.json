@@ -7,26 +7,41 @@
       "id": "t1",
       "type": "trigger.manual",
       "typeVersion": 1,
+      "label": "Manual Trigger",
       "config": {
         "message": "Hola"
+      },
+      "ui": {
+        "x": 100,
+        "y": 100
       }
     },
     {
       "id": "a1",
       "type": "agent.core",
       "typeVersion": 1,
+      "label": "Agent Core",
       "config": {
         "strategy": "reactive",
         "instructions": "Return intent=chat"
+      },
+      "ui": {
+        "x": 300,
+        "y": 100
       }
     },
     {
       "id": "r1",
       "type": "response.chat",
       "typeVersion": 1,
+      "label": "Response Chat",
       "config": {
         "format": "text",
         "template": "Hola, soy REDMIND."
+      },
+      "ui": {
+        "x": 500,
+        "y": 100
       }
     }
   ],
@@ -43,4 +58,3 @@
     }
   ]
 }
-

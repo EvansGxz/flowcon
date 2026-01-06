@@ -1,0 +1,53 @@
+{
+  "id": "input-llm-end-flow",
+  "version": 1,
+  "start": "input1",
+  "nodes": [
+    {
+      "id": "input1",
+      "type": "trigger.input",
+      "typeVersion": 1,
+      "config": {
+        "schema": {
+          "required": ["query", "user_id"]
+        }
+      }
+    },
+    {
+      "id": "llm1",
+      "type": "model.llm",
+      "typeVersion": 1,
+      "config": {
+        "provider": "openai",
+        "model": "gpt-4",
+        "prompt": "Answer the following question: {{query}}"
+      }
+    },
+    {
+      "id": "end1",
+      "type": "response.end",
+      "typeVersion": 1,
+      "config": {
+        "output": {
+          "answer": "{{response}}",
+          "user_id": "{{user_id}}"
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "input1",
+      "target": "llm1",
+      "label": null
+    },
+    {
+      "id": "e2",
+      "source": "llm1",
+      "target": "end1",
+      "label": null
+    }
+  ]
+}
+

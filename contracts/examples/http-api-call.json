@@ -1,0 +1,56 @@
+{
+  "id": "http-api-call",
+  "version": 1,
+  "start": "t1",
+  "nodes": [
+    {
+      "id": "t1",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "config": {
+        "message": "Obtener datos de API"
+      }
+    },
+    {
+      "id": "http1",
+      "type": "tool.http",
+      "typeVersion": 1,
+      "config": {
+        "method": "GET",
+        "url": "https://api.example.com/data",
+        "headers": {
+          "Accept": "application/json",
+          "User-Agent": "REDMIND/1.0"
+        },
+        "timeout": 10
+      }
+    },
+    {
+      "id": "r1",
+      "type": "response.chat",
+      "typeVersion": 1,
+      "config": {
+        "format": "text",
+        "template": "Respuesta de API: {{http_response}}"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "t1",
+      "target": "http1",
+      "label": null
+    },
+    {
+      "id": "e2",
+      "source": "http1",
+      "target": "r1",
+      "label": null
+    }
+  ]
+}
+
+
+
+

@@ -157,6 +157,44 @@ nodeRegistry.register(
   })
 );
 
+// Trigger Input (nuevo en v1.0.2)
+nodeRegistry.register(
+  new NodeDefinition({
+    typeId: 'ap.trigger.input',
+    version: 1,
+    displayName: 'Input Trigger',
+    name: 'trigger_input',
+    description: 'Valida y estructura datos de entrada (punto de entrada del flujo)',
+    category: NodeCategory.TRIGGER,
+    tags: ['trigger', 'input', 'validation'],
+    icon: '📥',
+    color: '#10b981',
+    inputs: [],
+    outputs: [
+      {
+        id: 'out',
+        type: PortType.MAIN,
+        label: 'Output',
+        multiple: false,
+        dataType: 'json',
+      },
+    ],
+    properties: [
+      {
+        name: 'schema',
+        label: 'Schema',
+        type: 'json',
+        required: false,
+        default: {},
+        ui: { widget: 'code', rows: 8, placeholder: '{"required": ["field1", "field2"]}' },
+      },
+    ],
+    defaults: {
+      schema: {},
+    },
+  })
+);
+
 // Agent Core (según contrato REDMIND)
 nodeRegistry.register(
   new NodeDefinition({
@@ -301,6 +339,15 @@ nodeRegistry.register(
     ],
     properties: [
       {
+        name: 'mode',
+        label: 'Modo',
+        type: 'enum',
+        required: true,
+        default: 'load',
+        options: ['load', 'save'],
+        ui: { widget: 'select' },
+      },
+      {
         name: 'scope',
         label: 'Alcance',
         type: 'enum',
@@ -315,11 +362,12 @@ nodeRegistry.register(
         type: 'enum',
         required: true,
         default: 'postgres',
-        options: ['postgres'],
+        options: ['postgres', 'memory'],
         ui: { widget: 'select' },
       },
     ],
     defaults: {
+      mode: 'load',
       scope: 'conversation',
       backend: 'postgres',
     },
@@ -382,11 +430,20 @@ nodeRegistry.register(
         default: 0.7,
         ui: { widget: 'number' },
       },
+      {
+        name: 'prompt',
+        label: 'Prompt',
+        type: 'string',
+        required: false,
+        default: '',
+        ui: { widget: 'textarea', rows: 5, placeholder: 'Prompt del modelo (puede venir de vars.prompt)' },
+      },
     ],
     defaults: {
       provider: 'openai',
       model: '',
       temperature: 0.7,
+      prompt: '',
     },
   })
 );
@@ -576,6 +633,44 @@ nodeRegistry.register(
     defaults: {
       format: 'text',
       template: '',
+    },
+  })
+);
+
+// Response End (nuevo en v1.0.2)
+nodeRegistry.register(
+  new NodeDefinition({
+    typeId: 'ap.response.end',
+    version: 1,
+    displayName: 'End Response',
+    name: 'response_end',
+    description: 'Finaliza ejecución y establece output final',
+    category: NodeCategory.OUTPUT,
+    tags: ['response', 'end', 'output', 'final'],
+    icon: '🏁',
+    color: '#06b6d4',
+    inputs: [
+      {
+        id: 'in',
+        type: PortType.MAIN,
+        label: 'Input',
+        multiple: false,
+        dataType: 'json',
+      },
+    ],
+    outputs: [],
+    properties: [
+      {
+        name: 'output',
+        label: 'Output',
+        type: 'json',
+        required: false,
+        default: {},
+        ui: { widget: 'code', rows: 8, placeholder: '{"result": "success", "data": "{{variable}}"' },
+      },
+    ],
+    defaults: {
+      output: {},
     },
   })
 );

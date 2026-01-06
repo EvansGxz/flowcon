@@ -7,23 +7,34 @@
       "id": "t1",
       "type": "trigger.manual",
       "typeVersion": 1,
+      "label": "Manual Trigger",
       "config": {
         "message": "reporte ventas"
+      },
+      "ui": {
+        "x": 100,
+        "y": 200
       }
     },
     {
       "id": "a1",
       "type": "agent.core",
       "typeVersion": 1,
+      "label": "Agent Core",
       "config": {
         "strategy": "reactive",
         "instructions": "If message includes 'reporte' return intent=report else intent=chat"
+      },
+      "ui": {
+        "x": 300,
+        "y": 200
       }
     },
     {
       "id": "c1",
       "type": "condition.expr",
       "typeVersion": 1,
+      "label": "Condition Expression",
       "config": {
         "engine": "jexl",
         "rules": [
@@ -36,24 +47,38 @@
             "to": "r_chat"
           }
         ]
+      },
+      "ui": {
+        "x": 500,
+        "y": 200
       }
     },
     {
       "id": "r_report",
       "type": "response.chat",
       "typeVersion": 1,
+      "label": "Response Report",
       "config": {
         "format": "text",
         "template": "OK, generaré el reporte."
+      },
+      "ui": {
+        "x": 700,
+        "y": 100
       }
     },
     {
       "id": "r_chat",
       "type": "response.chat",
       "typeVersion": 1,
+      "label": "Response Chat",
       "config": {
         "format": "text",
         "template": "OK, conversemos."
+      },
+      "ui": {
+        "x": 700,
+        "y": 300
       }
     }
   ],
@@ -71,13 +96,14 @@
     {
       "id": "e3",
       "source": "c1",
-      "target": "r_report"
+      "target": "r_report",
+      "label": "intent == 'report'"
     },
     {
       "id": "e4",
       "source": "c1",
-      "target": "r_chat"
+      "target": "r_chat",
+      "label": "intent == 'chat'"
     }
   ]
 }
-

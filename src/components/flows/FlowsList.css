@@ -1,0 +1,125 @@
+.flows-list-container {
+  width: 100%;
+  height: 100vh;
+  padding: 24px;
+  overflow-y: auto;
+  background-color: var(--bg-primary);
+}
+
+.flows-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.flows-list-title {
+  margin: 0 0 8px 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.flows-list-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.connection-status {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.connection-status.connected {
+  color: #10b981;
+}
+
+.connection-status.offline {
+  color: #ef4444;
+}
+
+.connection-status.mismatch {
+  color: #f59e0b;
+}
+
+.flows-list-create-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background-color: var(--node-border-selected);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.flows-list-create-button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.flows-list-create-button svg {
+  flex-shrink: 0;
+}
+
+.flows-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.flows-list-loading,
+.flows-list-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--text-secondary);
+}
+
+.flows-list-error {
+  gap: 16px;
+}
+
+.flows-list-error button {
+  padding: 8px 16px;
+  background-color: var(--node-border-selected);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.flows-list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 24px;
+  color: var(--text-secondary);
+}
+
+.flows-list-empty svg {
+  opacity: 0.5;
+}
+
+.flows-list-empty p {
+  font-size: 18px;
+  margin: 0;
+}
+
+.flows-list-empty-note {
+  font-size: 12px !important;
+  color: var(--text-secondary) !important;
+  font-style: italic;
+  margin-top: 8px !important;
+}
+

@@ -61,22 +61,26 @@
     {
       "id": "e1",
       "source": "t1",
-      "target": "a1"
+      "target": "a1",
+      "label": null
     },
     {
       "id": "e2",
       "source": "a1",
-      "target": "c1"
+      "target": "c1",
+      "label": null
     },
     {
       "id": "e3",
       "source": "c1",
-      "target": "r_report"
+      "target": "r_report",
+      "label": "intent == 'report'"
     },
     {
       "id": "e4",
       "source": "c1",
-      "target": "r_chat"
+      "target": "r_chat",
+      "label": "intent == 'chat'"
     }
   ]
 }

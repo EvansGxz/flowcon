@@ -1,0 +1,75 @@
+{
+  "id": "http-post-example",
+  "version": 1,
+  "start": "t1",
+  "nodes": [
+    {
+      "id": "t1",
+      "type": "trigger.manual",
+      "typeVersion": 1,
+      "config": {
+        "message": "Enviar datos"
+      }
+    },
+    {
+      "id": "http1",
+      "type": "tool.http",
+      "typeVersion": 1,
+      "config": {
+        "method": "POST",
+        "url": "https://api.example.com/submit",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer token123"
+        },
+        "body": {
+          "name": "Test",
+          "value": 42
+        },
+        "timeout": 15
+      }
+    },
+    {
+      "id": "a1",
+      "type": "agent.core",
+      "typeVersion": 1,
+      "config": {
+        "strategy": "reactive",
+        "instructions": "If http_status == 200 return success=true else return success=false"
+      }
+    },
+    {
+      "id": "r1",
+      "type": "response.chat",
+      "typeVersion": 1,
+      "config": {
+        "format": "text",
+        "template": "Estado: {{success}}"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "t1",
+      "target": "http1",
+      "label": null
+    },
+    {
+      "id": "e2",
+      "source": "http1",
+      "target": "a1",
+      "label": null
+    },
+    {
+      "id": "e3",
+      "source": "a1",
+      "target": "r1",
+      "label": null
+    }
+  ]
+}
+
+
+
+

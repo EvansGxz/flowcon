@@ -12,6 +12,7 @@ import { z } from 'zod';
 export const NodeTypeSchema = z.enum([
   'trigger.webhook',
   'trigger.manual',
+  'trigger.input',
   'agent.core',
   'condition.expr',
   'memory.kv',
@@ -19,6 +20,7 @@ export const NodeTypeSchema = z.enum([
   'tool.http',
   'tool.postgres',
   'response.chat',
+  'response.end',
 ]);
 
 // Los IDs pueden ser cualquier string único, no necesariamente UUIDs
@@ -64,6 +66,7 @@ export const ModelLlmConfigSchema = z.object({
   provider: z.enum(['azure', 'openai', 'local']),
   model: z.string(),
   temperature: z.number().min(0).max(2).optional(),
+  prompt: z.string().optional(),
 });
 
 export const ToolHttpConfigSchema = z.object({
@@ -83,6 +86,16 @@ export const ResponseChatConfigSchema = z.object({
   template: z.string().optional(),
 });
 
+export const TriggerInputConfigSchema = z.object({
+  schema: z.object({
+    required: z.array(z.string()).optional(),
+  }).optional(),
+});
+
+export const ResponseEndConfigSchema = z.object({
+  output: z.any().optional(),
+});
+
 // ============================================================================
 // Schema de configuración unificado (discriminated union)
 // ============================================================================
@@ -90,6 +103,7 @@ export const ResponseChatConfigSchema = z.object({
 export const NodeConfigSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('trigger.manual'), config: TriggerManualConfigSchema }),
   z.object({ type: z.literal('trigger.webhook'), config: TriggerWebhookConfigSchema }),
+  z.object({ type: z.literal('trigger.input'), config: TriggerInputConfigSchema }),
   z.object({ type: z.literal('agent.core'), config: AgentCoreConfigSchema }),
   z.object({ type: z.literal('condition.expr'), config: ConditionExprConfigSchema }),
   z.object({ type: z.literal('memory.kv'), config: MemoryKvConfigSchema }),
@@ -97,6 +111,7 @@ export const NodeConfigSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('tool.http'), config: ToolHttpConfigSchema }),
   z.object({ type: z.literal('tool.postgres'), config: ToolPostgresConfigSchema }),
   z.object({ type: z.literal('response.chat'), config: ResponseChatConfigSchema }),
+  z.object({ type: z.literal('response.end'), config: ResponseEndConfigSchema }),
 ]);
 
 // ============================================================================
@@ -164,6 +179,9 @@ export function validateNode(node) {
     case 'trigger.webhook':
       configSchema = TriggerWebhookConfigSchema;
       break;
+    case 'trigger.input':
+      configSchema = TriggerInputConfigSchema;
+      break;
     case 'agent.core':
       configSchema = AgentCoreConfigSchema;
       break;
@@ -185,6 +203,9 @@ export function validateNode(node) {
     case 'response.chat':
       configSchema = ResponseChatConfigSchema;
       break;
+    case 'response.end':
+      configSchema = ResponseEndConfigSchema;
+      break;
     default:
       return { valid: false, errors: [{ message: `Tipo de nodo desconocido: ${node.type}` }] };
   }
@@ -201,28 +222,45 @@ export function validateNode(node) {
  * Valida un grafo completo
  */
 export function validateGraph(graph) {
+  // Validar entrada básica
+  if (!graph || typeof graph !== 'object') {
+    return {
+      valid: false,
+      errors: ['El grafo no es un objeto válido'],
+    };
+  }
+
+  // Asegurar que nodes y edges sean arrays
+  if (!Array.isArray(graph.nodes)) {
+    graph.nodes = graph.nodes || [];
+  }
+  if (!Array.isArray(graph.edges)) {
+    graph.edges = graph.edges || [];
+  }
+
   const result = GraphDefinitionSchema.safeParse(graph);
   if (!result.success) {
     return {
       valid: false,
-      errors: result.error.errors.map((err) => `${err.path.join('.')}: ${err.message}`),
+      errors: (result.error?.errors || []).map((err) => `${err.path.join('.')}: ${err.message}`),
     };
   }
 
   // Validar que todos los nodos sean válidos
   const nodeErrors = [];
-  for (const node of graph.nodes) {
+  for (const node of graph.nodes || []) {
     const nodeValidation = validateNode(node);
     if (!nodeValidation.valid) {
+      const errors = nodeValidation.errors || [];
       nodeErrors.push(
-        ...nodeValidation.errors.map((err) => `Nodo ${node.id}: ${err.message || JSON.stringify(err)}`)
+        ...errors.map((err) => `Nodo ${node.id}: ${err.message || JSON.stringify(err)}`)
       );
     }
   }
 
   // Validar que los edges referencien nodos existentes
-  const nodeIds = new Set(graph.nodes.map((n) => n.id));
-  const edgeErrors = graph.edges
+  const nodeIds = new Set((graph.nodes || []).map((n) => n.id));
+  const edgeErrors = (graph.edges || [])
     .filter((e) => !nodeIds.has(e.source) || !nodeIds.has(e.target))
     .map((e) => `Edge ${e.id}: referencia a nodo inexistente`);
 
@@ -233,7 +271,7 @@ export function validateGraph(graph) {
 
   // Validar IDs únicos: node.id y edge.id sin duplicados
   const nodeIdSet = new Set();
-  const duplicateNodeIds = graph.nodes.filter((n) => {
+  const duplicateNodeIds = (graph.nodes || []).filter((n) => {
     if (nodeIdSet.has(n.id)) return true;
     nodeIdSet.add(n.id);
     return false;
@@ -243,7 +281,7 @@ export function validateGraph(graph) {
   }
 
   const edgeIdSet = new Set();
-  const duplicateEdgeIds = graph.edges.filter((e) => {
+  const duplicateEdgeIds = (graph.edges || []).filter((e) => {
     if (edgeIdSet.has(e.id)) return true;
     edgeIdSet.add(e.id);
     return false;
@@ -253,13 +291,13 @@ export function validateGraph(graph) {
   }
 
   // Validar no self-loops (source==target) en v1
-  const selfLoops = graph.edges.filter((e) => e.source === e.target);
+  const selfLoops = (graph.edges || []).filter((e) => e.source === e.target);
   if (selfLoops.length > 0) {
     edgeErrors.push(`Self-loops no permitidos en v1: ${selfLoops.map((e) => e.id).join(', ')}`);
   }
 
   // Validar Condition rules: rule.to debe existir
-  for (const node of graph.nodes) {
+  for (const node of graph.nodes || []) {
     if (node.type === 'condition.expr' && node.config?.rules) {
       for (const rule of node.config.rules) {
         if (rule.to && !nodeIds.has(rule.to)) {

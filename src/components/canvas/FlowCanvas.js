@@ -2,6 +2,7 @@
 // Este archivo será usado para reemplazar FlowCanvas.js
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -27,6 +28,9 @@ import TopRightControls from '../controls/TopRightControls';
 import NodePalette from '../palette/NodePalette';
 import PropertiesPanel from '../modals/PropertiesPanel';
 import EmptyState from './EmptyState';
+import NoProjectState from './NoProjectState';
+import ContextMenu from './ContextMenu';
+import ExecuteButton from './ExecuteButton';
 import { applyElkLayout, ELK_PRESETS } from '../../utils/elkLayout';
 import { createNodeInstance, migrateNodeIfNeeded, getNodeDefinition } from '../../utils/nodeInstance';
 import { ulid } from 'ulid';
@@ -36,6 +40,7 @@ import '../../nodes/definitions/registry'; // Cargar definiciones
 const nodeTypes = {
   webhook_trigger: TriggerNode,
   manual_trigger: TriggerNode,
+  trigger_input: TriggerNode, // Nuevo en v1.0.2
   agent_core: AgentNode,
   condition_expr: AgentNode, // TODO: crear componente específico
   memory_kv: AgentNode, // TODO: crear componente específico
@@ -43,6 +48,7 @@ const nodeTypes = {
   tool_http: ActionNode,
   tool_postgres: ActionNode, // TODO: crear componente específico
   response_chat: ActionNode, // TODO: crear componente específico
+  response_end: ActionNode, // Nuevo en v1.0.2
   http_request: ActionNode,
   // Mantener compatibilidad con nombres antiguos
   trigger: TriggerNode,
@@ -55,6 +61,7 @@ const edgeTypes = {
 };
 
 function FlowCanvasInner() {
+  const { workflowId } = useParams();
   const { isDark } = useTheme();
   const { fitView, screenToFlowPosition } = useReactFlow();
   const nodeInternals = useStore((store) => store.nodeInternals);
@@ -64,11 +71,40 @@ function FlowCanvasInner() {
     nodes,
     edges,
     selectedNodeId,
+    selectedProjectId,
+    selectedFlowId,
+    trace,
     setNodes,
     setEdges,
     setSelectedNodeId,
     upsertNode,
+    loadFlow,
   } = useEditorStore();
+  
+  // Cargar el workflow cuando cambie el workflowId de la URL
+  useEffect(() => {
+    if (workflowId && workflowId !== selectedFlowId) {
+      // Si el workflowId en la URL es diferente al seleccionado, cargar el flow
+      loadFlow(workflowId).catch((error) => {
+        // Si el flow no existe (es un nuevo workflow), no hacer nada
+        // El canvas se inicializará vacío
+        console.log('Workflow no encontrado, inicializando canvas vacío');
+      });
+    }
+  }, [workflowId, selectedFlowId, loadFlow]);
+  
+  // Identificar nodo activo desde el trace
+  const getActiveNodeId = () => {
+    if (!trace || trace.length === 0) return null;
+    // Buscar el último nodo con status 'running' o el primero con status diferente a 'completed'/'error'
+    const runningNode = trace.find(entry => entry.status === 'running');
+    if (runningNode) {
+      return runningNode.node_id || runningNode.nodeId;
+    }
+    return null;
+  };
+  
+  const activeNodeId = getActiveNodeId();
 
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [propertiesModalOpen, setPropertiesModalOpen] = useState(false);
@@ -76,6 +112,9 @@ function FlowCanvasInner() {
   
   // Verificar si hay alguna modal abierta (desde TopRightControls)
   const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
+  
+  // Menú contextual
+  const [contextMenu, setContextMenu] = useState({ isOpen: false, position: null });
   const autoLayoutEnabled = useRef(true);
   const layoutTimeoutRef = useRef(null);
   const previousEdgesLength = useRef(edges.length);
@@ -215,8 +254,17 @@ function FlowCanvasInner() {
   const minimapMaskColor = isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)';
   const minimapBgColor = theme === 'light' ? '#ffffff' : theme === 'abyss' ? '#1e293b' : '#171717';
 
+  // Bloquear editor si no hay proyecto activo
+  if (!selectedProjectId) {
+    return (
+      <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+        <NoProjectState />
+      </div>
+    );
+  }
+
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+    <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
       <NodePalette
         isOpen={isPaletteOpen}
         onClose={() => setIsPaletteOpen(false)}
@@ -233,8 +281,29 @@ function FlowCanvasInner() {
       {nodes.length === 0 && !isAnyModalOpen && !isPaletteOpen && !propertiesModalOpen && (
         <EmptyState onAddNode={() => setIsPaletteOpen(true)} />
       )}
+      <ContextMenu
+        isOpen={contextMenu.isOpen}
+        position={contextMenu.position}
+        onClose={() => setContextMenu({ isOpen: false, position: null })}
+        onAddNote={() => {
+          // Por ahora solo muestra un alert, después se implementará la funcionalidad
+          alert('Funcionalidad de agregar nota próximamente');
+        }}
+      />
       <ReactFlow
-        nodes={nodes}
+        style={{ width: '100%', height: '100%' }}
+        nodes={nodes.map(node => ({
+          ...node,
+          className: activeNodeId === node.id ? 'node-active' : node.className,
+          style: activeNodeId === node.id 
+            ? { 
+                ...node.style, 
+                boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.4)',
+                border: '2px solid #3b82f6',
+                zIndex: 1000,
+              }
+            : node.style,
+        }))}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
@@ -252,6 +321,11 @@ function FlowCanvasInner() {
             selectedNodeForProperties: node.id, 
             propertiesModalOpen: true 
           });
+        }}
+        onPaneContextMenu={(event) => {
+          event.preventDefault();
+          const position = { x: event.clientX, y: event.clientY };
+          setContextMenu({ isOpen: true, position });
         }}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
@@ -274,6 +348,7 @@ function FlowCanvasInner() {
           }}
         />
       </ReactFlow>
+      <ExecuteButton />
     </div>
   );
 }

@@ -145,6 +145,12 @@
         },
         {
           "$ref": "#/$defs/ResponseChatNode"
+        },
+        {
+          "$ref": "#/$defs/TriggerInputNode"
+        },
+        {
+          "$ref": "#/$defs/ResponseEndNode"
         }
       ]
     },
@@ -408,6 +414,9 @@
                   "minimum": 0,
                   "maximum": 2,
                   "default": 0.2
+                },
+                "prompt": {
+                  "type": "string"
                 }
               }
             }
@@ -534,6 +543,69 @@
                 "template": {
                   "type": "string"
                 }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "TriggerInputNode": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/NodeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "config"
+          ],
+          "properties": {
+            "type": {
+              "const": "trigger.input"
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "required": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ResponseEndNode": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/NodeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "config"
+          ],
+          "properties": {
+            "type": {
+              "const": "response.end"
+            },
+            "config": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "output": {}
               }
             }
           }

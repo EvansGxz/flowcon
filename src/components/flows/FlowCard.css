@@ -1,0 +1,100 @@
+.flow-card {
+  background-color: var(--node-bg);
+  border: 1px solid var(--node-border);
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px var(--node-shadow);
+}
+
+.flow-card:hover {
+  box-shadow: 0 4px 8px var(--node-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.flow-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.flow-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--node-title-color);
+  flex: 1;
+}
+
+.flow-card-delete {
+  background: transparent;
+  border: none;
+  color: var(--node-description-color);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow-card-delete:hover {
+  background-color: var(--bg-secondary);
+  color: #ef4444;
+}
+
+.flow-card-info {
+  margin-bottom: 16px;
+}
+
+.flow-card-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--node-description-color);
+}
+
+.flow-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.flow-card-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--node-border);
+  border-radius: 6px;
+  background-color: var(--node-bg);
+  color: var(--node-title-color);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.flow-card-button:hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--node-border-selected);
+}
+
+.flow-card-button-primary {
+  background-color: var(--node-border-selected);
+  color: white;
+  border-color: var(--node-border-selected);
+}
+
+.flow-card-button-primary:hover {
+  background-color: var(--node-border-selected);
+  opacity: 0.9;
+}
+
+.flow-card-button svg {
+  flex-shrink: 0;
+}
+

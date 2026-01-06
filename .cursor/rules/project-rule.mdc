@@ -1,0 +1,247 @@
+---
+name: project-rule
+description: Reglas de desarrollo para el proyecto React Flow
+---
+
+# Reglas de Estilos y ThemeContext
+
+## Estilos y Sistema de Temas
+
+**IMPORTANTE**: Todos los estilos de componentes creados o generados DEBEN pasar por el sistema de ThemeContext. NO se deben usar colores hardcodeados ni valores fijos.
+
+### Rutas de Componentes de Tema
+
+1. **ThemeContext Provider**: `src/context/ThemeContext.js`
+   - Proporciona el contexto de tema a toda la aplicación
+   - Gestiona los temas: `light`, `abyss`, `dark`
+   - Establece el atributo `data-theme` en `document.documentElement`
+
+2. **Variables CSS Globales**: `src/index.css`
+   - Define las variables CSS principales para todos los temas
+   - Variables disponibles:
+     - `--bg-primary`: Color de fondo principal
+     - `--bg-secondary`: Color de fondo secundario
+     - `--bg-tertiary`: Color de fondo terciario (si existe)
+     - `--text-primary`: Color de texto principal
+     - `--text-secondary`: Color de texto secundario
+     - `--border-color`: Color de bordes
+     - `--accent-color`: Color de acento/resaltado
+     - `--background-pattern`: Color para patrones de fondo
+
+3. **Variables CSS de Nodos**: `src/nodes/NodeStyles.css`
+   - Variables específicas para componentes de nodos:
+     - `--node-bg`: Fondo del nodo
+     - `--node-border`: Borde del nodo
+     - `--node-border-selected`: Borde cuando está seleccionado
+     - `--node-shadow`: Sombra del nodo
+     - `--node-title-color`: Color del título
+     - `--node-description-color`: Color de la descripción
+     - Y otras variables relacionadas con nodos
+
+### Reglas de Implementación
+
+1. **Usar Variables CSS**: Siempre usar variables CSS con `var(--variable-name)` en lugar de valores fijos
+   ```css
+   /* ✅ CORRECTO */
+   .mi-componente {
+     background-color: var(--bg-primary);
+     color: var(--text-primary);
+     border: 1px solid var(--border-color);
+   }
+   
+   /* ❌ INCORRECTO */
+   .mi-componente {
+     background-color: #ffffff;
+     color: #1f2937;
+     border: 1px solid #e5e7eb;
+   }
+   ```
+
+2. **Definir Variables para Nuevos Componentes**: Si un componente necesita variables específicas que no existen:
+   - Agregar las variables en el archivo CSS del componente
+   - Definir valores para cada tema usando `[data-theme='light']`, `[data-theme='abyss']`, `[data-theme='dark']`
+   ```css
+   :root {
+     --mi-componente-bg: #ffffff;
+     --mi-componente-text: #1f2937;
+   }
+   
+   [data-theme='abyss'] {
+     --mi-componente-bg: #1e293b;
+     --mi-componente-text: #f1f5f9;
+   }
+   
+   [data-theme='dark'] {
+     --mi-componente-bg: #171717;
+     --mi-componente-text: #f9fafb;
+   }
+   ```
+
+3. **Usar ThemeContext en Componentes React**: Para lógica condicional basada en el tema:
+   ```javascript
+   import { useTheme } from '../../context/ThemeContext';
+   
+   const MiComponente = () => {
+     const { theme, isDark, isLight } = useTheme();
+     
+     // Usar para lógica condicional si es necesario
+     return <div className={`mi-clase ${isDark ? 'dark-mode' : ''}`}>...</div>;
+   };
+   ```
+
+4. **Verificar ThemeProvider**: Asegurarse de que todos los componentes estén dentro del `ThemeProvider`:
+   - El `ThemeProvider` debe envolver toda la aplicación en `src/App.js`
+   - Verificar que la estructura sea: `ThemeProvider > BrowserRouter > Routes > ...`
+
+### Estructura de Archivos de Estilos
+
+- **Globales**: `src/index.css` - Variables CSS globales y estilos base
+- **Componentes**: `src/components/[componente]/[Componente].css` - Estilos específicos del componente
+- **Nodos**: `src/nodes/NodeStyles.css` - Variables y estilos específicos de nodos
+- **Temas React Flow**: `src/styles/ReactFlowTheme.css` - Temas para React Flow
+
+### Checklist al Crear Nuevos Componentes
+
+- [ ] Usar variables CSS del ThemeContext (`var(--variable-name)`)
+- [ ] Definir variables específicas del componente si es necesario
+- [ ] Probar que el componente funciona correctamente en los 3 temas (light, abyss, dark)
+- [ ] Verificar que el componente está dentro del ThemeProvider
+- [ ] No usar valores de color hardcodeados
+- [ ] Usar `useTheme()` hook si se necesita lógica condicional basada en el tema
+- [ ] NO usar emojis en el código
+- [ ] Usar iconos de `lucide-react` en lugar de SVGs manuales
+
+---
+
+# Reglas de Iconos y Emojis
+
+## Prohibición de Emojis
+
+**IMPORTANTE**: NUNCA usar emojis en el código del proyecto. Los emojis pueden causar problemas de compatibilidad, renderizado inconsistente entre plataformas y no son accesibles.
+
+### ❌ INCORRECTO - No usar emojis:
+```javascript
+// ❌ INCORRECTO
+const icon = '👆';
+const message = '✅ Éxito';
+const button = <button>🚀 Ejecutar</button>;
+```
+
+### ✅ CORRECTO - Usar iconos de lucide-react:
+```javascript
+// ✅ CORRECTO
+import { Play, Check, Rocket } from 'lucide-react';
+
+const icon = <Play />;
+const message = <><Check /> Éxito</>;
+const button = <button><Rocket /> Ejecutar</button>;
+```
+
+## Uso de Iconos con lucide-react
+
+**OBLIGATORIO**: Todos los iconos deben provenir de la librería `lucide-react`. NO se deben crear SVGs manualmente ni usar otros sistemas de iconos.
+
+### Instalación y Uso
+
+1. **Instalar lucide-react** (si no está instalado):
+   ```bash
+   npm install lucide-react
+   ```
+
+2. **Importar iconos específicos**:
+   ```javascript
+   import { Home, User, Settings, ChevronRight, X } from 'lucide-react';
+   ```
+
+3. **Usar iconos en componentes**:
+   ```javascript
+   import { Home, User, Settings } from 'lucide-react';
+   
+   const Sidebar = () => {
+     return (
+       <div>
+         <button>
+           <Home size={20} />
+           <span>Inicio</span>
+         </button>
+         <button>
+           <User size={20} />
+           <span>Usuario</span>
+         </button>
+         <button>
+           <Settings size={20} />
+           <span>Configuración</span>
+         </button>
+       </div>
+     );
+   };
+   ```
+
+### Propiedades de Iconos lucide-react
+
+Los iconos de `lucide-react` aceptan las siguientes props estándar:
+
+- `size`: Tamaño del icono (número, por defecto 24)
+- `color`: Color del icono (string, por defecto "currentColor")
+- `strokeWidth`: Grosor del trazo (número, por defecto 2)
+- `className`: Clase CSS adicional
+
+```javascript
+import { Home } from 'lucide-react';
+
+// Ejemplo con propiedades personalizadas
+<Home 
+  size={20} 
+  color="var(--accent-color)" 
+  strokeWidth={2.5}
+  className="mi-clase-icono"
+/>
+```
+
+### ❌ INCORRECTO - No crear SVGs manualmente:
+```javascript
+// ❌ INCORRECTO
+const Icon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" />
+  </svg>
+);
+```
+
+### ✅ CORRECTO - Usar lucide-react:
+```javascript
+// ✅ CORRECTO
+import { Home } from 'lucide-react';
+
+const Icon = () => <Home size={20} />;
+```
+
+### Buscar Iconos Disponibles
+
+Para encontrar el icono adecuado, consultar la documentación de lucide-react:
+- **Documentación oficial**: https://lucide.dev/icons/
+- **Búsqueda**: Usar el buscador en la página para encontrar iconos por nombre
+
+### Ejemplos de Reemplazo Común
+
+| Emoji/Descripción | Icono lucide-react | Import |
+|-------------------|-------------------|--------|
+| 👆 (mano señalando) | `Hand` o `Pointer` | `import { Hand } from 'lucide-react'` |
+| 🏠 (casa) | `Home` | `import { Home } from 'lucide-react'` |
+| 👤 (usuario) | `User` | `import { User } from 'lucide-react'` |
+| ⚙️ (configuración) | `Settings` | `import { Settings } from 'lucide-react'` |
+| ✅ (check) | `Check` | `import { Check } from 'lucide-react'` |
+| ❌ (X) | `X` | `import { X } from 'lucide-react'` |
+| ➡️ (flecha derecha) | `ChevronRight` | `import { ChevronRight } from 'lucide-react'` |
+| 🔄 (refresh) | `RefreshCw` | `import { RefreshCw } from 'lucide-react'` |
+| 🚀 (cohete) | `Rocket` | `import { Rocket } from 'lucide-react'` |
+
+### Checklist al Usar Iconos
+
+- [ ] NO usar emojis en el código
+- [ ] Importar iconos desde `lucide-react`
+- [ ] Usar el nombre correcto del icono según la documentación
+- [ ] Especificar `size` cuando sea necesario (por defecto 24)
+- [ ] Usar `color="currentColor"` o variables CSS para colores
+- [ ] NO crear SVGs manualmente
+- [ ] Verificar que el icono existe en lucide-react antes de usarlo

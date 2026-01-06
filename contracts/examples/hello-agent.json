@@ -34,12 +34,14 @@
     {
       "id": "e1",
       "source": "t1",
-      "target": "a1"
+      "target": "a1",
+      "label": null
     },
     {
       "id": "e2",
       "source": "a1",
-      "target": "r1"
+      "target": "r1",
+      "label": null
     }
   ]
 }

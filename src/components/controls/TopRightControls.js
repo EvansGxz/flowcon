@@ -3,6 +3,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useEditorStore } from '../../store/editorStore';
 import JsonModal from '../modals/JsonModal';
 import ExamplesModal from '../modals/ExamplesModal';
+import ExecuteFlowModal from '../modals/ExecuteFlowModal';
 import './TopRightControls.css';
 
 /**
@@ -11,7 +12,7 @@ import './TopRightControls.css';
  */
 const TopRightControls = ({ onAddNode, onModalStateChange }) => {
   const { theme, setTheme } = useTheme();
-  const { exportGraph, importGraph, validateLocal, nodeViewMode, setNodeViewMode, loadExample } = useEditorStore();
+  const { exportGraph, importGraph, validateLocal, validateRemote, nodeViewMode, setNodeViewMode, loadExample, saveFlow, executeFlow, selectedFlowId } = useEditorStore();
   const [showThemeMenu, setShowThemeMenu] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showViewMenu, setShowViewMenu] = useState(false);
@@ -19,6 +20,7 @@ const TopRightControls = ({ onAddNode, onModalStateChange }) => {
   const [isJsonModalOpen, setJsonModalOpen] = useState(false);
   const [jsonMode, setJsonMode] = useState('export');
   const [validationResult, setValidationResult] = useState(null);
+  const [showRunConfirm, setShowRunConfirm] = useState(false);
   
   const themeMenuRef = useRef(null);
   const exportMenuRef = useRef(null);
@@ -89,12 +91,72 @@ const TopRightControls = ({ onAddNode, onModalStateChange }) => {
     setShowExportMenu(false);
   };
 
-  const handleValidate = () => {
-    const result = validateLocal();
-    setValidationResult(result);
+  const handleValidate = async () => {
+    // Validar localmente primero
+    const localResult = validateLocal();
+    if (!localResult.valid) {
+      setValidationResult(localResult);
+      setShowExportMenu(false);
+      return;
+    }
+
+    // Si es válido localmente, validar remotamente
+    try {
+      const remoteResult = await validateRemote();
+      setValidationResult(remoteResult);
+    } catch (error) {
+      setValidationResult({
+        valid: false,
+        errors: [`Error al validar remotamente: ${error.message}`],
+      });
+    }
     setShowExportMenu(false);
-    
-    // Los errores se mostrarán en el popup de validación
+  };
+
+  const handleSave = async () => {
+    const flowName = window.prompt('Nombre del flow:', selectedFlowId || 'Nuevo Flow');
+    if (!flowName) return;
+
+    try {
+      const result = await saveFlow(flowName);
+      if (result.success) {
+        alert(`✅ Flow guardado: ${result.flow.name}`);
+      } else {
+        alert(`❌ Error al guardar: ${result.error}`);
+      }
+    } catch (error) {
+      alert(`❌ Error al guardar: ${error.message}`);
+    }
+  };
+
+  const handleRunClick = () => {
+    // Validar primero
+    const validation = validateLocal();
+    if (!validation.valid) {
+      alert(`❌ El flow no es válido:\n${validation.errors.join('\n')}`);
+      return;
+    }
+    setShowRunConfirm(true);
+  };
+
+  const handleRunConfirm = async (timeoutSeconds = null) => {
+    setShowRunConfirm(false);
+    try {
+      const result = await executeFlow(timeoutSeconds);
+      if (result.success) {
+        // Navegar a runs con flowId si está disponible
+        const { selectedFlowId } = useEditorStore.getState();
+        if (selectedFlowId) {
+          window.location.href = `/runs?flowId=${selectedFlowId}`;
+        } else if (window.location.pathname !== '/runs') {
+          window.location.href = '/runs';
+        }
+      } else {
+        alert(`❌ Error al ejecutar: ${result.error}`);
+      }
+    } catch (error) {
+      alert(`❌ Error al ejecutar: ${error.message}`);
+    }
   };
 
   const handleJsonImport = (jsonString) => {
@@ -519,6 +581,60 @@ const TopRightControls = ({ onAddNode, onModalStateChange }) => {
             </div>
           )}
         </div>
+
+        {/* Guardar Flow */}
+        <div className="top-right-control-wrapper">
+          <button
+            className="top-right-control-button"
+            onClick={handleSave}
+            aria-label="Guardar flow"
+            title="Guardar flow"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16L21 8V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M17 21V13H7V21"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M7 3V8H15"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Ejecutar Flow */}
+        <div className="top-right-control-wrapper">
+          <button
+            className="top-right-control-button"
+            onClick={handleRunClick}
+            aria-label="Ejecutar flow"
+            title="Ejecutar flow"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M8 5V19L19 12L8 5Z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* Modal de Ejemplos */}
@@ -565,6 +681,12 @@ const TopRightControls = ({ onAddNode, onModalStateChange }) => {
           </ul>
         </div>
       )}
+      <ExecuteFlowModal
+        isOpen={showRunConfirm}
+        onClose={() => setShowRunConfirm(false)}
+        onConfirm={handleRunConfirm}
+        defaultTimeout={300}
+      />
     </>
   );
 };

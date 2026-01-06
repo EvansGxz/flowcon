@@ -1,7 +1,40 @@
 .App {
-  width: 100%;
+  display: flex;
+  width: 100vw;
   height: 100vh;
-  margin: 0;
-  padding: 0;
   overflow: hidden;
+  position: relative;
+}
+
+.app-content {
+  flex: 1;
+  width: calc(100% - 200px);
+  height: 100vh;
+  margin-left: 200px; /* Ancho del sidebar expandido por defecto */
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main-content {
+  flex: 1;
+  overflow: hidden;
+  padding-top: 60px; /* Altura del header */
+  height: calc(100vh - 60px);
+  width: 100%;
+  position: relative;
+}
+
+/* Cuando el sidebar está colapsado */
+.App.sidebar-collapsed .app-content {
+  margin-left: 60px;
+  width: calc(100% - 60px);
+}
+
+/* Cuando el sidebar está expandido */
+.App.sidebar-expanded .app-content {
+  margin-left: 200px;
+  width: calc(100% - 200px);
 }

@@ -125,6 +125,7 @@ function mapTypeIdToNodeType(typeId) {
   const mapping = {
     'ap.trigger.webhook': 'trigger.webhook',
     'ap.trigger.manual': 'trigger.manual',
+    'ap.trigger.input': 'trigger.input',
     'ap.agent.core': 'agent.core',
     'ap.condition.expr': 'condition.expr',
     'ap.memory.kv': 'memory.kv',
@@ -133,6 +134,7 @@ function mapTypeIdToNodeType(typeId) {
     'ap.tool.http': 'tool.http',
     'ap.tool.postgres': 'tool.postgres',
     'ap.response.chat': 'response.chat',
+    'ap.response.end': 'response.end',
   };
   return mapping[typeId] || typeId;
 }
@@ -144,6 +146,7 @@ function mapNodeTypeToTypeId(nodeType) {
   const mapping = {
     'trigger.webhook': 'ap.trigger.webhook',
     'trigger.manual': 'ap.trigger.manual',
+    'trigger.input': 'ap.trigger.input',
     'agent.core': 'ap.agent.core',
     'condition.expr': 'ap.condition.expr',
     'memory.kv': 'ap.memory.kv',
@@ -151,6 +154,7 @@ function mapNodeTypeToTypeId(nodeType) {
     'tool.http': 'ap.tool.http',
     'tool.postgres': 'ap.tool.postgres',
     'response.chat': 'ap.response.chat',
+    'response.end': 'ap.response.end',
   };
   return mapping[nodeType] || `ap.${nodeType}`;
 }
@@ -164,6 +168,7 @@ function getReactFlowTypeName(nodeType) {
   const mapping = {
     'trigger.webhook': 'webhook_trigger',
     'trigger.manual': 'manual_trigger',
+    'trigger.input': 'trigger_input',
     'agent.core': 'agent_core',
     'condition.expr': 'condition_expr',
     'memory.kv': 'memory_kv',
@@ -171,6 +176,7 @@ function getReactFlowTypeName(nodeType) {
     'tool.http': 'tool_http',
     'tool.postgres': 'tool_postgres',
     'response.chat': 'response_chat',
+    'response.end': 'response_end',
   };
   return mapping[nodeType] || nodeType.replace('.', '_');
 }

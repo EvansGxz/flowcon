@@ -1,0 +1,52 @@
+.execute-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--accent-color);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.execute-button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.execute-button:active {
+  transform: translateY(0);
+}
+
+.execute-button svg {
+  flex-shrink: 0;
+}
+
+.execute-button-text {
+  white-space: nowrap;
+}
+
+/* Responsive: ocultar texto en pantallas pequeñas */
+@media (max-width: 768px) {
+  .execute-button-text {
+    display: none;
+  }
+  
+  .execute-button {
+    padding: 12px;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    justify-content: center;
+  }
+}
