@@ -1,9 +1,26 @@
 import { Handle, Position } from '@xyflow/react';
+import { useEffect, useRef } from 'react';
 import { Bot, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { getNodeDefinition } from '../utils/nodeInstance';
 import { NodeStatus } from './definitions/types';
 import { useEditorStore } from '../store/editorStore';
 import './NodeStyles.css';
+
+// Helper para crear un handle (según documentación React Flow)
+// React Flow posiciona los handles automáticamente en el centro del lado especificado
+const HandleWithClick = ({ id, type, position, className, nodeId }) => {
+  return (
+    <Handle
+      id={id}
+      type={type}
+      position={position}
+      className={className}
+      data-handle-wrapper="true"
+      data-node-id={nodeId}
+      data-handle-id={id}
+    />
+  );
+};
 
 const AgentNode = ({ data, selected, id }) => {
   // Obtener definición del nodo
@@ -12,6 +29,41 @@ const AgentNode = ({ data, selected, id }) => {
   const config = data.config || {};
   const status = data.status || NodeStatus.IDLE;
   const nodeViewMode = useEditorStore((state) => state.nodeViewMode);
+  const nodeRef = useRef(null);
+
+  // Event listener para detectar doble clic en handles dentro de este nodo
+  useEffect(() => {
+    const handleDoubleClick = (e) => {
+      const target = e.target;
+      // Verificar si el clic fue en un handle de este nodo
+      if (target.hasAttribute('data-handleid') && target.getAttribute('data-nodeid') === id) {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        const handleId = target.getAttribute('data-handleid');
+        const handleType = target.classList.contains('source') ? 'source' : 'target';
+        
+        // Emitir evento personalizado para abrir paleta
+        const event = new CustomEvent('handleDoubleClick', {
+          detail: {
+            nodeId: id,
+            handleId: handleId,
+            handleType: handleType,
+            position: { x: e.clientX, y: e.clientY },
+          },
+        });
+        window.dispatchEvent(event);
+      }
+    };
+
+    // Usar el ref del nodo o buscar en el DOM
+    const nodeElement = nodeRef.current || document.querySelector(`[data-id="${id}"]`);
+    if (nodeElement) {
+      nodeElement.addEventListener('dblclick', handleDoubleClick, true);
+      return () => {
+        nodeElement.removeEventListener('dblclick', handleDoubleClick, true);
+      };
+    }
+  }, [id]);
 
   // Obtener valores de configuración
   const model = config.model || definition?.getDefaultValue('model') || 'gpt-4';
@@ -24,6 +76,7 @@ const AgentNode = ({ data, selected, id }) => {
   if (nodeViewMode === 'icon') {
     return (
       <div
+        ref={nodeRef}
         className={`node-container agent-node icon-view ${selected ? 'node-selected' : ''} ${statusClass}`}
         style={{ width: '64px', height: '64px', minWidth: '64px' }}
       >
@@ -38,17 +91,19 @@ const AgentNode = ({ data, selected, id }) => {
             <Bot size={32} />
           )}
         </div>
-        <Handle
+        <HandleWithClick
           id="in"
           type="target"
           position={Position.Left}
           className="node-handle node-handle-purple"
+          nodeId={id}
         />
-        <Handle
+        <HandleWithClick
           id="out"
           type="source"
           position={Position.Right}
           className="node-handle node-handle-purple"
+          nodeId={id}
         />
       </div>
     );
@@ -58,6 +113,7 @@ const AgentNode = ({ data, selected, id }) => {
   if (nodeViewMode === 'compact') {
     return (
       <div
+        ref={nodeRef}
         className={`node-container agent-node compact-view ${selected ? 'node-selected' : ''} ${statusClass}`}
         style={{ minWidth: '200px' }}
       >
@@ -78,17 +134,19 @@ const AgentNode = ({ data, selected, id }) => {
             <div className="node-version">v{version}</div>
           )}
         </div>
-        <Handle
+        <HandleWithClick
           id="in"
           type="target"
           position={Position.Left}
           className="node-handle node-handle-purple"
+          nodeId={id}
         />
-        <Handle
+        <HandleWithClick
           id="out"
           type="source"
           position={Position.Right}
           className="node-handle node-handle-purple"
+          nodeId={id}
         />
       </div>
     );
@@ -97,6 +155,7 @@ const AgentNode = ({ data, selected, id }) => {
   // Vista informative: header + badges + descripción
   return (
     <div
+      ref={nodeRef}
       className={`node-container agent-node informative-view ${selected ? 'node-selected' : ''} ${statusClass}`}
       style={{ minWidth: '200px' }}
     >

@@ -60,12 +60,12 @@
 
 /* Background pattern */
 .react-flow__background-pattern {
-  opacity: 0.3;
+  opacity: 0.5;
 }
 
 [data-theme='abyss'] .react-flow__background-pattern,
 [data-theme='dark'] .react-flow__background-pattern,
 [data-theme='midnight-sakura'] .react-flow__background-pattern {
-  opacity: 0.2;
+  opacity: 0.4;
 }
 

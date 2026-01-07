@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, MoreVertical, Download, Upload, CheckCircle2, Save, Play, X } from 'lucide-react';
+import { Home, MoreVertical, Download, Upload, CheckCircle2, Save, Play, X, History } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import JsonModal from '../modals/JsonModal';
 import ExecuteFlowModal from '../modals/ExecuteFlowModal';
@@ -11,7 +11,7 @@ import './Header.css';
 
 const Header = () => {
   const navigate = useNavigate();
-  const { selectedProjectId, projects, flows, loadFlows, loadProjects, exportGraph, importGraph, validateLocal, validateRemote, saveFlow, executeFlow, selectedFlowId, loadFlow, openTabs, setOpenTabs } = useEditorStore();
+  const { selectedProjectId, projects, flows, flowsLoaded, loadFlows, loadProjects, exportGraph, importGraph, validateLocal, validateRemote, saveFlow, executeFlow, selectedFlowId, openTabs } = useEditorStore();
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [isJsonModalOpen, setJsonModalOpen] = useState(false);
   const [jsonMode, setJsonMode] = useState('export');
@@ -111,31 +111,21 @@ const Header = () => {
   const handleProjectClick = async () => {
     if (!showFlowsMenu) {
       // Si el menú se va a abrir, verificar si necesitamos cargar flows
-      if (selectedProjectId) {
-        // Solo hacer fetch si no hay flows cargados o si los flows están vacíos
-        // Si ya hay flows cargados, usar esos en lugar de hacer fetch
-        if (flows.length === 0) {
-          try {
-            await loadFlows();
-          } catch (error) {
-            console.error('Error al cargar flows:', error);
-          }
+      if (selectedProjectId && !flowsLoaded) {
+        try {
+          await loadFlows();
+        } catch (error) {
+          console.error('Error al cargar flows:', error);
         }
       }
     }
     setShowFlowsMenu(!showFlowsMenu);
   };
 
-  const handleFlowSelect = async (flowId) => {
-    // Agregar el flow a las tabs abiertas si no está
-    if (!openTabs.includes(flowId)) {
-      setOpenTabs([...openTabs, flowId]);
-    }
-    // Cargar el flow y navegar a la ruta correspondiente
-    const result = await loadFlow(flowId);
-    if (result?.success) {
-      navigate(`/workflow/${flowId}`);
-    }
+  const handleFlowSelect = (flowId) => {
+    // IMPORTANTE: solo navegar, no cargar
+    // FlowTabs agregará el tab al detectar la URL
+    navigate(`/workflow/${flowId}`);
     setShowFlowsMenu(false);
   };
 
@@ -354,6 +344,22 @@ const Header = () => {
           title="Guardar flow"
         >
           <Save size={18} />
+        </button>
+
+        {/* Historial de Runs */}
+        <button
+          className="header-control-button"
+          onClick={() => {
+            if (selectedFlowId) {
+              navigate(`/runs?flowId=${selectedFlowId}`);
+            } else {
+              navigate('/runs');
+            }
+          }}
+          aria-label="Historial de ejecuciones"
+          title="Historial de ejecuciones"
+        >
+          <History size={18} />
         </button>
 
         {/* Ejecutar Flow */}

@@ -5,7 +5,7 @@ import { getCategoryMetadata } from '../../utils/categoryIcons';
 import { getNodeIcon } from '../../utils/nodeIcons';
 import './NodePalette.css';
 
-const NodePalette = ({ onAddNode, isOpen, onClose }) => {
+const NodePalette = ({ onAddNode, isOpen, onClose, connectionFilter = null }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [shouldRender, setShouldRender] = useState(false);
@@ -76,9 +76,10 @@ const NodePalette = ({ onAddNode, isOpen, onClose }) => {
     return { category, count, ...metadata };
   }).filter((item) => item.count > 0);
 
+  // Si hay un filtro de conexión, mostrar nodos directamente sin categorías
   // Si hay una categoría seleccionada, mostrar nodos de esa categoría
   // Si no, mostrar lista de categorías
-  const showCategories = selectedCategory === null;
+  const showCategories = selectedCategory === null && !connectionFilter;
 
   // Filtrar nodos por categoría seleccionada o búsqueda
   let filteredNodes = [];
@@ -86,7 +87,23 @@ const NodePalette = ({ onAddNode, isOpen, onClose }) => {
     // No mostrar nodos, solo categorías
     filteredNodes = [];
   } else {
-    filteredNodes = allDefinitions.filter((def) => def.category === selectedCategory);
+    // Si hay un filtro de conexión, mostrar todos los nodos compatibles
+    if (connectionFilter) {
+      const { nodeId, handleId, handleType } = connectionFilter;
+      filteredNodes = allDefinitions.filter((def) => {
+        if (handleType === 'source') {
+          // Si es un source handle (output), buscar nodos con inputs compatibles
+          return def.inputs && def.inputs.length > 0;
+        } else if (handleType === 'target') {
+          // Si es un target handle (input), buscar nodos con outputs compatibles
+          return def.outputs && def.outputs.length > 0;
+        }
+        return true;
+      });
+    } else {
+      // Filtrar por categoría seleccionada
+      filteredNodes = allDefinitions.filter((def) => def.category === selectedCategory);
+    }
     
     // Si hay búsqueda, filtrar también por búsqueda
     if (searchQuery) {
@@ -130,7 +147,12 @@ const NodePalette = ({ onAddNode, isOpen, onClose }) => {
               <ChevronLeft size={20} />
             </button>
           )}
-          <h3>{showCategories ? 'Categorías' : selectedCategory}</h3>
+          <h3>
+            {connectionFilter 
+              ? (connectionFilter.handleType === 'source' ? 'Conectar desde' : 'Conectar a')
+              : (showCategories ? 'Categorías' : selectedCategory)
+            }
+          </h3>
           <button className="node-palette-close" onClick={onClose} title="Cerrar">
             <X size={20} />
           </button>
@@ -140,7 +162,7 @@ const NodePalette = ({ onAddNode, isOpen, onClose }) => {
           <div className="node-palette-search">
             <input
               type="text"
-              placeholder="Buscar nodos..."
+              placeholder={connectionFilter ? "Buscar nodos compatibles..." : "Buscar nodos..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="node-palette-search-input"

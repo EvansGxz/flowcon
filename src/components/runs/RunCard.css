@@ -43,6 +43,37 @@
   color: var(--node-description-color);
 }
 
+/* Badge de modo de ejecución */
+.run-card-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 12px;
+  width: fit-content;
+}
+
+.run-card-mode-badge.agent {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(168, 85, 247, 0.1));
+  color: #a855f7;
+  border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+.run-card-mode-badge.sequential {
+  background: rgba(100, 116, 139, 0.1);
+  color: var(--text-secondary);
+  border: 1px solid var(--node-border);
+}
+
+.run-card-mode-badge svg {
+  flex-shrink: 0;
+}
+
 .run-card-error {
   display: flex;
   align-items: center;

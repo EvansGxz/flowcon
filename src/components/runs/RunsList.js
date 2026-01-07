@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useEditorStore } from '../../store/editorStore';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import RunCard from './RunCard';
 import SkeletonLoader from '../common/SkeletonLoader';
 import './RunsList.css';
@@ -102,24 +103,28 @@ const RunsList = () => {
     );
   }
 
+  // Obtener el flowId actual para la navegación de regreso
+  const flowIdFromQuery = searchParams.get('flowId');
+  const currentFlowId = flowIdParam || flowIdFromQuery || selectedFlowId;
+
+  const handleBackClick = () => {
+    if (currentFlowId) {
+      navigate(`/workflow/${currentFlowId}`);
+    } else {
+      navigate('/flows');
+    }
+  };
+
   return (
     <div className="runs-list-container">
       <div className="runs-list-header">
         <div>
           <button
             className="runs-list-back-button"
-            onClick={() => navigate('/flows')}
+            onClick={handleBackClick}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M19 12H5M5 12L12 19M5 12L12 5"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Volver a Flows
+            <ArrowLeft size={18} />
+            {currentFlowId ? 'Volver al Flow' : 'Volver a Flows'}
           </button>
           <h1 className="runs-list-title">Historial de Ejecuciones</h1>
         </div>
@@ -148,7 +153,7 @@ const RunsList = () => {
       ) : (
         <div className="runs-list-grid">
           {runs.map((run) => (
-            <RunCard key={run.id} run={run} />
+            <RunCard key={run.id || run.run_id} run={run} />
           ))}
         </div>
       )}

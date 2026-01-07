@@ -307,7 +307,47 @@ export function validateGraph(graph) {
     }
   }
 
-  const allErrors = [...nodeErrors, ...edgeErrors];
+  // ============================================================================
+  // Validaciones AgentCore MVP2
+  // ============================================================================
+  const agentCoreErrors = [];
+  
+  // 1. Validar que haya máximo 1 agent.core por grafo
+  const agentCores = (graph.nodes || []).filter(n => n.type === 'agent.core');
+  if (agentCores.length > 1) {
+    agentCoreErrors.push({
+      code: 'MULTIPLE_AGENT_CORES',
+      message: `El grafo tiene ${agentCores.length} nodos agent.core (máximo permitido: 1)`,
+      path: 'nodes'
+    });
+  }
+  
+  // 2. Validar que las capabilities estén conectadas al agent.core
+  if (agentCores.length === 1) {
+    const agentCoreId = agentCores[0].id;
+    const capabilityTypes = ['model.llm', 'memory.kv', 'tool.http', 'tool.postgres'];
+    const capabilityNodes = (graph.nodes || []).filter(n => capabilityTypes.includes(n.type));
+    
+    // Obtener los edges que salen del agent.core
+    const agentCoreOutgoingEdges = (graph.edges || []).filter(e => e.source === agentCoreId);
+    const connectedToAgentCore = new Set(agentCoreOutgoingEdges.map(e => e.target));
+    
+    // Verificar que cada capability tenga un edge desde agent.core
+    for (const capability of capabilityNodes) {
+      if (!connectedToAgentCore.has(capability.id)) {
+        agentCoreErrors.push({
+          code: 'CAPABILITY_NOT_CONNECTED',
+          message: `La capability '${capability.id}' (${capability.type}) no está conectada al agent.core`,
+          path: `nodes[${capability.id}]`
+        });
+      }
+    }
+  }
+  
+  // Convertir errores de AgentCore a formato string para mantener compatibilidad
+  const agentCoreErrorStrings = agentCoreErrors.map(e => `[${e.code}] ${e.message}`);
+
+  const allErrors = [...nodeErrors, ...edgeErrors, ...agentCoreErrorStrings];
 
   return {
     valid: allErrors.length === 0,

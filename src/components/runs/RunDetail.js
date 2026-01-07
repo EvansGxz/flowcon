@@ -5,7 +5,147 @@ import { getStatusColor } from '../../utils/colorHelpers';
 import TraceView from './TraceView';
 import ConfirmModal from '../modals/ConfirmModal';
 import AlertModal from '../modals/AlertModal';
+import { Bot, Layers, Clock, ArrowLeft, X, RefreshCw, Calendar, AlertCircle, ChevronDown, ChevronRight, Brain, Zap } from 'lucide-react';
 import './RunDetail.css';
+
+/**
+ * Componente para mostrar el historial de acciones del agente
+ */
+const AgentHistoryPanel = ({ trace, isExpanded, onToggle }) => {
+  // Filtrar solo las iteraciones del AgentCore
+  const agentIterations = trace.filter(entry => {
+    const nodeId = entry.node_id || entry.nodeId;
+    return (
+      nodeId?.includes('agent') ||
+      nodeId?.includes('core') ||
+      entry.output?.iteration !== undefined ||
+      entry.output?.action !== undefined
+    );
+  });
+
+  if (agentIterations.length === 0) return null;
+
+  const getActionIcon = (type) => {
+    switch (type) {
+      case 'llm': return <Brain size={14} />;
+      case 'tool': return <Zap size={14} />;
+      default: return <Bot size={14} />;
+    }
+  };
+
+  return (
+    <div className="run-detail-agent-history">
+      <div 
+        className="run-detail-agent-history-header"
+        onClick={onToggle}
+      >
+        <span className="run-detail-agent-history-toggle">
+          {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+        </span>
+        <Bot size={18} />
+        <span className="run-detail-agent-history-title">
+          Historial de Decisiones del Agente
+        </span>
+        <span className="run-detail-agent-history-count">
+          {agentIterations.length} iteracion{agentIterations.length !== 1 ? 'es' : ''}
+        </span>
+      </div>
+
+      {isExpanded && (
+        <div className="run-detail-agent-history-content">
+          {agentIterations.map((entry, idx) => {
+            const iteration = entry.output?.iteration ?? idx + 1;
+            const action = entry.output?.action;
+            const confidence = action?.confidence;
+
+            return (
+              <div key={idx} className="run-detail-agent-history-item">
+                <div className="run-detail-agent-history-item-number">
+                  {iteration}
+                </div>
+                <div className="run-detail-agent-history-item-content">
+                  <div className="run-detail-agent-history-item-action">
+                    {action ? (
+                      <>
+                        <span className="run-detail-agent-history-item-icon">
+                          {getActionIcon(action.type)}
+                        </span>
+                        <span className="run-detail-agent-history-item-type">
+                          {action.type}
+                        </span>
+                        <span className="run-detail-agent-history-item-arrow">→</span>
+                        <span className="run-detail-agent-history-item-capability">
+                          {action.capability_id || action.capabilityId}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="run-detail-agent-history-item-no-action">
+                        Sin acción registrada
+                      </span>
+                    )}
+                  </div>
+                  {confidence !== undefined && (
+                    <div className="run-detail-agent-history-item-confidence">
+                      <div className="run-detail-agent-history-item-confidence-bar">
+                        <div 
+                          className="run-detail-agent-history-item-confidence-fill"
+                          style={{ 
+                            width: `${Math.round(confidence * 100)}%`,
+                            backgroundColor: confidence >= 0.8 ? '#10b981' : confidence >= 0.5 ? '#f59e0b' : '#ef4444'
+                          }}
+                        />
+                      </div>
+                      <span className="run-detail-agent-history-item-confidence-value">
+                        {Math.round(confidence * 100)}%
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Componente para mostrar la barra de progreso de iteraciones
+ */
+const IterationProgress = ({ trace, maxIterations = 50 }) => {
+  // Contar iteraciones del AgentCore
+  const agentIterations = trace.filter(entry => {
+    const nodeId = entry.node_id || entry.nodeId;
+    return (
+      nodeId?.includes('agent') ||
+      nodeId?.includes('core') ||
+      entry.output?.iteration !== undefined
+    );
+  });
+
+  const currentIteration = agentIterations.length;
+  const percentage = Math.min((currentIteration / maxIterations) * 100, 100);
+
+  return (
+    <div className="run-detail-iteration-progress">
+      <div className="run-detail-iteration-progress-header">
+        <span className="run-detail-iteration-progress-label">
+          Progreso de Iteraciones
+        </span>
+        <span className="run-detail-iteration-progress-count">
+          {currentIteration} / {maxIterations}
+        </span>
+      </div>
+      <div className="run-detail-iteration-progress-bar">
+        <div 
+          className="run-detail-iteration-progress-fill"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  );
+};
 
 const RunDetail = () => {
   const { runId } = useParams();
@@ -16,6 +156,7 @@ const RunDetail = () => {
   const [showRerunConfirm, setShowRerunConfirm] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [alertModal, setAlertModal] = useState({ isOpen: false, message: '', type: 'error' });
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(true);
 
   useEffect(() => {
     const initialize = async () => {
@@ -135,10 +276,18 @@ const RunDetail = () => {
         return 'Error';
       case 'running':
         return 'Ejecutando';
+      case 'pending':
+        return 'Pendiente';
+      case 'cancelled':
+        return 'Cancelado';
+      case 'timeout':
+        return 'Timeout';
       default:
         return status;
     }
   };
+
+  const isAgentMode = selectedRun?.execution_mode === 'agent';
 
   if (loading) {
     return (
@@ -148,12 +297,22 @@ const RunDetail = () => {
     );
   }
 
+  // Obtener flowId del run para navegar de vuelta
+  const flowId = selectedRun?.flow_id || selectedRun?.flowId;
+  const handleBackClick = () => {
+    if (flowId) {
+      navigate(`/runs?flowId=${flowId}`);
+    } else {
+      navigate('/runs');
+    }
+  };
+
   if (error || !selectedRun) {
     return (
       <div className="run-detail-container">
         <div className="run-detail-error">
           <p>Error: {error || 'Ejecución no encontrada'}</p>
-          <button onClick={() => navigate('/runs')}>Volver</button>
+          <button onClick={handleBackClick}>Volver</button>
         </div>
       </div>
     );
@@ -164,93 +323,69 @@ const RunDetail = () => {
       <div className="run-detail-header">
         <button
           className="run-detail-back-button"
-          onClick={() => navigate('/runs')}
+          onClick={handleBackClick}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M19 12H5M5 12L12 19M5 12L12 5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <ArrowLeft size={18} />
           Volver
         </button>
         <div className="run-detail-info">
-          <div className="run-detail-status">
-            <div
-              className="run-detail-status-dot"
-              style={{ backgroundColor: getStatusColorLocal(selectedRun.status) }}
-            />
-            <h1 className="run-detail-title">{getStatusLabel(selectedRun.status)}</h1>
+          <div className="run-detail-status-row">
+            <div className="run-detail-status">
+              <div
+                className="run-detail-status-dot"
+                style={{ backgroundColor: getStatusColorLocal(selectedRun.status) }}
+              />
+              <h1 className="run-detail-title">{getStatusLabel(selectedRun.status)}</h1>
+            </div>
+            
+            {/* Badge de modo de ejecución */}
+            {selectedRun.execution_mode && (
+              <div className={`run-detail-mode-badge ${selectedRun.execution_mode}`}>
+                {selectedRun.execution_mode === 'agent' ? (
+                  <>
+                    <Bot size={14} />
+                    <span>Agent Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <Layers size={14} />
+                    <span>Sequential Mode</span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
+          
           <div className="run-detail-meta">
             <div className="run-detail-date">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M8 2V6M16 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <Calendar size={16} />
               {formatDate(selectedRun.created_at || selectedRun.started_at || selectedRun.createdAt)}
             </div>
             {selectedRun && (selectedRun.status === 'running' || selectedRun.status === 'pending') && (
               <button className="run-detail-cancel-button" onClick={handleCancelClick}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M6 18L18 6M6 6L18 18"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <X size={16} />
                 Cancelar
               </button>
             )}
             <button className="run-detail-rerun-button" onClick={handleRerunClick}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M1 4V10H7M23 20V14H17M14.5 3.5C16.5711 4.54537 18 6.85884 18 9.5C18 12.1412 16.5711 14.4546 14.5 15.5M9.5 20.5C7.42893 19.4546 6 17.1412 6 14.5C6 11.8588 7.42893 9.54537 9.5 8.5"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <RefreshCw size={16} />
               Re-ejecutar
             </button>
           </div>
         </div>
       </div>
 
+      {/* Barra de progreso para modo agent */}
+      {isAgentMode && (selectedRun.status === 'running' || selectedRun.status === 'pending') && (
+        <IterationProgress trace={trace} maxIterations={50} />
+      )}
+
       {selectedRun.error && (
         <div className={`run-detail-error-box ${isRunTimeout() ? 'run-detail-error-box-timeout' : ''}`}>
           {isRunTimeout() ? (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-              <path
-                d="M12 6V12L16 14"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <Clock size={20} />
           ) : (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <AlertCircle size={20} />
           )}
           <div>
             <strong>{isRunTimeout() ? 'Timeout de Ejecución:' : 'Error:'}</strong>
@@ -269,7 +404,7 @@ const RunDetail = () => {
                   <p className="run-detail-timeout-detail">{selectedRun.error.message}</p>
                 )}
                 <p className="run-detail-timeout-suggestion">
-                  💡 Sugerencia: Intenta aumentar el timeout o revisa si el flow tiene loops infinitos.
+                  Sugerencia: Intenta aumentar el timeout o revisa si el flow tiene loops infinitos.
                 </p>
               </div>
             ) : (
@@ -279,9 +414,18 @@ const RunDetail = () => {
         </div>
       )}
 
+      {/* Panel de historial de agente (solo en modo agent) */}
+      {isAgentMode && trace.length > 0 && (
+        <AgentHistoryPanel 
+          trace={trace} 
+          isExpanded={isHistoryExpanded}
+          onToggle={() => setIsHistoryExpanded(!isHistoryExpanded)}
+        />
+      )}
+
       <div className="run-detail-content">
         <h2 className="run-detail-section-title">Trace de Ejecución</h2>
-        <TraceView trace={trace} />
+        <TraceView trace={trace} executionMode={selectedRun.execution_mode} />
       </div>
       <ConfirmModal
         isOpen={showRerunConfirm}
@@ -315,4 +459,3 @@ const RunDetail = () => {
 };
 
 export default RunDetail;
-

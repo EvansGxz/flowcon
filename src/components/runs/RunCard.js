@@ -3,6 +3,7 @@ import { useEditorStore } from '../../store/editorStore';
 import { useNavigate } from 'react-router-dom';
 import { getStatusColor } from '../../utils/colorHelpers';
 import ConfirmModal from '../modals/ConfirmModal';
+import { Bot, Layers, Eye, RefreshCw, AlertCircle } from 'lucide-react';
 import './RunCard.css';
 
 const RunCard = ({ run }) => {
@@ -11,9 +12,14 @@ const RunCard = ({ run }) => {
   const [showRerunConfirm, setShowRerunConfirm] = useState(false);
 
   const handleView = async () => {
-    const result = await loadRun(run.id);
+    const runId = run.id || run.run_id;
+    if (!runId) {
+      console.error('[RunCard] No se puede ver el run: falta id o run_id');
+      return;
+    }
+    const result = await loadRun(runId);
     if (result.success) {
-      navigate(`/runs/${run.id}`);
+      navigate(`/runs/${runId}`);
     }
   };
 
@@ -23,9 +29,17 @@ const RunCard = ({ run }) => {
 
   const handleRerunConfirm = async () => {
     setShowRerunConfirm(false);
-    const result = await rerunFlow(run.id);
+    const runId = run.id || run.run_id;
+    if (!runId) {
+      console.error('[RunCard] No se puede re-ejecutar el run: falta id o run_id');
+      return;
+    }
+    const result = await rerunFlow(runId);
     if (result.success) {
-      navigate(`/runs/${result.run.id}`);
+      const newRunId = result.run?.id || result.run?.runId || result.runId;
+      if (newRunId) {
+        navigate(`/runs/${newRunId}`);
+      }
     }
   };
 
@@ -55,12 +69,17 @@ const RunCard = ({ run }) => {
         return 'Ejecutando';
       case 'pending':
         return 'Pendiente';
+      case 'cancelled':
+        return 'Cancelado';
+      case 'timeout':
+        return 'Timeout';
       default:
         return status;
     }
   };
 
   const isActive = run.status === 'running' || run.status === 'pending';
+  const executionMode = run.execution_mode;
 
   return (
     <>
@@ -86,40 +105,35 @@ const RunCard = ({ run }) => {
               <span className="run-card-status-badge">Activo</span>
             )}
           </div>
-          <div className="run-card-date">{formatDate(run.created_at || run.started_at || run.createdAt)}</div>
+          <div className="run-card-date">{formatDate(run.started_at || run.created_at || run.createdAt)}</div>
         </div>
+        
+        {/* Badge de modo de ejecución */}
+        {executionMode && (
+          <div className={`run-card-mode-badge ${executionMode}`}>
+            {executionMode === 'agent' ? (
+              <>
+                <Bot size={12} />
+                <span>Agent</span>
+              </>
+            ) : (
+              <>
+                <Layers size={12} />
+                <span>Sequential</span>
+              </>
+            )}
+          </div>
+        )}
+        
       {run.error && (
         <div className="run-card-error">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M12 8V12M12 16H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span>{run.error}</span>
+          <AlertCircle size={16} />
+          <span>{typeof run.error === 'string' ? run.error : run.error?.message || 'Error en la ejecución'}</span>
         </div>
       )}
       <div className="run-card-actions">
         <button className="run-card-button run-card-button-primary" onClick={handleView}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <circle
-              cx="12"
-              cy="12"
-              r="3"
-              stroke="currentColor"
-              strokeWidth="2"
-            />
-          </svg>
+          <Eye size={16} />
           Ver Detalle
         </button>
         <button 
@@ -127,15 +141,7 @@ const RunCard = ({ run }) => {
           onClick={handleRerunClick}
           disabled={isActive}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M1 4V10H7M23 20V14H17M14.5 3.5C16.5711 4.54537 18 6.85884 18 9.5C18 12.1412 16.5711 14.4546 14.5 15.5M9.5 20.5C7.42893 19.4546 6 17.1412 6 14.5C6 11.8588 7.42893 9.54537 9.5 8.5"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <RefreshCw size={16} />
           Re-ejecutar
         </button>
       </div>
@@ -145,4 +151,3 @@ const RunCard = ({ run }) => {
 };
 
 export default RunCard;
-

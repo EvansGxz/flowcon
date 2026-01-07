@@ -10,6 +10,288 @@
   color: var(--text-secondary);
 }
 
+/* Badge de modo de ejecución */
+.trace-view-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+  color: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  width: fit-content;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+/* Grupo de AgentCore */
+.trace-agent-group {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.05));
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.trace-agent-group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(139, 92, 246, 0.1);
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.trace-agent-group-header:hover {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.trace-agent-group-toggle {
+  color: var(--text-secondary);
+}
+
+.trace-agent-group-icon {
+  color: #a855f7;
+}
+
+.trace-agent-group-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Iteraciones del AgentCore */
+.trace-agent-iterations {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trace-agent-iteration {
+  background: var(--bg-secondary);
+  border: 1px solid var(--node-border);
+  border-radius: 8px;
+  padding: 14px;
+  position: relative;
+}
+
+.trace-agent-iteration::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #a855f7, #6366f1);
+  border-radius: 3px 0 0 3px;
+}
+
+.trace-agent-iteration-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.trace-agent-iteration-number {
+  font-size: 13px;
+  font-weight: 700;
+  color: #a855f7;
+  background: rgba(168, 85, 247, 0.15);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.trace-agent-iteration-status {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.trace-agent-iteration-status.success {
+  color: var(--success-color, #10b981);
+}
+
+.trace-agent-iteration-status.error {
+  color: var(--error-color, #ef4444);
+}
+
+.trace-agent-iteration-final {
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #10b981, #059669);
+  padding: 3px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Acción del AgentCore */
+.trace-agent-action {
+  background: var(--node-bg);
+  border: 1px solid var(--node-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 8px;
+}
+
+.trace-agent-action-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.trace-agent-action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, var(--accent-color), #6366f1);
+  color: white;
+  border-radius: 6px;
+}
+
+.trace-agent-action-type {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.trace-agent-action-arrow {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.trace-agent-action-capability {
+  font-size: 13px;
+  color: var(--accent-color);
+  font-weight: 500;
+  font-family: 'Courier New', monospace;
+  background: rgba(99, 102, 241, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.trace-agent-action-reasoning {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--node-border);
+}
+
+.trace-agent-action-reasoning-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.trace-agent-action-reasoning-text {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* Badge de Confidence */
+.trace-confidence-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.trace-confidence-bar {
+  width: 50px;
+  height: 6px;
+  background: var(--bg-tertiary, var(--bg-secondary));
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.trace-confidence-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.trace-confidence-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 35px;
+  text-align: right;
+}
+
+/* Error en iteración */
+.trace-agent-iteration-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: 6px;
+  color: var(--error-color);
+  font-size: 12px;
+}
+
+.trace-agent-iteration-duration {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+/* Capabilities ejecutadas */
+.trace-view-capabilities {
+  margin-top: 8px;
+}
+
+.trace-view-capabilities-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--node-border);
+}
+
+/* Entry invocado por agent */
+.trace-view-entry-invoked {
+  border-left: 3px solid #a855f7;
+}
+
+.trace-view-entry-invoked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #a855f7;
+  background: rgba(168, 85, 247, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Estilos base existentes */
 .trace-view-entry {
   background-color: var(--node-bg);
   border: 1px solid var(--node-border);
@@ -153,4 +435,18 @@
   font-size: 12px;
   opacity: 0.8;
   font-style: italic;
+}
+
+/* Animación para el spinner */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }

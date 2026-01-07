@@ -1,7 +1,7 @@
 // Versión refactorizada de FlowCanvas usando Zustand
 // Este archivo será usado para reemplazar FlowCanvas.js
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   ReactFlow,
@@ -80,20 +80,49 @@ function FlowCanvasInner() {
     loadFlow,
   } = useEditorStore();
   
-  // Cargar el workflow cuando cambie el workflowId de la URL
-  // Solo cargar si la URL tiene un workflowId diferente al seleccionado
-  // Si selectedFlowId ya está establecido (por ejemplo, desde tabs), no forzar carga desde URL
+  // ÚNICO lugar que carga el flow: cuando cambia workflowId en la URL
+  // Esta es la única fuente de verdad para cargar flows
   useEffect(() => {
-    if (workflowId && workflowId !== selectedFlowId) {
-      // Si el workflowId en la URL es diferente al seleccionado, cargar el flow
-      // Esto puede pasar cuando se navega directamente a una URL o cuando se abre un flow desde fuera
-      loadFlow(workflowId).catch((error) => {
-        // Si el flow no existe (es un nuevo workflow), no hacer nada
-        // El canvas se inicializará vacío
-        console.log('Workflow no encontrado, inicializando canvas vacío');
-      });
+    if (!workflowId) return;
+    
+    // Cargar el flow cuando cambia el workflowId de la URL
+    loadFlow(workflowId).catch((error) => {
+      // Si el flow no existe (es un nuevo workflow), no hacer nada
+      // El canvas se inicializará vacío
+      console.log('Workflow no encontrado, inicializando canvas vacío');
+    });
+  }, [workflowId, loadFlow]);
+  
+  // Memorizar nodos y edges para evitar renders intermedios
+  // Solo mostrar contenido cuando selectedFlowId coincide con workflowId
+  // Esto previene mostrar contenido del flow anterior mientras se carga el nuevo
+  const displayNodes = useMemo(() => {
+    // Si no hay workflowId, mostrar canvas vacío
+    if (!workflowId) {
+      return [];
     }
-  }, [workflowId, selectedFlowId, loadFlow]);
+    // Si workflowId no coincide con selectedFlowId, mostrar canvas vacío
+    // Esto evita mostrar contenido del flow anterior mientras se carga el nuevo
+    if (workflowId !== selectedFlowId) {
+      return [];
+    }
+    // Solo mostrar nodos cuando workflowId y selectedFlowId coinciden
+    return nodes;
+  }, [nodes, workflowId, selectedFlowId]);
+  
+  const displayEdges = useMemo(() => {
+    // Si no hay workflowId, mostrar canvas vacío
+    if (!workflowId) {
+      return [];
+    }
+    // Si workflowId no coincide con selectedFlowId, mostrar canvas vacío
+    // Esto evita mostrar contenido del flow anterior mientras se carga el nuevo
+    if (workflowId !== selectedFlowId) {
+      return [];
+    }
+    // Solo mostrar edges cuando workflowId y selectedFlowId coinciden
+    return edges;
+  }, [edges, workflowId, selectedFlowId]);
   
   // Actualizar estados de los nodos desde el trace durante la ejecución
   useEffect(() => {
@@ -180,6 +209,7 @@ function FlowCanvasInner() {
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [propertiesModalOpen, setPropertiesModalOpen] = useState(false);
   const [selectedNodeForProperties, setSelectedNodeForProperties] = useState(null);
+  const [connectionFilter, setConnectionFilter] = useState(null);
   
   // Verificar si hay alguna modal abierta (desde TopRightControls)
   const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
@@ -190,6 +220,20 @@ function FlowCanvasInner() {
   const isApplyingLayout = useRef(false);
   const isInitialMount = useRef(true);
 
+  // Listener para doble clic en handles (estilo BaseNode)
+  useEffect(() => {
+    const handleDoubleClick = (event) => {
+      const { nodeId, handleId, handleType } = event.detail;
+      setConnectionFilter({ nodeId, handleId, handleType });
+      setIsPaletteOpen(true);
+    };
+
+    window.addEventListener('handleDoubleClick', handleDoubleClick);
+    return () => {
+      window.removeEventListener('handleDoubleClick', handleDoubleClick);
+    };
+  }, []);
+
   // Función para agregar un nodo desde la paleta
   const handleAddNode = useCallback(
     (typeId) => {
@@ -199,9 +243,28 @@ function FlowCanvasInner() {
       });
       const newNode = createNodeInstance(typeId, viewport);
       upsertNode(newNode);
+      
+      // Si hay un filtro de conexión, conectar automáticamente
+      if (connectionFilter) {
+        const { nodeId, handleId, handleType } = connectionFilter;
+        setTimeout(() => {
+          const newEdge = {
+            id: `e_${ulid()}`,
+            source: handleType === 'source' ? nodeId : newNode.id,
+            target: handleType === 'target' ? nodeId : newNode.id,
+            sourceHandle: handleType === 'source' ? handleId : 'out',
+            targetHandle: handleType === 'target' ? handleId : 'in',
+            type: 'custom',
+            animated: true,
+          };
+          setEdges((eds) => addEdge(newEdge, eds));
+        }, 100);
+        setConnectionFilter(null);
+      }
+      
       setIsPaletteOpen(false);
     },
-    [screenToFlowPosition, upsertNode]
+    [screenToFlowPosition, upsertNode, connectionFilter, setEdges]
   );
 
   // Función para aplicar layout manualmente (solo desde el botón)
@@ -341,8 +404,12 @@ function FlowCanvasInner() {
     <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
       <NodePalette
         isOpen={isPaletteOpen}
-        onClose={() => setIsPaletteOpen(false)}
+        onClose={() => {
+          setIsPaletteOpen(false);
+          setConnectionFilter(null);
+        }}
         onAddNode={handleAddNode}
+        connectionFilter={connectionFilter}
       />
       <PropertiesPanel
         isOpen={propertiesModalOpen}
@@ -352,7 +419,7 @@ function FlowCanvasInner() {
         }}
         nodeId={selectedNodeForProperties}
       />
-      {nodes.length === 0 && !isAnyModalOpen && !isPaletteOpen && !propertiesModalOpen && (
+      {displayNodes.length === 0 && !isAnyModalOpen && !isPaletteOpen && !propertiesModalOpen && (
         <EmptyState onAddNode={() => setIsPaletteOpen(true)} />
       )}
       <ContextMenu
@@ -367,7 +434,7 @@ function FlowCanvasInner() {
       />
       <ReactFlow
         style={{ width: '100%', height: '100%' }}
-        nodes={nodes.map(node => ({
+        nodes={displayNodes.map(node => ({
           ...node,
           className: activeNodeId === node.id ? 'node-active' : node.className,
           style: activeNodeId === node.id 
@@ -379,13 +446,20 @@ function FlowCanvasInner() {
               }
             : node.style,
         }))}
-        edges={edges}
+        edges={displayEdges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={(event, node) => {
-          // Manejar clic simple para selección
-          setSelectedNodeId(node.id);
+          // Solo seleccionar si el clic NO viene de un handle wrapper o del handle mismo
+          const target = event.target;
+          const isHandleClick = target.closest('[data-handle-wrapper]') || 
+                               target.closest('[data-handleid]') ||
+                               target.hasAttribute('data-handleid');
+          
+          if (!isHandleClick) {
+            setSelectedNodeId(node.id);
+          }
         }}
         onNodeDoubleClick={(event, node) => {
           console.log('Double click on node:', node.id, node);

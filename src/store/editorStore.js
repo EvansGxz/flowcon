@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { reactFlowToGraphDefinition, graphDefinitionToReactFlow } from '../utils/graphConverter';
 import { validateGraph } from '../contracts';
 import { checkHealth } from '../services/healthService';
-import { getFlows as getFlowsService, saveFlow as saveFlowService, getFlow as getFlowService, deleteFlow as deleteFlowService, updateFlow as updateFlowService } from '../services/flowsService';
+import { getFlows as getFlowsService, saveFlow as saveFlowService, getFlow as getFlowService, deleteFlow as deleteFlowService, updateFlow as updateFlowService, createFlow as createFlowService } from '../services/flowsService';
 import { getRuns, executeFlowTest, executeFlow as executeFlowService, rerunFlow as rerunFlowService, getRun as getRunService, cancelRun as cancelRunService } from '../services/runsService';
 import { validateGraphRemote } from '../services/validationService';
 import { createProject as createProjectService, getProjects as getProjectsService, deleteProject as deleteProjectService, getProject as getProjectService } from '../services/projectsService';
@@ -51,6 +51,7 @@ export const useEditorStore = create((set, get) => ({
   // Estado Semana 2
   selectedFlowId: null,
   flows: [],
+  flowsLoaded: false, // Flag para evitar refetch infinito cuando el proyecto está vacío
   runs: [],
   selectedRun: null,
   trace: [],
@@ -63,6 +64,7 @@ export const useEditorStore = create((set, get) => ({
   openTabs: [], // Array de flowIds que están abiertos en tabs
   flowSavedStates: {}, // { flowId: { nodes, edges, graphId } } - Estado guardado de cada flow
   flowErrors: {}, // { flowId: { valid: boolean, errors: [] } } - Errores de validación por flow
+  loadFlowRequestId: 0, // Token incremental para protección anti-race en loadFlow
 
   // Setters básicos
   setNodes: (nodesOrUpdater) => {
@@ -160,21 +162,35 @@ export const useEditorStore = create((set, get) => ({
       localStorage.removeItem('redmind_currentProjectId');
     }
     
-    set({ selectedProjectId: projectId });
+    set({ 
+      selectedProjectId: projectId,
+      flowsLoaded: false // Resetear flag al cambiar de proyecto
+    });
     
     // Recargar flows y runs al cambiar de proyecto según REDMIND_Projects_System.md
     if (projectId) {
       const { loadFlows } = get();
       try {
         await loadFlows();
-        // Limpiar runs y flows del proyecto anterior
-        set({ runs: [], selectedRun: null, flows: [], selectedFlowId: null });
+        // Limpiar runs del proyecto anterior (flows ya se cargaron con loadFlows)
+        set({ runs: [], selectedRun: null, selectedFlowId: null });
       } catch (error) {
         console.error('Error al recargar datos del proyecto:', error);
       }
     } else {
       // Si no hay proyecto, limpiar todo
-      set({ runs: [], selectedRun: null, flows: [], selectedFlowId: null, nodes: [], edges: [], openTabs: [], flowSavedStates: {}, flowErrors: {} });
+      set({ 
+        runs: [], 
+        selectedRun: null, 
+        flows: [], 
+        selectedFlowId: null, 
+        nodes: [], 
+        edges: [], 
+        openTabs: [], 
+        flowSavedStates: {}, 
+        flowErrors: {},
+        flowsLoaded: false
+      });
     }
   },
 
@@ -417,12 +433,18 @@ export const useEditorStore = create((set, get) => ({
       // Usar /flows con X-Project-Id header si hay proyecto seleccionado
       // Si no hay proyecto, llamar sin X-Project-Id para obtener todos los flows
       const flows = await getFlowsService(selectedProjectId || null);
-      set({ flows: Array.isArray(flows) ? flows : [] });
+      set({ 
+        flows: Array.isArray(flows) ? flows : [],
+        flowsLoaded: true // Marcar como cargado
+      });
       return { success: true, flows: Array.isArray(flows) ? flows : [] };
     } catch (error) {
       console.error('Error al cargar flows:', error);
       // No fallar si el endpoint no existe, solo retornar lista vacía
-      set({ flows: [] });
+      set({ 
+        flows: [],
+        flowsLoaded: true // Marcar como cargado incluso si hay error
+      });
       return { success: true, flows: [] };
     }
   },
@@ -439,8 +461,23 @@ export const useEditorStore = create((set, get) => ({
   },
 
   loadFlow: async (flowId) => {
+    // Protección anti-race: usar token incremental
+    const requestId = get().loadFlowRequestId + 1;
+    set({ 
+      loadFlowRequestId: requestId,
+      selectedFlowId: flowId,
+      // Limpiar el canvas inmediatamente para evitar mostrar contenido anterior
+      nodes: [],
+      edges: []
+    });
+    
     try {
       const flow = await getFlowService(flowId);
+      
+      // Si llegó tarde, NO aplicar (otra request más reciente ya ganó)
+      if (get().loadFlowRequestId !== requestId) {
+        return { success: false, cancelled: true };
+      }
       
       // El backend puede retornar el grafo de diferentes formas:
       // 1. En flow.graph_json (string JSON o objeto)
@@ -470,6 +507,11 @@ export const useEditorStore = create((set, get) => ({
         }
       }
       
+      // Verificar requestId antes de aplicar cambios
+      if (get().loadFlowRequestId !== requestId) {
+        return { success: false, cancelled: true };
+      }
+      
       // Si no hay graphData, inicializar con canvas vacío
       if (!graphData) {
         // Guardar el estado inicial como estado guardado
@@ -480,6 +522,11 @@ export const useEditorStore = create((set, get) => ({
           graphId: flow.id || flowId,
         });
         
+        // Verificar requestId antes de aplicar
+        if (get().loadFlowRequestId !== requestId) {
+          return { success: false, cancelled: true };
+        }
+        
         // No validar automáticamente - solo validar cuando se ejecute
         const { flowErrors } = get();
         set({
@@ -487,18 +534,19 @@ export const useEditorStore = create((set, get) => ({
             ...flowErrors,
             [flowId]: { valid: true, errors: [] },
           },
-        });
-        
-        set({
           nodes: [],
           edges: [],
           graphId: flow.id || flowId,
-          selectedFlowId: flowId,
         });
         return { success: true, flow };
       }
       
       const { nodes, edges } = graphDefinitionToReactFlow(graphData);
+      
+      // Verificar requestId antes de aplicar cambios
+      if (get().loadFlowRequestId !== requestId) {
+        return { success: false, cancelled: true };
+      }
       
       // Guardar el estado inicial como estado guardado
       const { setFlowSavedState } = get();
@@ -508,31 +556,37 @@ export const useEditorStore = create((set, get) => ({
         graphId: flow.id || flowId,
       });
       
+      // Verificar requestId antes de aplicar
+      if (get().loadFlowRequestId !== requestId) {
+        return { success: false, cancelled: true };
+      }
+      
       // No validar automáticamente al cargar - solo validar cuando se ejecute
       // Limpiar errores previos al cargar un flow
+      // Actualizar nodes+edges en UNA sola actualización para evitar estados intermedios
       const { flowErrors } = get();
       set({
         flowErrors: {
           ...flowErrors,
           [flowId]: { valid: true, errors: [] },
         },
-      });
-      
-      set({
         nodes,
         edges,
         graphId: flow.id || flowId,
-        selectedFlowId: flowId,
       });
       return { success: true, flow };
     } catch (error) {
+      // Si llegó tarde, NO aplicar
+      if (get().loadFlowRequestId !== requestId) {
+        return { success: false, cancelled: true };
+      }
+      
       // Si el flow no existe (404), inicializar canvas vacío en lugar de mostrar error
       if (error.status === 404 || error.message?.includes('not found') || error.message?.includes('Not found')) {
         set({
           nodes: [],
           edges: [],
           graphId: flowId,
-          selectedFlowId: flowId,
         });
         return { success: true, flow: null, message: 'Flow no encontrado, canvas inicializado vacío' };
       }
@@ -584,7 +638,10 @@ export const useEditorStore = create((set, get) => ({
         graph: graphDefinition, // El backend espera 'graph' pero lo guarda en la columna 'graph_json'
       };
 
-      const savedFlow = await saveFlowService(flowIdToUse, flowData);
+      // Usar POST explícitamente para nuevos flujos, PUT para actualizaciones
+      const savedFlow = isNewFlow 
+        ? await createFlowService(flowData) 
+        : await saveFlowService(flowIdToUse, flowData);
       
       // El backend puede retornar id o flow_id
       const flowId = savedFlow.id || savedFlow.flow_id;
@@ -673,7 +730,7 @@ export const useEditorStore = create((set, get) => ({
         const graphDefinition = reactFlowToGraphDefinition(nodes, edges, graphId);
         const startNodeId = graphDefinition.start;
         const startNode = graphDefinition.nodes.find((n) => n.id === startNodeId);
-        let input = null;
+        let input = {}; // El backend requiere input, usar objeto vacío por defecto
         
         // Si el start node es un trigger manual, extraer su input
         if (startNode && startNode.type === 'trigger.manual' && startNode.config) {
@@ -681,9 +738,12 @@ export const useEditorStore = create((set, get) => ({
             message: startNode.config.message || '',
           };
           console.log('[editorStore] Input extraído del trigger manual:', input);
+        } else {
+          console.log('[editorStore] No hay trigger manual, usando input vacío:', input);
         }
         
         // POST /api/v1/runs ahora retorna inmediatamente con {runId, status: "running"}
+        // El backend requiere input (aunque sea objeto vacío)
         result = await executeFlowService(selectedFlowId, input, timeoutSeconds);
         
         console.log('[editorStore] Respuesta inmediata del backend:', result);
@@ -698,6 +758,7 @@ export const useEditorStore = create((set, get) => ({
             id: runId,
             flowId: selectedFlowId,
             status: initialStatus,
+            execution_mode: null, // Se actualizará con el polling
             trace: [],
             error: null,
             createdAt: new Date().toISOString(),
@@ -732,6 +793,7 @@ export const useEditorStore = create((set, get) => ({
             id: result.runId || result.id || result.run_id,
             flowId: result.flowId || result.flow_id,
             status: result.status,
+            execution_mode: result.execution_mode || null, // MVP2: modo de ejecución
             trace: traceArray,
             error: result.error,
             createdAt: result.created_at || result.started_at || new Date().toISOString(),
@@ -774,6 +836,7 @@ export const useEditorStore = create((set, get) => ({
             id: run.runId || run.id || run.run_id,
             flowId: run.flowId || run.flow_id,
             status: run.status,
+            execution_mode: run.execution_mode || null, // MVP2: modo de ejecución
             trace: traceArray,
             error: run.error,
             createdAt: run.created_at || run.started_at || run.createdAt,
@@ -864,6 +927,7 @@ export const useEditorStore = create((set, get) => ({
           id: result.runId || result.id || result.run_id,
           flowId: result.flowId || result.flow_id,
           status: result.status,
+          execution_mode: result.execution_mode || null, // MVP2: modo de ejecución
           trace: traceArray,
           error: result.error,
           createdAt: result.created_at || result.started_at || new Date().toISOString(),

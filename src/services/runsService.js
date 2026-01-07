@@ -79,35 +79,59 @@ export async function executeFlowTest(graphDefinition, timeoutSeconds = null) {
 /**
  * Ejecuta un flow persistido
  * POST /api/v1/runs
+ * 
+ * Este endpoint retorna inmediatamente con runId y status "running".
+ * La ejecución del flow continúa en background. El frontend debe hacer
+ * polling a GET /api/v1/runs/{run_id} para obtener el progreso.
+ * 
+ * Requiere autenticación y header X-Project-Id.
+ * 
  * @param {string} flowId - ID del flow persistido a ejecutar
- * @param {Object} input - Input opcional para el trigger (si no se proporciona, se usa el del flow guardado)
+ * @param {Object} input - Input requerido para el trigger (objeto vacío {} si no hay input)
  * @param {number|null} timeoutSeconds - Timeout opcional en segundos (default: 300)
- * @returns {Promise<{runId: string, status: string, trace: Array, error?: string}>}
+ * @returns {Promise<{runId: string, status: string}>} - Retorna solo runId y status inmediatamente
  */
-export async function executeFlow(flowId, input = null, timeoutSeconds = null) {
+export async function executeFlow(flowId, input = {}, timeoutSeconds = null) {
   try {
-    const payload = { flow_id: flowId };
+    const projectId = localStorage.getItem('redmind_currentProjectId');
+    console.log('[runsService] POST /runs - Ejecutando flow persistido:', { 
+      flowId, 
+      input, 
+      timeoutSeconds,
+      projectId 
+    });
     
-    // Si se proporciona input, agregarlo a la petición
-    if (input !== null) {
-      payload.input = input;
-    }
+    // El backend requiere flow_id, input y opcionalmente timeout_seconds
+    const payload = {
+      flow_id: flowId,
+      input: input || {} // Asegurar que siempre hay un objeto (aunque esté vacío)
+    };
     
     // Agregar timeout_seconds si se proporciona
     if (timeoutSeconds !== null && timeoutSeconds !== undefined) {
       payload.timeout_seconds = timeoutSeconds;
     }
     
-    console.log('[runsService] Ejecutando flow persistido:', { flowId, payload });
+    console.log('[runsService] POST /runs payload:', payload);
+    console.log('[runsService] Headers que se enviarán: X-Project-Id:', projectId || 'NO ENVIADO');
     
-    // POST /api/v1/runs requiere autenticación y X-Project-Id es opcional según la documentación
-    // requireProjectId=true para incluir X-Project-Id si está disponible (es opcional pero se incluye si existe)
+    // POST /api/v1/runs requiere autenticación y header X-Project-Id
+    // requireProjectId=true para incluir X-Project-Id (requerido según nuevo contrato)
     // requireAuth=true porque requiere autenticación
     const result = await apiPost('/runs', payload, {}, true, true);
-    console.log('[runsService] Resultado de ejecución:', result);
+    console.log('[runsService] POST /runs response:', result);
+    console.log('[runsService] Run creado - runId:', result.runId, 'status:', result.status);
+    
+    // El backend retorna solo {runId, status} inmediatamente
+    // El trace completo se obtiene con GET /runs/{runId}
     return result;
   } catch (error) {
     console.error('[runsService] Error al ejecutar flow persistido:', error);
+    console.error('[runsService] Error details:', {
+      message: error.message,
+      status: error.status,
+      detail: error.detail
+    });
     throw error;
   }
 }
@@ -119,9 +143,32 @@ export async function executeFlow(flowId, input = null, timeoutSeconds = null) {
  */
 export async function getRuns(flowId) {
   try {
-    return await apiGet(`/runs?flowId=${flowId}`);
+    const projectId = localStorage.getItem('redmind_currentProjectId');
+    console.log('[runsService] GET /runs?flowId=', flowId);
+    console.log('[runsService] projectId desde localStorage:', projectId);
+    console.log('[runsService] URL completa:', `/api/v1/runs?flowId=${flowId}`);
+    console.log('[runsService] Headers que se enviarán: X-Project-Id:', projectId || 'NO ENVIADO');
+    
+    const result = await apiGet(`/runs?flowId=${flowId}`);
+    console.log('[runsService] GET /runs response:', result);
+    console.log('[runsService] runs array length:', result.runs?.length || 0);
+    if (result.runs && result.runs.length > 0) {
+      console.log('[runsService] Primer run:', result.runs[0]);
+    }
+    // El backend retorna {runs: [...]}, extraer el array
+    // Normalizar los runs para que tengan 'id' además de 'run_id' para compatibilidad
+    const runs = (result.runs || []).map(run => ({
+      ...run,
+      id: run.run_id || run.id, // Asegurar que siempre hay 'id'
+    }));
+    return runs;
   } catch (error) {
-    console.error('Error al obtener runs:', error);
+    console.error('[runsService] Error al obtener runs:', error);
+    console.error('[runsService] Error details:', {
+      message: error.message,
+      status: error.status,
+      detail: error.detail
+    });
     throw error;
   }
 }
@@ -129,13 +176,29 @@ export async function getRuns(flowId) {
 /**
  * Obtiene un run por ID
  * @param {string} runId - ID del run
- * @returns {Promise<{id: string, flowId: string, status: string, trace: Array, createdAt: string, error?: string}>}
+ * @returns {Promise<{id: string, runId: string, flow_id: string, status: string, trace: Array, started_at: string, ended_at: string, execution_mode: string, result: any}>}
  */
 export async function getRun(runId) {
   try {
-    return await apiGet(`/runs/${runId}`);
+    console.log('[runsService] GET /runs/', runId);
+    const result = await apiGet(`/runs/${runId}`);
+    console.log('[runsService] GET /runs/{id} response:', result);
+    
+    // Normalizar el run: el backend retorna runId, pero también necesitamos id para compatibilidad
+    const normalizedRun = {
+      ...result,
+      id: result.runId || result.id || runId, // Asegurar que siempre hay 'id'
+      run_id: result.runId || result.run_id || runId, // También mantener run_id
+    };
+    console.log('[runsService] Run normalizado:', normalizedRun);
+    return normalizedRun;
   } catch (error) {
-    console.error('Error al obtener run:', error);
+    console.error('[runsService] Error al obtener run:', error);
+    console.error('[runsService] Error details:', {
+      message: error.message,
+      status: error.status,
+      detail: error.detail
+    });
     throw error;
   }
 }
