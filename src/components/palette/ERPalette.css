@@ -1,0 +1,53 @@
+/* Estilos específicos para la paleta ER */
+
+.er-palette-section {
+  padding: 8px;
+}
+
+.er-palette-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  background: var(--bg-secondary);
+}
+
+.er-palette-item:hover {
+  background: var(--bg-primary);
+  border-color: var(--border-color);
+  transform: translateX(4px);
+}
+
+.er-palette-item-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  color: var(--accent-color);
+}
+
+.er-palette-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.er-palette-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.er-palette-item-description {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}

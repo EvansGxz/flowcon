@@ -1,0 +1,301 @@
+/* Estilos para nodos de diagramas Entidad-Relación */
+
+.er-node {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  min-width: 250px;
+  max-width: 400px;
+}
+
+.er-node.node-selected {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.2);
+}
+
+.er-node-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  border-radius: 8px 8px 0 0;
+}
+
+.er-node-icon {
+  color: var(--accent-color);
+  flex-shrink: 0;
+}
+
+.er-node-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: text;
+  user-select: none;
+}
+
+.er-node-name:hover {
+  color: var(--accent-color);
+}
+
+.er-node-name-input {
+  flex: 1;
+  background: var(--bg-primary);
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.er-node-edit-button {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.er-node-header:hover .er-node-edit-button {
+  opacity: 1;
+}
+
+.er-node-edit-button:hover {
+  background: var(--bg-primary);
+  color: var(--accent-color);
+}
+
+.er-node-attributes {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.er-attribute {
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: var(--bg-secondary);
+  transition: background 0.2s ease;
+}
+
+.er-attribute:hover {
+  background: var(--bg-tertiary);
+}
+
+.er-attribute-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  cursor: text;
+}
+
+.er-attribute-name {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-primary);
+  font-family: 'Courier New', monospace;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.er-attribute-type {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+}
+
+.er-attribute-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.er-attribute-name-input {
+  background: var(--bg-primary);
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.er-attribute-type-select {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+}
+
+.er-attribute-length-input {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  color: var(--text-primary);
+  outline: none;
+  width: 80px;
+}
+
+.er-attribute-options {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.er-attribute-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.er-attribute-checkbox input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: var(--accent-color);
+}
+
+.er-attribute-delete-button {
+  background: transparent;
+  border: none;
+  color: var(--text-error, #ef4444);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.er-attribute-delete-button:hover {
+  opacity: 1;
+  background: var(--bg-primary);
+}
+
+.er-add-attribute-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  background: transparent;
+  border: 1px dashed var(--border-color);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.er-add-attribute-button:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  background: var(--bg-secondary);
+}
+
+.er-attribute-icons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.er-attribute-icon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.er-attribute-icon-pk {
+  color: var(--accent-color);
+}
+
+.er-attribute-icon-uq {
+  color: var(--text-secondary);
+}
+
+.er-attribute-icon-nn {
+  color: var(--text-warning, #f59e0b);
+}
+
+.er-attribute-handle {
+  width: 10px;
+  height: 10px;
+  background: var(--border-color);
+  border: 2px solid var(--bg-primary);
+  border-radius: 50%;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.er-attribute-handle:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.2);
+}
+
+.er-attribute-handle-connected {
+  background: var(--accent-color);
+  opacity: 1;
+  border-color: var(--accent-color);
+}
+
+.er-attribute-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  cursor: text;
+  position: relative;
+  padding-right: 28px;
+  padding-left: 28px;
+}
+
+/* Scrollbar para lista de atributos */
+.er-node-attributes::-webkit-scrollbar {
+  width: 6px;
+}
+
+.er-node-attributes::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.er-node-attributes::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 3px;
+}
+
+.er-node-attributes::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-secondary);
+}

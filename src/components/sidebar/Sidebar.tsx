@@ -1,6 +1,6 @@
 import { useState, useEffect, type ReactElement } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, ChevronLeft, ChevronRight, ChevronDown, LogOut, Key } from 'lucide-react';
+import { Home, ChevronLeft, ChevronRight, ChevronDown, LogOut, Key, Database, DoorOpen } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { getUser, logout } from '../../services/authService';
 import './Sidebar.css';
@@ -43,6 +43,9 @@ const Sidebar = () => {
 
   const activeCategory = getActiveCategory();
 
+  // Detectar si "Datos" está activo
+  const isDatabaseActive = location.pathname === '/database' || location.pathname.startsWith('/database');
+
   // Cargar proyectos al montar
   useEffect(() => {
     loadProjects();
@@ -63,6 +66,9 @@ const Sidebar = () => {
       navigate('/auth');
     }
   };
+
+  // Detectar si "Salida" está activo
+  const isOutputActive = location.pathname === '/output' || location.pathname.startsWith('/output');
 
   // Expandir proyectos si estamos en la ruta de proyectos
   useEffect(() => {
@@ -188,6 +194,26 @@ const Sidebar = () => {
                 </span>
               </button>
             ))}
+          </div>
+
+          {/* Sección de acciones inferiores */}
+          <div className="sidebar-bottom-actions">
+            <button
+              className={`sidebar-bottom-button ${isDatabaseActive ? 'active' : ''}`}
+              onClick={() => navigate('/database')}
+              title={isExpanded ? 'Datos' : 'Datos'}
+            >
+              <Database size={16} />
+              {isExpanded && <span className="sidebar-bottom-button-text">Datos</span>}
+            </button>
+            <button
+              className={`sidebar-bottom-button ${isOutputActive ? 'active' : ''}`}
+              onClick={() => navigate('/output')}
+              title={isExpanded ? 'Salida' : 'Salida'}
+            >
+              <DoorOpen size={16} />
+              {isExpanded && <span className="sidebar-bottom-button-text">Salida</span>}
+            </button>
           </div>
 
           {/* User Menu al final del sidebar */}

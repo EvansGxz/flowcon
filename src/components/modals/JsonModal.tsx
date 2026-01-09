@@ -4,11 +4,13 @@ import './JsonModal.css';
 interface JsonModalProps {
   mode: 'export' | 'import';
   onClose: () => void;
-  onImport: (jsonString: string) => { success: boolean; errors?: string[] };
+  onImport?: (jsonString: string) => void | { success: boolean; errors?: string[] };
   initialJson?: string;
+  title?: string;
+  contentType?: 'json' | 'sql'; // Tipo de contenido: JSON o SQL
 }
 
-const JsonModal = ({ mode, onClose, onImport, initialJson = '' }: JsonModalProps) => {
+const JsonModal = ({ mode, onClose, onImport, initialJson = '', title, contentType = 'json' }: JsonModalProps) => {
   const [jsonText, setJsonText] = useState(initialJson);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,25 +36,71 @@ const JsonModal = ({ mode, onClose, onImport, initialJson = '' }: JsonModalProps
   };
 
   const handleImport = () => {
+    if (!onImport) return;
+    
     try {
-      JSON.parse(jsonText); // Validar que sea JSON válido
-      setError(null);
-      const result = onImport(jsonText);
-      // Si hay errores en el resultado, mostrarlos
-      if (result && !result.success && result.errors) {
-        setError(result.errors.join('\n'));
+      // Si es SQL, no validar como JSON
+      if (contentType === 'sql') {
+        onImport(jsonText);
+        setError(null);
+        return;
+      }
+      
+      // Si onImport retorna un objeto con success, validar JSON primero
+      if (mode === 'import' && typeof onImport === 'function') {
+        const result = onImport(jsonText);
+        // Si hay errores en el resultado, mostrarlos
+        if (result && typeof result === 'object' && 'success' in result && !result.success && result.errors) {
+          setError(result.errors.join('\n'));
+        } else {
+          setError(null);
+        }
+      } else {
+        // Llamar directamente sin validar JSON (para SQL u otros formatos)
+        onImport(jsonText);
+        setError(null);
       }
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Error desconocido';
-      setError(`JSON inválido: ${errorMessage}`);
+      setError(`Error: ${errorMessage}`);
     }
+  };
+
+  const formatSQL = (sql: string): string => {
+    // Formateador básico de SQL
+    let formatted = sql
+      // Agregar nueva línea después de punto y coma
+      .replace(/;/g, ';\n')
+      // Agregar nueva línea después de CREATE TABLE
+      .replace(/CREATE TABLE/g, '\nCREATE TABLE')
+      // Agregar nueva línea después de ALTER TABLE
+      .replace(/ALTER TABLE/g, '\nALTER TABLE')
+      // Agregar indentación para columnas dentro de CREATE TABLE
+      .replace(/\(\s*([^)]+)\s*\)/g, (match, content) => {
+        // Dividir por comas y agregar indentación
+        const lines = content.split(',').map((line: string) => '  ' + line.trim());
+        return '(\n' + lines.join(',\n') + '\n)';
+      })
+      // Limpiar líneas vacías múltiples
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    
+    return formatted;
   };
 
   const handleFormat = () => {
     try {
-      const parsed = JSON.parse(jsonText);
-      setJsonText(JSON.stringify(parsed, null, 2));
-      setError(null);
+      if (contentType === 'sql') {
+        // Formatear SQL
+        const formatted = formatSQL(jsonText);
+        setJsonText(formatted);
+        setError(null);
+      } else {
+        // Formatear JSON
+        const parsed = JSON.parse(jsonText);
+        setJsonText(JSON.stringify(parsed, null, 2));
+        setError(null);
+      }
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Error desconocido';
       setError(`No se puede formatear: ${errorMessage}`);
@@ -63,7 +111,7 @@ const JsonModal = ({ mode, onClose, onImport, initialJson = '' }: JsonModalProps
     <div className="json-modal-overlay" onClick={onClose}>
       <div className="json-modal" onClick={(e) => e.stopPropagation()}>
         <div className="json-modal-header">
-          <h3>{mode === 'export' ? 'Exportar Grafo' : 'Importar Grafo'}</h3>
+          <h3>{title || (mode === 'export' ? 'Exportar Grafo' : 'Importar Grafo')}</h3>
           <button className="json-modal-close" onClick={onClose}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -122,7 +170,7 @@ const JsonModal = ({ mode, onClose, onImport, initialJson = '' }: JsonModalProps
               setError(null);
             }}
             readOnly={mode === 'export'}
-            placeholder={mode === 'import' ? 'Pega el JSON del grafo aquí...' : ''}
+            placeholder={mode === 'import' ? (contentType === 'sql' ? 'Pega el SQL aquí...' : 'Pega el JSON del grafo aquí...') : ''}
           />
           
           {error && (

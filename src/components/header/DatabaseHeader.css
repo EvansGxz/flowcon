@@ -1,0 +1,161 @@
+.database-header {
+  position: fixed;
+  top: 0;
+  left: 200px; /* Ancho del sidebar expandido por defecto */
+  right: 0;
+  width: calc(100% - 200px);
+  height: 60px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Cuando el sidebar está colapsado */
+.App.sidebar-collapsed .database-header {
+  left: 60px;
+  width: calc(100% - 60px);
+}
+
+/* Cuando el sidebar está expandido */
+.App.sidebar-expanded .database-header {
+  left: 200px;
+  width: calc(100% - 200px);
+}
+
+.database-header-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.database-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.database-header-logo svg {
+  color: var(--accent-color);
+}
+
+.database-header-logo-text {
+  letter-spacing: 0.5px;
+}
+
+.database-header-select-wrapper {
+  position: relative;
+}
+
+.database-header-select {
+  appearance: none;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 6px 32px 6px 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.database-header-select:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-color);
+}
+
+.database-header-select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.1);
+}
+
+.database-header-select-icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--text-secondary);
+}
+
+.database-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.database-header-control-wrapper {
+  position: relative;
+}
+
+.database-header-control-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.database-header-control-button:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.database-header-export-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 220px;
+  z-index: 1001;
+  overflow: hidden;
+}
+
+.database-header-export-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: left;
+}
+
+.database-header-export-menu-item:hover {
+  background: var(--bg-secondary);
+}
+
+.database-header-export-menu-item svg {
+  flex-shrink: 0;
+  color: var(--accent-color);
+}

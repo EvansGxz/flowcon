@@ -1,0 +1,108 @@
+/* Notificaciones tipo toast lateral */
+
+.notification-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  min-width: 300px;
+  max-width: 400px;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  z-index: 10000;
+  transform: translateX(calc(100% + 20px));
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 4px solid;
+}
+
+.notification-toast.visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.notification-toast.success {
+  background: var(--bg-primary);
+  border-left-color: #10b981;
+  color: var(--text-primary);
+}
+
+.notification-toast.error {
+  background: var(--bg-primary);
+  border-left-color: #ef4444;
+  color: var(--text-primary);
+}
+
+.notification-toast.warning {
+  background: var(--bg-primary);
+  border-left-color: #f59e0b;
+  color: var(--text-primary);
+}
+
+.notification-toast.info {
+  background: var(--bg-primary);
+  border-left-color: #3b82f6;
+  color: var(--text-primary);
+}
+
+.notification-toast-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notification-toast.success .notification-toast-icon {
+  color: #10b981;
+}
+
+.notification-toast.error .notification-toast-icon {
+  color: #ef4444;
+}
+
+.notification-toast.warning .notification-toast-icon {
+  color: #f59e0b;
+}
+
+.notification-toast.info .notification-toast-icon {
+  color: #3b82f6;
+}
+
+.notification-toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-toast-message {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  word-wrap: break-word;
+}
+
+.notification-toast-close {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.notification-toast-close:hover {
+  opacity: 1;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Animación para múltiples notificaciones */
+.notification-toast + .notification-toast {
+  margin-top: 12px;
+}
