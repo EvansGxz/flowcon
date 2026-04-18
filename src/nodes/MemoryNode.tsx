@@ -7,30 +7,6 @@ import { useEditorStore } from '../store/editorStore';
 import type { ReactFlowNodeData } from '../types/reactflow';
 import './NodeStyles.css';
 
-interface HandleWithClickProps {
-  id: string;
-  type: 'source' | 'target';
-  position: Position;
-  className: string;
-  nodeId: string;
-}
-
-// Helper para crear un handle (según documentación React Flow)
-// React Flow posiciona los handles automáticamente en el centro del lado especificado
-const HandleWithClick = ({ id, type, position, className, nodeId }: HandleWithClickProps) => {
-  return (
-    <Handle
-      id={id}
-      type={type}
-      position={position}
-      className={className}
-      data-handle-wrapper="true"
-      data-node-id={nodeId}
-      data-handle-id={id}
-    />
-  );
-};
-
 interface MemoryNodeProps extends NodeProps {
   data: ReactFlowNodeData;
 }
@@ -80,144 +56,61 @@ const MemoryNode = ({ data, selected, id }: MemoryNodeProps) => {
 
   // Obtener valores de configuración
   const memoryType = typeof config.type === 'string' ? config.type : (definition?.getDefaultValue('type') as string) || 'kv';
-  const keyPattern = typeof config.keyPattern === 'string' ? config.keyPattern : null;
-  const version = data.version || definition?.version || 1;
 
   // Clase de estado para el indicador
   const statusClass = `node-status-${status}`;
 
-  // Vista icon: solo icono - Más grande
+  // Render status icon helper
+  const renderIcon = (size: number) => {
+    if (status === NodeStatus.RUNNING) return <Loader2 size={size} className="animate-spin" />;
+    if (status === NodeStatus.SUCCESS) return <CheckCircle2 size={size} />;
+    if (status === NodeStatus.ERROR) return <XCircle size={size} />;
+    return <Database size={size} />;
+  };
+
+  // Vista icon: small circle
   if (nodeViewMode === 'icon') {
     return (
       <div
         ref={nodeRef}
-        className={`node-container memory-node icon-view ${selected ? 'node-selected' : ''} ${statusClass}`}
-        style={{ width: '64px', height: '64px', minWidth: '64px' }}
+        className={`node-container sub-agent-node ${selected ? 'node-selected' : ''} ${statusClass}`}
+        style={{ width: 48, height: 48 }}
       >
-        <div className={`node-indicator node-indicator-teal ${statusClass}`} style={{ width: '100%', height: '100%', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' }}>
-          {status === NodeStatus.RUNNING ? (
-            <Loader2 size={32} className="animate-spin" />
-          ) : status === NodeStatus.SUCCESS ? (
-            <CheckCircle2 size={32} />
-          ) : status === NodeStatus.ERROR ? (
-            <XCircle size={32} />
-          ) : (
-            <Database size={32} />
-          )}
-        </div>
-        <HandleWithClick
-          id="in"
-          type="target"
-          position={Position.Left}
-          className="node-handle node-handle-teal"
-          nodeId={id}
-        />
-        <HandleWithClick
-          id="out"
-          type="source"
-          position={Position.Right}
-          className="node-handle node-handle-teal"
-          nodeId={id}
-        />
+        {renderIcon(24)}
         <Handle id="ai_output" type="source" position={Position.Top} className="node-handle node-handle-ai-source" />
+        <div className="sub-agent-label">{displayName}</div>
       </div>
     );
   }
 
-  // Vista compact: solo header
+  // Vista compact: medium circle with label
   if (nodeViewMode === 'compact') {
     return (
       <div
         ref={nodeRef}
-        className={`node-container memory-node compact-view ${selected ? 'node-selected' : ''} ${statusClass}`}
-        style={{ minWidth: '200px' }}
+        className={`node-container sub-agent-node ${selected ? 'node-selected' : ''} ${statusClass}`}
+        style={{ width: 64, height: 64 }}
       >
-        <div className="node-header">
-          <div className={`node-indicator node-indicator-teal ${statusClass}`}>
-            {status === NodeStatus.RUNNING ? (
-              <Loader2 size={22} className="animate-spin" />
-            ) : status === NodeStatus.SUCCESS ? (
-              <CheckCircle2 size={22} />
-            ) : status === NodeStatus.ERROR ? (
-              <XCircle size={22} />
-            ) : (
-              <Database size={22} />
-            )}
-          </div>
-          <div className="node-title">{displayName}</div>
-          {version > 1 && (
-            <div className="node-version">v{version}</div>
-          )}
-        </div>
-        <HandleWithClick
-          id="in"
-          type="target"
-          position={Position.Left}
-          className="node-handle node-handle-teal"
-          nodeId={id}
-        />
-        <HandleWithClick
-          id="out"
-          type="source"
-          position={Position.Right}
-          className="node-handle node-handle-teal"
-          nodeId={id}
-        />
+        {renderIcon(28)}
         <Handle id="ai_output" type="source" position={Position.Top} className="node-handle node-handle-ai-source" />
+        <div className="sub-agent-label">{displayName}</div>
       </div>
     );
   }
 
-  // Vista informative: header + badges + descripción
+  // Vista informative: larger circle with name + type info
   return (
     <div
       ref={nodeRef}
-      className={`node-container memory-node informative-view ${selected ? 'node-selected' : ''} ${statusClass}`}
-      style={{ minWidth: '200px' }}
+      className={`node-container sub-agent-node ${selected ? 'node-selected' : ''} ${statusClass}`}
+      style={{ width: 80, height: 80 }}
     >
-      <div className="node-header">
-        <div className={`node-indicator node-indicator-teal ${statusClass}`}>
-          {status === NodeStatus.RUNNING ? (
-            <Loader2 size={16} className="animate-spin" />
-          ) : status === NodeStatus.SUCCESS ? (
-            <CheckCircle2 size={16} />
-          ) : status === NodeStatus.ERROR ? (
-            <XCircle size={16} />
-          ) : (
-            <Database size={16} />
-          )}
-        </div>
-        <div className="node-title">{displayName}</div>
-        {version > 1 && (
-          <div className="node-version">v{version}</div>
-        )}
-      </div>
-      {data.description && (
-        <div className="node-description">{data.description as string}</div>
-      )}
-      {memoryType && (
-        <div className="node-badge node-badge-teal">
-          Type: {memoryType}
-        </div>
-      )}
-      {keyPattern && (
-        <div className="node-badge node-badge-info">
-          Key: {keyPattern.length > 30 ? `${keyPattern.substring(0, 30)}...` : keyPattern}
-        </div>
-      )}
-      <Handle
-        id="in"
-        type="target"
-        position={Position.Left}
-        className="node-handle node-handle-teal"
-      />
-      <Handle
-        id="out"
-        type="source"
-        position={Position.Right}
-        className="node-handle node-handle-teal"
-      />
+      {renderIcon(32)}
       <Handle id="ai_output" type="source" position={Position.Top} className="node-handle node-handle-ai-source" />
+      <div className="sub-agent-label">
+        {displayName}
+        {memoryType && <span className="sub-agent-detail">Type: {memoryType}</span>}
+      </div>
     </div>
   );
 };
