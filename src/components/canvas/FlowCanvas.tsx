@@ -405,14 +405,16 @@ function FlowCanvasInner() {
 
   const onConnect = useCallback(
     (params: Connection) => {
+      console.log('[FlowCanvas] onConnect fired:', JSON.stringify(params));
       const newEdge: Edge = {
         ...params,
-        id: `e_${ulid()}`, // Edge ID con prefijo "e_" usando ULID
+        id: `e_${ulid()}`,
         type: 'custom',
         animated: true,
         sourceHandle: params.sourceHandle ?? 'out',
         targetHandle: params.targetHandle ?? 'in',
       };
+      console.log('[FlowCanvas] Creating edge:', JSON.stringify({ id: newEdge.id, source: newEdge.source, target: newEdge.target, sourceHandle: newEdge.sourceHandle, targetHandle: newEdge.targetHandle }));
       const updatedEdges = addEdge(newEdge, edges);
       setEdges(updatedEdges);
     },

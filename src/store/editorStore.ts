@@ -626,11 +626,13 @@ export const useEditorStore = create<StoreState>((set, get) => ({
         }
       }
       
+      console.log('[saveFlow] Edges before serialize:', edges.map(e => ({ id: e.id, source: e.source, target: e.target, sourceHandle: e.sourceHandle, targetHandle: e.targetHandle })));
       const graphDefinition = reactFlowToGraphDefinition(nodes, edges, graphIdToUse);
+      console.log('[saveFlow] Graph edges after serialize:', graphDefinition.edges);
       
       const flowData = {
         name: flowName || `Flow ${new Date().toLocaleString()}`,
-        graph: graphDefinition, // El backend espera 'graph' pero lo guarda en la columna 'graph_json'
+        graph: graphDefinition,
       };
 
       // Usar POST explícitamente para nuevos flujos, PUT para actualizaciones
@@ -694,6 +696,9 @@ export const useEditorStore = create<StoreState>((set, get) => ({
   executeFlow: async (timeoutSeconds: number | null = null): Promise<{ success: boolean; run?: Run; error?: string }> => {
     try {
       const { nodes, edges, graphId, selectedFlowId } = get();
+      
+      console.log('[executeFlow] edges count:', edges.length);
+      console.log('[executeFlow] edges:', edges.map(e => ({ src: e.source, tgt: e.target, sh: e.sourceHandle, th: e.targetHandle })));
       
       // Validar el flow antes de ejecutar y guardar errores
       const graphDefinition = reactFlowToGraphDefinition(nodes, edges, graphId);

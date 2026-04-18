@@ -40,7 +40,7 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
   const definition = data.typeId ? nodeRegistry.get(data.typeId) : null;
   const displayName = data.displayName || definition?.displayName || (data.label as string) || 'AI Agent';
   const config = data.config || {};
-  const isAgentCore = data.typeId === 'agent_core';
+  const isAgentCore = data.typeId === 'ap.agent.core' || data.typeId === 'agent_core';
   const status = (data.status as NodeStatusValue) || NodeStatus.IDLE;
   const nodeViewMode = useEditorStore((state) => state.nodeViewMode);
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -92,7 +92,7 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
       <div
         ref={nodeRef}
         className={`node-container agent-node icon-view ${selected ? 'node-selected' : ''} ${statusClass}`}
-        style={{ width: '64px', height: '64px', minWidth: '64px' }}
+        style={{ width: '64px', height: '64px', minWidth: '64px', overflow: 'visible' }}
       >
         <div className={`node-indicator node-indicator-purple ${statusClass}`} style={{ width: '100%', height: '100%', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' }}>
           {status === NodeStatus.RUNNING ? (
@@ -121,9 +121,9 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
         />
         {isAgentCore && (
           <>
-            <Handle id="ai_model" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '25%' }} />
-            <Handle id="ai_tool" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '50%' }} />
-            <Handle id="ai_memory" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '75%' }} />
+            <Handle id="ai_model" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '20%', bottom: '-5px' }} />
+            <Handle id="ai_tool" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '50%', bottom: '-5px' }} />
+            <Handle id="ai_memory" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '80%', bottom: '-5px' }} />
           </>
         )}
       </div>
@@ -170,18 +170,11 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
           nodeId={id}
         />
         {isAgentCore && (
-          <div className="agent-ai-handles">
-            <div className="agent-ai-handle-group">
-              <Handle id="ai_model" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '25%' }} />
-              <Handle id="ai_tool" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '50%' }} />
-              <Handle id="ai_memory" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '75%' }} />
-            </div>
-            <div className="agent-ai-labels">
-              <span style={{ left: '25%' }}>Model</span>
-              <span style={{ left: '50%' }}>Tools</span>
-              <span style={{ left: '75%' }}>Memory</span>
-            </div>
-          </div>
+          <>
+            <Handle id="ai_model" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '20%', bottom: '-5px' }} />
+            <Handle id="ai_tool" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '50%', bottom: '-5px' }} />
+            <Handle id="ai_memory" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '80%', bottom: '-5px' }} />
+          </>
         )}
       </div>
     );
@@ -192,7 +185,7 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
     <div
       ref={nodeRef}
       className={`node-container agent-node informative-view ${selected ? 'node-selected' : ''} ${statusClass}`}
-      style={{ minWidth: '200px' }}
+      style={{ minWidth: '200px', overflow: 'visible' }}
     >
       <div className="node-header">
         <div className={`node-indicator node-indicator-purple ${statusClass}`}>
@@ -237,18 +230,11 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
         className="node-handle node-handle-purple"
       />
       {isAgentCore && (
-        <div className="agent-ai-handles">
-          <div className="agent-ai-handle-group">
-            <Handle id="ai_model" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '25%' }} />
-            <Handle id="ai_tool" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '50%' }} />
-            <Handle id="ai_memory" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '75%' }} />
-          </div>
-          <div className="agent-ai-labels">
-            <span style={{ left: '25%' }}>Model</span>
-            <span style={{ left: '50%' }}>Tools</span>
-            <span style={{ left: '75%' }}>Memory</span>
-          </div>
-        </div>
+        <>
+          <Handle id="ai_model" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '20%', bottom: '-5px' }} />
+          <Handle id="ai_tool" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '50%', bottom: '-5px' }} />
+          <Handle id="ai_memory" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '80%', bottom: '-5px' }} />
+        </>
       )}
     </div>
   );

@@ -143,6 +143,8 @@ export const EdgeSchema = z.object({
   id: EdgeIdSchema,
   source: NodeIdSchema,
   target: NodeIdSchema,
+  sourceHandle: z.string().optional(),
+  targetHandle: z.string().optional(),
   label: z.string().optional(),
 });
 
@@ -338,11 +340,17 @@ export function validateGraph(graph: unknown): ValidationResult {
     const capabilityTypes = ['model.llm', 'memory.kv', 'tool.http', 'tool.postgres'] as const;
     const capabilityNodes = (validatedGraph.nodes || []).filter(n => capabilityTypes.includes(n.type as typeof capabilityTypes[number]));
     
-    // Obtener los edges que salen del agent.core
-    const agentCoreOutgoingEdges = (validatedGraph.edges || []).filter(e => e.source === agentCoreId);
-    const connectedToAgentCore = new Set(agentCoreOutgoingEdges.map(e => e.target));
+    // Obtener capabilities conectadas al agent.core (ambas direcciones)
+    // Legacy: edge FROM agent.core TO capability
+    // AI ports: edge FROM capability TO agent.core
+    const allEdges = validatedGraph.edges || [];
+    const connectedToAgentCore = new Set<string>();
+    for (const e of allEdges) {
+      if (e.source === agentCoreId) connectedToAgentCore.add(e.target);
+      if (e.target === agentCoreId) connectedToAgentCore.add(e.source);
+    }
     
-    // Verificar que cada capability tenga un edge desde agent.core
+    // Verificar que cada capability esté conectada al agent.core
     for (const capability of capabilityNodes) {
       if (!connectedToAgentCore.has(capability.id)) {
         agentCoreErrors.push({

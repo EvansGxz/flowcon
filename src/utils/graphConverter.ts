@@ -37,9 +37,11 @@ export function reactFlowEdgesToEdges(reactFlowEdges: ReactFlowEdge[]): Edge[] {
     return [];
   }
   return reactFlowEdges.map((edge) => ({
-    id: String(edge.id), // Preservar ID original al exportar
-    source: String(edge.source), // Preservar referencias
-    target: String(edge.target), // Preservar referencias
+    id: String(edge.id),
+    source: String(edge.source),
+    target: String(edge.target),
+    sourceHandle: edge.sourceHandle || undefined,
+    targetHandle: edge.targetHandle || undefined,
     label: typeof edge.label === 'string' ? edge.label : undefined,
   }));
 }
@@ -103,13 +105,13 @@ export function edgesToReactFlow(edges: Edge[]): ReactFlowEdge[] {
     return [];
   }
   return edges.map((edge) => ({
-    id: String(edge.id), // Preservar ID original del edge
-    source: String(edge.source), // Preservar referencias a nodos
-    target: String(edge.target), // Preservar referencias a nodos
+    id: String(edge.id),
+    source: String(edge.source),
+    target: String(edge.target),
     type: 'custom',
     animated: true,
-    sourceHandle: 'out',
-    targetHandle: 'in',
+    sourceHandle: (edge as Record<string, unknown>).sourceHandle as string || 'out',
+    targetHandle: (edge as Record<string, unknown>).targetHandle as string || 'in',
     label: edge.label,
   }));
 }
