@@ -1,5 +1,5 @@
-import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { useEffect, useRef } from 'react';
+import { Handle, Position, useEdges, type NodeProps } from '@xyflow/react';
+import { useEffect, useRef, useMemo } from 'react';
 import { Bot, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { NodeStatus, type NodeStatusValue } from './definitions/types';
 import { nodeRegistry } from './definitions/registry';
@@ -44,6 +44,17 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
   const status = (data.status as NodeStatusValue) || NodeStatus.IDLE;
   const nodeViewMode = useEditorStore((state) => state.nodeViewMode);
   const nodeRef = useRef<HTMLDivElement>(null);
+
+  // Detectar qué handles AI están conectados
+  const edges = useEdges();
+  const connectedAiHandles = useMemo(() => {
+    if (!isAgentCore) return new Set<string>();
+    const set = new Set<string>();
+    for (const e of edges) {
+      if (e.target === id && e.targetHandle) set.add(e.targetHandle);
+    }
+    return set;
+  }, [edges, id, isAgentCore]);
 
   // Event listener para detectar doble clic en handles dentro de este nodo
   useEffect(() => {
@@ -121,9 +132,9 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
         />
         {isAgentCore && (
           <>
-            <Handle id="ai_model" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '20%', bottom: '-5px' }} />
-            <Handle id="ai_tool" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '50%', bottom: '-5px' }} />
-            <Handle id="ai_memory" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '80%', bottom: '-5px' }} />
+            <Handle id="ai_model" type="target" position={Position.Bottom} className={`node-handle node-handle-ai ${connectedAiHandles.has('ai_model') ? 'ai-connected' : ''}`} style={{ left: '20%' }} />
+            <Handle id="ai_tool" type="target" position={Position.Bottom} className={`node-handle node-handle-ai ${connectedAiHandles.has('ai_tool') ? 'ai-connected' : ''}`} style={{ left: '50%' }} />
+            <Handle id="ai_memory" type="target" position={Position.Bottom} className={`node-handle node-handle-ai ${connectedAiHandles.has('ai_memory') ? 'ai-connected' : ''}`} style={{ left: '80%' }} />
           </>
         )}
       </div>
@@ -171,9 +182,9 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
         />
         {isAgentCore && (
           <>
-            <Handle id="ai_model" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '20%', bottom: '-5px' }} />
-            <Handle id="ai_tool" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '50%', bottom: '-5px' }} />
-            <Handle id="ai_memory" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '80%', bottom: '-5px' }} />
+            <Handle id="ai_model" type="target" position={Position.Bottom} className={`node-handle node-handle-ai ${connectedAiHandles.has('ai_model') ? 'ai-connected' : ''}`} style={{ left: '20%' }} />
+            <Handle id="ai_tool" type="target" position={Position.Bottom} className={`node-handle node-handle-ai ${connectedAiHandles.has('ai_tool') ? 'ai-connected' : ''}`} style={{ left: '50%' }} />
+            <Handle id="ai_memory" type="target" position={Position.Bottom} className={`node-handle node-handle-ai ${connectedAiHandles.has('ai_memory') ? 'ai-connected' : ''}`} style={{ left: '80%' }} />
           </>
         )}
       </div>
@@ -231,9 +242,9 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
       />
       {isAgentCore && (
         <>
-          <Handle id="ai_model" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '20%', bottom: '-5px' }} />
-          <Handle id="ai_tool" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '50%', bottom: '-5px' }} />
-          <Handle id="ai_memory" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '80%', bottom: '-5px' }} />
+          <Handle id="ai_model" type="target" position={Position.Bottom} className={`node-handle node-handle-ai ${connectedAiHandles.has('ai_model') ? 'ai-connected' : ''}`} style={{ left: '20%' }} />
+          <Handle id="ai_tool" type="target" position={Position.Bottom} className={`node-handle node-handle-ai ${connectedAiHandles.has('ai_tool') ? 'ai-connected' : ''}`} style={{ left: '50%' }} />
+          <Handle id="ai_memory" type="target" position={Position.Bottom} className={`node-handle node-handle-ai ${connectedAiHandles.has('ai_memory') ? 'ai-connected' : ''}`} style={{ left: '80%' }} />
         </>
       )}
     </div>

@@ -1,5 +1,5 @@
-import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { useEffect, useRef } from 'react';
+import { Handle, Position, useEdges, type NodeProps } from '@xyflow/react';
+import { useEffect, useRef, useMemo } from 'react';
 import { Database, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { NodeStatus, type NodeStatusValue } from './definitions/types';
 import { nodeRegistry } from './definitions/registry';
@@ -19,6 +19,8 @@ const MemoryNode = ({ data, selected, id }: MemoryNodeProps) => {
   const status = (data.status as NodeStatusValue) || NodeStatus.IDLE;
   const nodeViewMode = useEditorStore((state) => state.nodeViewMode);
   const nodeRef = useRef<HTMLDivElement>(null);
+  const edges = useEdges();
+  const isConnected = useMemo(() => edges.some(e => e.source === id && e.sourceHandle === 'ai_output'), [edges, id]);
 
   // Event listener para detectar doble clic en handles dentro de este nodo
   useEffect(() => {
@@ -77,7 +79,7 @@ const MemoryNode = ({ data, selected, id }: MemoryNodeProps) => {
         style={{ width: 48, height: 48 }}
       >
         {renderIcon(24)}
-        <Handle id="ai_output" type="source" position={Position.Top} className="node-handle node-handle-ai-source" />
+        <Handle id="ai_output" type="source" position={Position.Top} className={`node-handle node-handle-ai-source ${isConnected ? 'ai-connected' : ''}`} />
         <div className="sub-agent-label">{displayName}</div>
       </div>
     );
@@ -92,7 +94,7 @@ const MemoryNode = ({ data, selected, id }: MemoryNodeProps) => {
         style={{ width: 64, height: 64 }}
       >
         {renderIcon(28)}
-        <Handle id="ai_output" type="source" position={Position.Top} className="node-handle node-handle-ai-source" />
+        <Handle id="ai_output" type="source" position={Position.Top} className={`node-handle node-handle-ai-source ${isConnected ? 'ai-connected' : ''}`} />
         <div className="sub-agent-label">{displayName}</div>
       </div>
     );
@@ -106,7 +108,7 @@ const MemoryNode = ({ data, selected, id }: MemoryNodeProps) => {
       style={{ width: 80, height: 80 }}
     >
       {renderIcon(32)}
-      <Handle id="ai_output" type="source" position={Position.Top} className="node-handle node-handle-ai-source" />
+      <Handle id="ai_output" type="source" position={Position.Top} className={`node-handle node-handle-ai-source ${isConnected ? 'ai-connected' : ''}`} />
       <div className="sub-agent-label">
         {displayName}
         {memoryType && <span className="sub-agent-detail">Type: {memoryType}</span>}
