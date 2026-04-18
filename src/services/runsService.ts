@@ -94,7 +94,7 @@ export async function executeFlow(
   flowId: string,
   input: Record<string, unknown> = {},
   timeoutSeconds: number | null = null
-): Promise<{ runId: string; status: string }> {
+): Promise<{ run_id: string; runId?: string; status: string }> {
   try {
     const projectId = localStorage.getItem('redmind_currentProjectId');
     console.log('[runsService] POST /runs - Ejecutando flow persistido:', { 
@@ -125,13 +125,14 @@ export async function executeFlow(
     // POST /api/v1/runs requiere autenticación y header X-Project-Id
     // requireProjectId=true para incluir X-Project-Id (requerido según nuevo contrato)
     // requireAuth=true porque requiere autenticación
-    const result = await apiPost<{ runId: string; status: string }>('/runs', payload, {}, true, true);
-    console.log('[runsService] POST /runs response:', result);
-    console.log('[runsService] Run creado - runId:', result.runId, 'status:', result.status);
+    const raw = await apiPost<{ run_id?: string; runId?: string; status: string }>('/runs', payload, {}, true, true);
+    console.log('[runsService] POST /runs response:', raw);
     
-    // El backend retorna solo {runId, status} inmediatamente
-    // El trace completo se obtiene con GET /runs/{runId}
-    return result;
+    // Normalizar: backend ahora retorna run_id (snake_case)
+    const run_id = raw.run_id || raw.runId || '';
+    console.log('[runsService] Run creado - run_id:', run_id, 'status:', raw.status);
+    
+    return { run_id, status: raw.status };
   } catch (error) {
     console.error('[runsService] Error al ejecutar flow persistido:', error);
     const apiError = error as { message?: string; status?: number; detail?: unknown };
@@ -225,9 +226,9 @@ export async function rerunFlow(runId: string): Promise<Run> {
  * Cancela un run en ejecución
  * POST /api/v1/runs/{run_id}/cancel
  */
-export async function cancelRun(runId: string): Promise<{ runId: string; status: string }> {
+export async function cancelRun(runId: string): Promise<{ run_id: string; status: string }> {
   try {
-    return await apiPost<{ runId: string; status: string }>(`/runs/${runId}/cancel`, {});
+    return await apiPost<{ run_id: string; status: string }>(`/runs/${runId}/cancel`, {});
   } catch (error) {
     console.error('Error al cancelar run:', error);
     throw error;

@@ -13,8 +13,11 @@ interface MigrateFunctions {
 }
 
 interface CredentialDef {
+  name: string;
+  label: string;
   type: string;
   required?: boolean;
+  description?: string;
 }
 
 interface NodeDefinitionOptions {

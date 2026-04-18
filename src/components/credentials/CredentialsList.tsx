@@ -1,65 +1,341 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { Key, Plus, Trash2, Copy, Check, ChevronDown, X, Loader2 } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
+import {
+  listCredentials,
+  createCredential,
+  deleteCredential,
+  type Credential,
+  type CreateCredentialPayload,
+} from '../../services/credentialsService';
 import './CredentialsList.css';
 
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
+type CredentialType = Credential['credential_type'];
+
+interface FieldDef {
+  key: string;
+  label: string;
+  type: 'text' | 'password' | 'number';
+  placeholder?: string;
+}
+
+const FIELD_MAP: Record<CredentialType, FieldDef[]> = {
+  openai: [
+    { key: 'api_key', label: 'API Key', type: 'password', placeholder: 'sk-...' },
+  ],
+  azure_openai: [
+    { key: 'api_key', label: 'API Key', type: 'password', placeholder: 'Tu Azure API key' },
+    { key: 'azure_endpoint', label: 'Azure Endpoint (solo base URL, sin /openai/...)', type: 'text', placeholder: 'https://tu-recurso.openai.azure.com/' },
+    { key: 'api_version', label: 'API Version', type: 'text', placeholder: '2025-01-01-preview' },
+  ],
+  postgres: [
+    { key: 'host', label: 'Host', type: 'text', placeholder: 'localhost' },
+    { key: 'port', label: 'Puerto', type: 'number', placeholder: '5432' },
+    { key: 'database', label: 'Base de datos', type: 'text', placeholder: 'mydb' },
+    { key: 'user', label: 'Usuario', type: 'text', placeholder: 'postgres' },
+    { key: 'password', label: 'Contraseña', type: 'password', placeholder: 'password' },
+  ],
+  http_bearer: [
+    { key: 'token', label: 'Token', type: 'password', placeholder: 'Bearer token' },
+  ],
+};
+
+const TYPE_LABELS: Record<CredentialType, string> = {
+  openai: 'OpenAI',
+  azure_openai: 'Azure OpenAI',
+  postgres: 'PostgreSQL',
+  http_bearer: 'HTTP Bearer',
+};
+
+const TYPE_DESCRIPTIONS: Record<CredentialType, string> = {
+  openai: 'Conecta con la API de OpenAI para modelos GPT',
+  azure_openai: 'Conecta con Azure OpenAI Service',
+  postgres: 'Conexión a base de datos PostgreSQL',
+  http_bearer: 'Token de autenticación HTTP Bearer',
+};
+
+const ALL_TYPES: CredentialType[] = ['openai', 'azure_openai', 'postgres', 'http_bearer'];
+
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
 const CredentialsList = () => {
   const { checkConnection, connectionStatus } = useEditorStore();
+
+  // List state
+  const [credentials, setCredentials] = useState<Credential[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Form state
+  const [showForm, setShowForm] = useState(false);
+  const [formName, setFormName] = useState('');
+  const [formType, setFormType] = useState<CredentialType>('azure_openai');
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+
+  // UI state
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  /* ---------- fetch ---------- */
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      await checkConnection();
+    } catch (e) {
+      console.warn('[Credentials] checkConnection:', e);
+    }
+    try {
+      const list = await listCredentials();
+      setCredentials(list);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('401') || msg.includes('Authorization') || msg.includes('token')) {
+        setError('Inicia sesion para ver tus credenciales');
+      } else {
+        setError(msg);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [checkConnection]);
 
   useEffect(() => {
-    const initialize = async () => {
-      setLoading(true);
-      try {
-        await checkConnection();
-      } catch (err) {
-        console.error('Error al verificar conexión:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchAll();
+  }, [fetchAll]);
 
-    initialize();
-  }, [checkConnection]);
+  /* ---------- helpers ---------- */
+  const resetForm = () => {
+    setFormName('');
+    setFormType('azure_openai');
+    setFormData({});
+    setShowForm(false);
+  };
+
+  const handleFieldChange = (key: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleTypeChange = (type: CredentialType) => {
+    setFormType(type);
+    setFormData({});
+  };
+
+  /* ---------- create ---------- */
+  const handleCreate = async () => {
+    if (!formName.trim()) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const payload: CreateCredentialPayload = {
+        name: formName.trim(),
+        credential_type: formType,
+        data: { ...formData },
+      };
+      await createCredential(payload);
+      resetForm();
+      await fetchAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al crear credencial');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* ---------- delete ---------- */
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('¿Eliminar esta credencial? Los nodos que la usen dejarán de funcionar.')) return;
+    setDeletingId(id);
+    setError(null);
+    try {
+      await deleteCredential(id);
+      setCredentials((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al eliminar credencial');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  /* ---------- copy ---------- */
+  const handleCopy = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  /* ---------- render ---------- */
+  const fields = FIELD_MAP[formType];
+  const isFormValid =
+    formName.trim().length > 0 &&
+    fields.every((f) => (formData[f.key] ?? '').trim().length > 0);
 
   if (loading) {
     return (
       <div className="credentials-list-container">
-        <div className="credentials-list-loading">Cargando...</div>
+        <div className="credentials-list-loading">
+          <Loader2 size={24} className="animate-spin" style={{ marginBottom: 8 }} />
+          Cargando credenciales...
+        </div>
       </div>
     );
   }
 
   return (
     <div className="credentials-list-container">
+      {/* Header */}
       <div className="credentials-list-header">
         <div>
           <h1 className="credentials-list-title">Credenciales</h1>
           <p className="credentials-list-subtitle">
-            Estado de conexión: <span className={`connection-status ${connectionStatus}`}>{connectionStatus}</span>
+            Gestiona las claves de API y conexiones a servicios externos.
+            Estado: <span className={`connection-status ${connectionStatus}`}>{connectionStatus}</span>
           </p>
         </div>
+        <button className="cred-add-btn" onClick={() => setShowForm(true)}>
+          <Plus size={18} />
+          Nueva Credencial
+        </button>
       </div>
 
-      <div className="credentials-list-empty">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M12 15C15.866 15 19 11.866 19 8C19 4.13401 15.866 1 12 1C8.13401 1 5 4.13401 5 8C5 11.866 8.13401 15 12 15Z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M8.21 13.89L7 23L12 20L17 23L15.79 13.88"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <p>Gestión de Credenciales</p>
-        <p className="credentials-list-empty-note">Próximamente</p>
-      </div>
+      {/* Error */}
+      {error && (
+        <div className="cred-error-banner">
+          <span>{error}</span>
+          <button className="cred-error-dismiss" onClick={() => setError(null)}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* New credential form */}
+      {showForm && (
+        <div className="cred-form-card">
+          <div className="cred-form-header">
+            <h3 className="cred-form-title">Nueva Credencial</h3>
+            <button className="cred-form-close" onClick={resetForm}>
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="cred-form-body">
+            {/* Name */}
+            <label className="cred-label">Nombre</label>
+            <input
+              className="cred-input"
+              type="text"
+              placeholder="Ej: Azure OpenAI Producción"
+              value={formName}
+              onChange={(e) => setFormName(e.target.value)}
+              autoFocus
+            />
+
+            {/* Type */}
+            <label className="cred-label">Tipo</label>
+            <div className="cred-type-grid">
+              {ALL_TYPES.map((t) => (
+                <button
+                  key={t}
+                  className={`cred-type-option ${formType === t ? 'active' : ''}`}
+                  onClick={() => handleTypeChange(t)}
+                >
+                  <span className="cred-type-option-name">{TYPE_LABELS[t]}</span>
+                  <span className="cred-type-option-desc">{TYPE_DESCRIPTIONS[t]}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Dynamic fields */}
+            <div className="cred-fields-section">
+              <label className="cred-label">Configuración — {TYPE_LABELS[formType]}</label>
+              {fields.map((f) => (
+                <div key={f.key} className="cred-field-row">
+                  <label className="cred-field-label">{f.label}</label>
+                  <input
+                    className="cred-input"
+                    type={f.type}
+                    placeholder={f.placeholder}
+                    value={formData[f.key] ?? ''}
+                    onChange={(e) => handleFieldChange(f.key, e.target.value)}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div className="cred-form-actions">
+              <button className="cred-cancel-btn" onClick={resetForm}>Cancelar</button>
+              <button
+                className="cred-save-btn"
+                disabled={!isFormValid || saving}
+                onClick={handleCreate}
+              >
+                {saving ? 'Guardando...' : 'Guardar Credencial'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Credentials list */}
+      {credentials.length === 0 && !showForm ? (
+        <div className="credentials-list-empty">
+          <Key size={48} strokeWidth={1.5} />
+          <p>No hay credenciales configuradas</p>
+          <p className="credentials-list-empty-note">
+            Agrega credenciales para conectar tus nodos con Azure OpenAI, PostgreSQL y otros servicios.
+          </p>
+        </div>
+      ) : (
+        <div className="cred-grid">
+          {credentials.map((cred) => (
+            <div key={cred.id} className="cred-card">
+              <div className="cred-card-header">
+                <div className="cred-card-name">{cred.name}</div>
+                <button
+                  className="cred-card-delete"
+                  onClick={() => handleDelete(cred.id)}
+                  disabled={deletingId === cred.id}
+                  title="Eliminar"
+                >
+                  {deletingId === cred.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                </button>
+              </div>
+
+              <div className="cred-card-type-row">
+                <span className={`cred-card-badge cred-badge-${cred.credential_type}`}>
+                  {TYPE_LABELS[cred.credential_type]}
+                </span>
+                {cred.created_at && (
+                  <span className="cred-card-date">
+                    {new Date(cred.created_at).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+
+              <div className="cred-card-id-row">
+                <code className="cred-card-id">{cred.id}</code>
+                <button
+                  className="cred-card-copy"
+                  onClick={() => handleCopy(cred.id)}
+                  title="Copiar ID"
+                >
+                  {copiedId === cred.id ? <Check size={13} /> : <Copy size={13} />}
+                </button>
+              </div>
+
+              <p className="cred-card-hint">
+                Usa este ID en el campo <code>credential_id</code> de la config del nodo.
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

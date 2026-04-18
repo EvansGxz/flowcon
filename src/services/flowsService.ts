@@ -8,7 +8,7 @@
  * Se asume que el frontend mantendrá una lista local o se implementará después
  */
 
-import { apiGet, apiPost, apiPut } from './apiService';
+import { apiGet, apiPost, apiPut, apiDelete } from './apiService';
 import type { Flow, GraphDefinition } from '../types';
 
 interface FlowData {
@@ -141,13 +141,11 @@ export async function getFlows(projectId: string | null = null): Promise<Flow[]>
 
 /**
  * Elimina un flow
- * NOTA: El backend no expone DELETE en Semana 2
- * Esta función se mantiene para compatibilidad
+ * DELETE /api/v1/flows/{flow_id}
  */
 export async function deleteFlow(flowId: string): Promise<void> {
   try {
-    // Por ahora lanzar error hasta que el backend exponga DELETE /api/v1/flows/{id}
-    throw new Error('DELETE /api/v1/flows/{id} no está disponible en el backend Semana 2');
+    await apiDelete(`/flows/${flowId}`);
   } catch (error) {
     console.error('Error al eliminar flow:', error);
     throw error;

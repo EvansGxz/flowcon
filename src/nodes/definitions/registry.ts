@@ -213,6 +213,30 @@ nodeRegistry.register(
         multiple: false,
         dataType: 'json',
       },
+      {
+        id: 'ai_model',
+        type: PortType.TOOL,
+        label: 'Model',
+        multiple: false,
+        required: true,
+        dataType: 'any',
+      },
+      {
+        id: 'ai_tool',
+        type: PortType.TOOL,
+        label: 'Tools',
+        multiple: true,
+        required: false,
+        dataType: 'any',
+      },
+      {
+        id: 'ai_memory',
+        type: PortType.TOOL,
+        label: 'Memory',
+        multiple: false,
+        required: false,
+        dataType: 'any',
+      },
     ],
     outputs: [
       {
@@ -328,11 +352,20 @@ nodeRegistry.register(
     ],
     outputs: [
       {
-        id: 'out',
-        type: PortType.MAIN,
-        label: 'Output',
+        id: 'ai_output',
+        type: PortType.TOOL,
+        label: 'To Agent',
         multiple: false,
-        dataType: 'json',
+        dataType: 'any',
+      },
+    ],
+    credentials: [
+      {
+        name: 'credential_id',
+        label: 'Credencial PostgreSQL',
+        type: 'postgres',
+        required: true,
+        description: 'Conexión a PostgreSQL (backend de memoria)',
       },
     ],
     properties: [
@@ -395,11 +428,20 @@ nodeRegistry.register(
     ],
     outputs: [
       {
-        id: 'out',
-        type: PortType.MAIN,
-        label: 'Output',
+        id: 'ai_output',
+        type: PortType.TOOL,
+        label: 'To Agent',
         multiple: false,
-        dataType: 'json',
+        dataType: 'any',
+      },
+    ],
+    credentials: [
+      {
+        name: 'credential_id',
+        label: 'Credencial LLM',
+        type: 'azure_openai',
+        required: true,
+        description: 'API key y endpoint del modelo',
       },
     ],
     properties: [
@@ -436,12 +478,21 @@ nodeRegistry.register(
         default: '',
         ui: { widget: 'textarea', rows: 5, placeholder: 'Prompt del modelo (puede venir de vars.prompt)' },
       },
+      {
+        name: 'credential_id',
+        label: 'Credencial',
+        type: 'string',
+        required: false,
+        description: 'ID de la credencial a usar',
+        ui: { widget: 'textarea', placeholder: 'ID de credencial (copiar de Credenciales)', rows: 1 },
+      },
     ],
     defaults: {
       provider: 'openai',
       model: '',
       temperature: 0.7,
       prompt: '',
+      credential_id: '',
     },
   })
 );
@@ -555,11 +606,20 @@ nodeRegistry.register(
     ],
     outputs: [
       {
-        id: 'out',
-        type: PortType.MAIN,
-        label: 'Output',
+        id: 'ai_output',
+        type: PortType.TOOL,
+        label: 'To Agent',
         multiple: false,
-        dataType: 'json',
+        dataType: 'any',
+      },
+    ],
+    credentials: [
+      {
+        name: 'credential_id',
+        label: 'Credencial PostgreSQL',
+        type: 'postgres',
+        required: true,
+        description: 'Conexión a PostgreSQL',
       },
     ],
     properties: [
@@ -579,10 +639,19 @@ nodeRegistry.register(
         default: '',
         ui: { widget: 'textarea', rows: 5, placeholder: '' },
       },
+      {
+        name: 'credential_id',
+        label: 'Credencial',
+        type: 'string',
+        required: false,
+        description: 'ID de la credencial a usar',
+        ui: { widget: 'textarea', placeholder: 'ID de credencial (copiar de Credenciales)', rows: 1 },
+      },
     ],
     defaults: {
       connectionRef: '',
       query: '',
+      credential_id: '',
     },
   })
 );

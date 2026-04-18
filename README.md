@@ -1,99 +1,69 @@
-# React Flow - Agent AI Canvas
+# FlowCon - REDMIND Frontend
 
-Aplicación estilo n8n con canvas para nodos orientados a Agent AI construida con React Flow.
+Frontend React para REDMIND. Canvas visual estilo n8n para crear y ejecutar flujos de agentes AI.
 
-## 🚀 Características
-
-- **Canvas interactivo** con React Flow para crear flujos de trabajo de Agent AI
-- **Nodos personalizados**:
-  - **Trigger Node**: Nodo de inicio que activa el flujo
-  - **Agent Node**: Nodo de procesamiento con IA
-  - **Action Node**: Nodo de acción para ejecutar tareas
-- **Interfaz estilo n8n** con diseño moderno y limpio
-- **Controles de navegación**: Zoom, pan, minimap
-- **Conexiones animadas** entre nodos
-
-## 📦 Instalación
-
-El proyecto ya tiene React Flow instalado. Para iniciar:
+## Instalacion
 
 ```bash
 npm install
 npm start
 ```
 
-La aplicación se abrirá en [http://localhost:3000](http://localhost:3000)
+La aplicacion se abre en [http://localhost:3000](http://localhost:3000)
 
-## 🏗️ Estructura del Proyecto
+## Estructura
 
 ```
 src/
-├── components/
-│   └── FlowCanvas.js      # Componente principal del canvas
-├── nodes/
-│   ├── TriggerNode.js     # Nodo de trigger
-│   ├── AgentNode.js       # Nodo de agente AI
-│   ├── ActionNode.js      # Nodo de acción
-│   └── NodeStyles.css     # Estilos para los nodos
-├── App.js                 # Componente principal
-└── index.js               # Punto de entrada
+  components/
+    canvas/         # FlowCanvas - editor visual de grafos
+    runs/           # RunCard, RunDetail, TraceView - ejecucion y traces
+    common/         # Sidebar, ProtectedRoute, etc.
+  services/
+    apiService.ts   # HTTP client base con auth
+    flowsService.ts # CRUD de flows
+    runsService.ts  # Ejecucion y consulta de runs
+    authService.ts  # Login, registro, tokens
+  store/
+    editorStore.ts  # Zustand store principal (flows, runs, UI state)
+  types/
+    api.ts          # Tipos compartidos (Flow, Run, NodeRun, etc.)
+    index.ts        # Re-exports
+  contracts/        # Contratos sincronizados con backend
+  nodes/            # Componentes de nodos custom para React Flow
 ```
 
-## 🎨 Uso
+## Funcionalidades principales
 
-### Nodos Disponibles
+- **Canvas interactivo**: React Flow con nodos custom para cada tipo
+- **Tipos de nodo**: trigger.manual, agent.core, response.chat, condition.expr, model.llm, tool.http, tool.postgres, memory.kv, response.end
+- **Ejecucion de flows**: via API backend con polling de status
+- **Vista de trace**: TraceView con iteraciones del AgentCore, confidence y reasoning
+- **Modos de ejecucion**: badge visual para modo sequential vs agent
+- **Proyectos**: CRUD completo con selector en sidebar
+- **Autenticacion**: Login/registro con tokens OAuth-like
+- **Validacion**: Validacion local y remota de grafos
 
-1. **Trigger Node** (Verde)
-   - Nodo de inicio del flujo
-   - Tiene un handle de salida (source)
-   - Ejemplo: Webhook Trigger
+## Conexion con backend
 
-2. **Agent Node** (Morado)
-   - Nodo de procesamiento con IA
-   - Tiene handles de entrada y salida
-   - Puede incluir información del modelo (ej: GPT-4)
+El frontend se conecta al backend en `http://localhost:8000/api/v1/`.
 
-3. **Action Node** (Azul)
-   - Nodo de acción final
-   - Tiene handles de entrada y salida
-   - Puede incluir tipo de acción
+Headers automaticos:
+- `Authorization: Bearer {token}` (auth)
+- `X-Project-Id: {projectId}` (contexto de proyecto)
 
-### Interacciones
+## Scripts
 
-- **Arrastrar nodos**: Click y arrastra para mover nodos
-- **Conectar nodos**: Arrastra desde un handle de salida a un handle de entrada
-- **Seleccionar nodos**: Click en un nodo para seleccionarlo
-- **Zoom**: Usa la rueda del mouse o los controles
-- **Pan**: Click y arrastra en el canvas vacío
+```bash
+npm start       # Dev server en puerto 3000
+npm run build   # Build de produccion
+npm test        # Tests (CI mode)
+```
 
-## 🔧 Personalización
+## Tecnologias
 
-### Agregar Nuevos Nodos
-
-1. Crea un nuevo componente en `src/nodes/`
-2. Importa `Handle` y `Position` de `@xyflow/react`
-3. Usa los estilos de `NodeStyles.css`
-4. Regístralo en `FlowCanvas.js` en el objeto `nodeTypes`
-
-### Modificar Nodos Existentes
-
-Edita los archivos en `src/nodes/` para personalizar la apariencia y funcionalidad de los nodos.
-
-## 📚 Documentación
-
-- [React Flow Documentation](https://reactflow.dev/learn)
-- [React Flow API Reference](https://reactflow.dev/api-reference/react-flow)
-
-## 🛠️ Tecnologías
-
-- React 19
-- React Flow (@xyflow/react) 12.10.0
+- React 19 + TypeScript
+- React Flow (@xyflow/react)
+- Zustand (state management)
+- React Router
 - Create React App
-
-## 📝 Próximos Pasos
-
-- [ ] Agregar panel lateral para agregar nuevos nodos
-- [ ] Implementar guardado/carga de flujos
-- [ ] Agregar validación de conexiones
-- [ ] Implementar ejecución de flujos
-- [ ] Agregar más tipos de nodos (Condition, Loop, etc.)

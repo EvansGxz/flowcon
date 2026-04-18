@@ -29,6 +29,11 @@ import type { ReactFlowNode } from '../../types/reactflow';
 import TriggerNode from '../../nodes/TriggerNode';
 import AgentNode from '../../nodes/AgentNode';
 import ActionNode from '../../nodes/ActionNode';
+import ConditionNode from '../../nodes/ConditionNode';
+import MemoryNode from '../../nodes/MemoryNode';
+import ModelLlmNode from '../../nodes/ModelLlmNode';
+import ToolPostgresNode from '../../nodes/ToolPostgresNode';
+import ResponseChatNode from '../../nodes/ResponseChatNode';
 import CustomEdge from '../../edges/CustomEdge';
 import CustomControls from '../controls/CustomControls';
 import TopRightControls from '../controls/TopRightControls';
@@ -37,6 +42,7 @@ import PropertiesPanel from '../modals/PropertiesPanel';
 import EmptyState from './EmptyState';
 import NoProjectState from './NoProjectState';
 import ContextMenu from './ContextMenu';
+import CredentialsManager from '../credentials/CredentialsManager';
 import { applyElkLayout, ELK_PRESETS } from '../../utils/elkLayout';
 import { createNodeInstance, migrateNodeIfNeeded, getNodeDefinition } from '../../utils/nodeInstance';
 import { NodeStatus } from '../../nodes/definitions/types';
@@ -50,12 +56,12 @@ const nodeTypes: NodeTypes = {
   manual_trigger: TriggerNode,
   trigger_input: TriggerNode, // Nuevo en v1.0.2
   agent_core: AgentNode,
-  condition_expr: AgentNode, // TODO: crear componente específico
-  memory_kv: AgentNode, // TODO: crear componente específico
-  model_llm: AgentNode, // TODO: crear componente específico
+  condition_expr: ConditionNode,
+  memory_kv: MemoryNode,
+  model_llm: ModelLlmNode,
   tool_http: ActionNode,
-  tool_postgres: ActionNode, // TODO: crear componente específico
-  response_chat: ActionNode, // TODO: crear componente específico
+  tool_postgres: ToolPostgresNode,
+  response_chat: ResponseChatNode,
   response_end: ActionNode, // Nuevo en v1.0.2
   http_request: ActionNode,
   // Mantener compatibilidad con nombres antiguos
@@ -242,6 +248,9 @@ function FlowCanvasInner() {
   // Verificar si hay alguna modal abierta (desde TopRightControls)
   const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
   
+  // Credentials manager modal
+  const [isCredentialsOpen, setIsCredentialsOpen] = useState(false);
+  
   // Menú contextual
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({ isOpen: false, position: null });
   const previousEdgesLength = useRef(edges.length);
@@ -369,9 +378,17 @@ function FlowCanvasInner() {
             setSelectedNodeId(null);
           }
         }
-        // Manejar doble clic para abrir propiedades
-        if (change.type === 'position' && change.dragging === false) {
-          // Esto se activa cuando se suelta el mouse después de hacer doble clic
+        // Limpiar selectedNodeId cuando se elimina un nodo
+        if (change.type === 'remove') {
+          if (selectedNodeId === change.id) {
+            setSelectedNodeId(null);
+          }
+          // Eliminar edges conectados via el store
+          const { edges: currentEdges } = useEditorStore.getState();
+          const cleanedEdges = currentEdges.filter(
+            (e) => e.source !== change.id && e.target !== change.id
+          );
+          setEdges(cleanedEdges);
         }
       }
     },
@@ -460,6 +477,10 @@ function FlowCanvasInner() {
           console.log('Funcionalidad de agregar nota próximamente');
         }}
       />
+      <CredentialsManager
+        isOpen={isCredentialsOpen}
+        onClose={() => setIsCredentialsOpen(false)}
+      />
       <ReactFlow
         style={{ width: '100%', height: '100%' }}
         nodes={displayNodes.map(node => ({
@@ -504,6 +525,7 @@ function FlowCanvasInner() {
           const position = { x: event.clientX, y: event.clientY };
           setContextMenu({ isOpen: true, position });
         }}
+        deleteKeyCode={['Backspace', 'Delete']}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
@@ -512,6 +534,7 @@ function FlowCanvasInner() {
         <CustomControls onLayout={applyAutoLayout} />
         <TopRightControls 
           onAddNode={() => setIsPaletteOpen(true)}
+          onOpenCredentials={() => setIsCredentialsOpen(true)}
           onModalStateChange={setIsAnyModalOpen}
         />
         <MiniMap

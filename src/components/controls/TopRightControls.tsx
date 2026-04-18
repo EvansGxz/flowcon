@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, LayoutGrid, LayoutList, FileText, Sun, Cloud, Moon, File, SquareSplitVertical, Cherry, Rose } from 'lucide-react';
+import { Plus, LayoutGrid, LayoutList, FileText, Sun, Cloud, Moon, File, SquareSplitVertical, Cherry, Rose, KeyRound } from 'lucide-react';
 import { useTheme, type Theme } from '../../context/ThemeContext';
 import { useEditorStore } from '../../store/editorStore';
 import ExamplesModal from '../modals/ExamplesModal';
@@ -7,6 +7,7 @@ import './TopRightControls.css';
 
 interface TopRightControlsProps {
   onAddNode: () => void;
+  onOpenCredentials?: () => void;
   onModalStateChange?: (isOpen: boolean) => void;
 }
 
@@ -14,7 +15,7 @@ interface TopRightControlsProps {
  * Controles del panel superior derecho
  * Incluye: Agregar Nodo, Toggle Theme, Modo de Vista, Cargar Ejemplos
  */
-const TopRightControls = ({ onAddNode, onModalStateChange }: TopRightControlsProps) => {
+const TopRightControls = ({ onAddNode, onOpenCredentials, onModalStateChange }: TopRightControlsProps) => {
   const { theme, setTheme } = useTheme();
   const { nodeViewMode, setNodeViewMode, loadExample } = useEditorStore();
   const [showThemeMenu, setShowThemeMenu] = useState(false);
@@ -212,6 +213,16 @@ const TopRightControls = ({ onAddNode, onModalStateChange }: TopRightControlsPro
             </div>
           )}
         </div>
+
+        {/* Credentials */}
+        <button
+          className="top-right-control-button"
+          onClick={() => onOpenCredentials?.()}
+          aria-label="Credentials"
+          title="Credentials"
+        >
+          <KeyRound size={18} />
+        </button>
 
         {/* Cargar Ejemplos */}
         <button

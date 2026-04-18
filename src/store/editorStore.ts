@@ -746,8 +746,8 @@ export const useEditorStore = create<StoreState>((set, get) => ({
         
         console.log('[editorStore] Respuesta inmediata del backend:', executeResult);
         
-        // El backend retorna inmediatamente: {runId, status: "running"}
-        const runId = executeResult.runId || '';
+        // El backend retorna inmediatamente: {run_id, status: "running"}
+        const runId = executeResult.run_id || '';
         const initialStatus = executeResult.status || 'running';
         
         // Inicializar el run seleccionado con estado inicial

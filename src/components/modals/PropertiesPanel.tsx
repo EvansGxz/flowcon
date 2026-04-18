@@ -1,7 +1,8 @@
-import { useState, useEffect, ChangeEvent, KeyboardEvent } from 'react';
+import { useState, useEffect, useCallback, ChangeEvent, KeyboardEvent } from 'react';
 import { useEditorStore } from '../../store/editorStore';
 import { getNodeDefinition } from '../../utils/nodeInstance';
 import type { PropertyDef } from '../../nodes/definitions/PropertyDef';
+import { listCredentials, type Credential } from '../../services/credentialsService';
 import './PropertiesPanel.css';
 
 interface PropertiesPanelProps {
@@ -16,12 +17,22 @@ const PropertiesPanel = ({ isOpen, onClose, nodeId }: PropertiesPanelProps) => {
   const selectedNode = nodeId ? nodesArray.find((n) => n.id === nodeId) : null;
   const definition = selectedNode ? getNodeDefinition(selectedNode) : null;
   const [formData, setFormData] = useState<Record<string, unknown>>({});
+  const [credentials, setCredentials] = useState<Credential[]>([]);
 
   useEffect(() => {
     if (selectedNode) {
       setFormData((selectedNode.data?.config as Record<string, unknown>) || {});
     }
   }, [selectedNode, nodeId]);
+
+  // Cargar credenciales si el nodo tiene credential definitions
+  useEffect(() => {
+    if (definition && definition.credentials && definition.credentials.length > 0) {
+      listCredentials()
+        .then(setCredentials)
+        .catch(() => setCredentials([]));
+    }
+  }, [definition]);
 
   // Cerrar modal con Escape o al hacer clic fuera
   useEffect(() => {
@@ -140,10 +151,43 @@ const PropertiesPanel = ({ isOpen, onClose, nodeId }: PropertiesPanelProps) => {
         </div>
 
       <div className="properties-panel-content">
-        {definition.properties.length === 0 ? (
+        {/* Selector de credencial */}
+        {definition.credentials && definition.credentials.length > 0 && (
+          <div className="properties-field properties-credential-section">
+            <label className="properties-label">
+              Credencial
+              <span className="properties-required">*</span>
+            </label>
+            <div className="properties-description">
+              Selecciona la credencial para este nodo. Crea credenciales en la seccion Credenciales.
+            </div>
+            <select
+              value={(formData['credential_id'] as string) || ''}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => handleChange('credential_id', e.target.value)}
+              className="properties-input"
+            >
+              <option value="">-- Seleccionar credencial --</option>
+              {credentials
+                .filter(c => {
+                  // Filtrar por tipo compatible
+                  const credDef = definition.credentials[0];
+                  if (!credDef?.type) return true;
+                  return c.credential_type === credDef.type || c.credential_type === 'openai' || c.credential_type === 'azure_openai';
+                })
+                .map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} ({c.credential_type})
+                  </option>
+                ))
+              }
+            </select>
+          </div>
+        )}
+
+        {definition.properties.length === 0 && (!definition.credentials || definition.credentials.length === 0) ? (
           <div className="properties-panel-empty">Este nodo no tiene propiedades configurables</div>
         ) : (
-          definition.properties.map((property: PropertyDef) => (
+          definition.properties.filter(p => p.name !== 'credential_id').map((property: PropertyDef) => (
             <div key={property.name} className="properties-field">
               <label className="properties-label">
                 {property.label}

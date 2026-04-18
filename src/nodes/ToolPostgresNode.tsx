@@ -1,6 +1,6 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { useEffect, useRef } from 'react';
-import { Bot, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Database, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { NodeStatus, type NodeStatusValue } from './definitions/types';
 import { nodeRegistry } from './definitions/registry';
 import { useEditorStore } from '../store/editorStore';
@@ -31,16 +31,15 @@ const HandleWithClick = ({ id, type, position, className, nodeId }: HandleWithCl
   );
 };
 
-interface AgentNodeProps extends NodeProps {
+interface ToolPostgresNodeProps extends NodeProps {
   data: ReactFlowNodeData;
 }
 
-const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
+const ToolPostgresNode = ({ data, selected, id }: ToolPostgresNodeProps) => {
   // Obtener definición del nodo
   const definition = data.typeId ? nodeRegistry.get(data.typeId) : null;
-  const displayName = data.displayName || definition?.displayName || (data.label as string) || 'AI Agent';
+  const displayName = data.displayName || definition?.displayName || (data.label as string) || 'PostgreSQL';
   const config = data.config || {};
-  const isAgentCore = data.typeId === 'agent_core';
   const status = (data.status as NodeStatusValue) || NodeStatus.IDLE;
   const nodeViewMode = useEditorStore((state) => state.nodeViewMode);
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -80,7 +79,8 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
   }, [id]);
 
   // Obtener valores de configuración
-  const model = typeof config.model === 'string' ? config.model : (definition?.getDefaultValue('model') as string) || 'gpt-4';
+  const queryType = typeof config.queryType === 'string' ? config.queryType : null;
+  const database = typeof config.database === 'string' ? config.database : null;
   const version = data.version || definition?.version || 1;
 
   // Clase de estado para el indicador
@@ -91,10 +91,10 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
     return (
       <div
         ref={nodeRef}
-        className={`node-container agent-node icon-view ${selected ? 'node-selected' : ''} ${statusClass}`}
+        className={`node-container tool-postgres-node icon-view ${selected ? 'node-selected' : ''} ${statusClass}`}
         style={{ width: '64px', height: '64px', minWidth: '64px' }}
       >
-        <div className={`node-indicator node-indicator-purple ${statusClass}`} style={{ width: '100%', height: '100%', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' }}>
+        <div className={`node-indicator node-indicator-cyan ${statusClass}`} style={{ width: '100%', height: '100%', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' }}>
           {status === NodeStatus.RUNNING ? (
             <Loader2 size={32} className="animate-spin" />
           ) : status === NodeStatus.SUCCESS ? (
@@ -102,30 +102,24 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
           ) : status === NodeStatus.ERROR ? (
             <XCircle size={32} />
           ) : (
-            <Bot size={32} />
+            <Database size={32} />
           )}
         </div>
         <HandleWithClick
           id="in"
           type="target"
           position={Position.Left}
-          className="node-handle node-handle-purple"
+          className="node-handle node-handle-cyan"
           nodeId={id}
         />
         <HandleWithClick
           id="out"
           type="source"
           position={Position.Right}
-          className="node-handle node-handle-purple"
+          className="node-handle node-handle-cyan"
           nodeId={id}
         />
-        {isAgentCore && (
-          <>
-            <Handle id="ai_model" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '25%' }} />
-            <Handle id="ai_tool" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '50%' }} />
-            <Handle id="ai_memory" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '75%' }} />
-          </>
-        )}
+        <Handle id="ai_output" type="source" position={Position.Top} className="node-handle node-handle-ai-source" />
       </div>
     );
   }
@@ -135,11 +129,11 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
     return (
       <div
         ref={nodeRef}
-        className={`node-container agent-node compact-view ${selected ? 'node-selected' : ''} ${statusClass}`}
+        className={`node-container tool-postgres-node compact-view ${selected ? 'node-selected' : ''} ${statusClass}`}
         style={{ minWidth: '200px' }}
       >
         <div className="node-header">
-          <div className={`node-indicator node-indicator-purple ${statusClass}`}>
+          <div className={`node-indicator node-indicator-cyan ${statusClass}`}>
             {status === NodeStatus.RUNNING ? (
               <Loader2 size={22} className="animate-spin" />
             ) : status === NodeStatus.SUCCESS ? (
@@ -147,7 +141,7 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
             ) : status === NodeStatus.ERROR ? (
               <XCircle size={22} />
             ) : (
-              <Bot size={22} />
+              <Database size={22} />
             )}
           </div>
           <div className="node-title">{displayName}</div>
@@ -159,30 +153,17 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
           id="in"
           type="target"
           position={Position.Left}
-          className="node-handle node-handle-purple"
+          className="node-handle node-handle-cyan"
           nodeId={id}
         />
         <HandleWithClick
           id="out"
           type="source"
           position={Position.Right}
-          className="node-handle node-handle-purple"
+          className="node-handle node-handle-cyan"
           nodeId={id}
         />
-        {isAgentCore && (
-          <div className="agent-ai-handles">
-            <div className="agent-ai-handle-group">
-              <Handle id="ai_model" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '25%' }} />
-              <Handle id="ai_tool" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '50%' }} />
-              <Handle id="ai_memory" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '75%' }} />
-            </div>
-            <div className="agent-ai-labels">
-              <span style={{ left: '25%' }}>Model</span>
-              <span style={{ left: '50%' }}>Tools</span>
-              <span style={{ left: '75%' }}>Memory</span>
-            </div>
-          </div>
-        )}
+        <Handle id="ai_output" type="source" position={Position.Top} className="node-handle node-handle-ai-source" />
       </div>
     );
   }
@@ -191,11 +172,11 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
   return (
     <div
       ref={nodeRef}
-      className={`node-container agent-node informative-view ${selected ? 'node-selected' : ''} ${statusClass}`}
+      className={`node-container tool-postgres-node informative-view ${selected ? 'node-selected' : ''} ${statusClass}`}
       style={{ minWidth: '200px' }}
     >
       <div className="node-header">
-        <div className={`node-indicator node-indicator-purple ${statusClass}`}>
+        <div className={`node-indicator node-indicator-cyan ${statusClass}`}>
           {status === NodeStatus.RUNNING ? (
             <Loader2 size={16} className="animate-spin" />
           ) : status === NodeStatus.SUCCESS ? (
@@ -203,7 +184,7 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
           ) : status === NodeStatus.ERROR ? (
             <XCircle size={16} />
           ) : (
-            <Bot size={16} />
+            <Database size={16} />
           )}
         </div>
         <div className="node-title">{displayName}</div>
@@ -214,44 +195,31 @@ const AgentNode = ({ data, selected, id }: AgentNodeProps) => {
       {data.description && (
         <div className="node-description">{data.description as string}</div>
       )}
-      {model && (
-        <div className="node-badge node-badge-purple">
-          Model: {model}
+      {queryType && (
+        <div className="node-badge node-badge-cyan">
+          {queryType}
         </div>
       )}
-      {config.temperature !== undefined && (
+      {database && (
         <div className="node-badge node-badge-info">
-          Temp: {config.temperature as number}
+          DB: {database}
         </div>
       )}
       <Handle
         id="in"
         type="target"
         position={Position.Left}
-        className="node-handle node-handle-purple"
+        className="node-handle node-handle-cyan"
       />
       <Handle
         id="out"
         type="source"
         position={Position.Right}
-        className="node-handle node-handle-purple"
+        className="node-handle node-handle-cyan"
       />
-      {isAgentCore && (
-        <div className="agent-ai-handles">
-          <div className="agent-ai-handle-group">
-            <Handle id="ai_model" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '25%' }} />
-            <Handle id="ai_tool" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '50%' }} />
-            <Handle id="ai_memory" type="target" position={Position.Bottom} className="node-handle node-handle-ai" style={{ left: '75%' }} />
-          </div>
-          <div className="agent-ai-labels">
-            <span style={{ left: '25%' }}>Model</span>
-            <span style={{ left: '50%' }}>Tools</span>
-            <span style={{ left: '75%' }}>Memory</span>
-          </div>
-        </div>
-      )}
+      <Handle id="ai_output" type="source" position={Position.Top} className="node-handle node-handle-ai-source" />
     </div>
   );
 };
 
-export default AgentNode;
+export default ToolPostgresNode;
