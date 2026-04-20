@@ -53,3 +53,12 @@ export async function deleteCredential(
 ): Promise<void> {
   await apiDelete(`/credentials/${credentialId}`);
 }
+
+/**
+ * Testea una credencial intentando conectar al servicio.
+ */
+export async function testCredential(
+  credentialId: string
+): Promise<{ success: boolean; message: string }> {
+  return apiPost<{ success: boolean; message: string }>(`/credentials/${credentialId}/test`, {});
+}

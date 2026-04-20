@@ -1,10 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Key, Plus, Trash2, Copy, Check, ChevronDown, X, Loader2 } from 'lucide-react';
+import { Key, Plus, Trash2, Copy, Check, X, Loader2, Pencil, Zap } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import {
   listCredentials,
   createCredential,
+  updateCredential,
   deleteCredential,
+  testCredential,
   type Credential,
   type CreateCredentialPayload,
 } from '../../services/credentialsService';
@@ -77,9 +79,17 @@ const CredentialsList = () => {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
+  // Edit state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editData, setEditData] = useState<Record<string, string>>({});
+  const [editType, setEditType] = useState<CredentialType>('azure_openai');
+
   // UI state
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [testingId, setTestingId] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<Record<string, { success: boolean; message: string }>>({});
 
   /* ---------- fetch ---------- */
   const fetchAll = useCallback(async () => {
@@ -167,6 +177,50 @@ const CredentialsList = () => {
     navigator.clipboard.writeText(id);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  /* ---------- test ---------- */
+  const handleTest = async (id: string) => {
+    setTestingId(id);
+    setTestResult((prev) => ({ ...prev, [id]: { success: false, message: 'Probando...' } }));
+    try {
+      const result = await testCredential(id);
+      setTestResult((prev) => ({ ...prev, [id]: result }));
+    } catch (err) {
+      setTestResult((prev) => ({ ...prev, [id]: { success: false, message: err instanceof Error ? err.message : 'Error' } }));
+    } finally {
+      setTestingId(null);
+    }
+  };
+
+  /* ---------- edit ---------- */
+  const handleStartEdit = (cred: Credential) => {
+    setEditingId(cred.id);
+    setEditName(cred.name);
+    setEditType(cred.credential_type);
+    setEditData({}); // Campos vacíos -- el usuario solo llena lo que quiere cambiar
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const payload: { name?: string; data?: Record<string, unknown> } = {};
+      if (editName.trim()) payload.name = editName.trim();
+      // Solo enviar data si el usuario llenó al menos un campo
+      const filledData = Object.fromEntries(
+        Object.entries(editData).filter(([, v]) => v.trim().length > 0)
+      );
+      if (Object.keys(filledData).length > 0) payload.data = filledData;
+      await updateCredential(editingId, payload);
+      setEditingId(null);
+      await fetchAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al actualizar');
+    } finally {
+      setSaving(false);
+    }
   };
 
   /* ---------- render ---------- */
@@ -297,14 +351,31 @@ const CredentialsList = () => {
             <div key={cred.id} className="cred-card">
               <div className="cred-card-header">
                 <div className="cred-card-name">{cred.name}</div>
-                <button
-                  className="cred-card-delete"
-                  onClick={() => handleDelete(cred.id)}
-                  disabled={deletingId === cred.id}
-                  title="Eliminar"
-                >
-                  {deletingId === cred.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                </button>
+                <div className="cred-card-actions">
+                  <button
+                    className="cred-card-action"
+                    onClick={() => handleStartEdit(cred)}
+                    title="Editar"
+                  >
+                    <Pencil size={13} />
+                  </button>
+                  <button
+                    className="cred-card-action"
+                    onClick={() => handleTest(cred.id)}
+                    disabled={testingId === cred.id}
+                    title="Probar conexion"
+                  >
+                    {testingId === cred.id ? <Loader2 size={13} className="animate-spin" /> : <Zap size={13} />}
+                  </button>
+                  <button
+                    className="cred-card-action cred-card-action-danger"
+                    onClick={() => handleDelete(cred.id)}
+                    disabled={deletingId === cred.id}
+                    title="Eliminar"
+                  >
+                    {deletingId === cred.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                  </button>
+                </div>
               </div>
 
               <div className="cred-card-type-row">
@@ -318,6 +389,52 @@ const CredentialsList = () => {
                 )}
               </div>
 
+              {/* Test result */}
+              {testResult[cred.id] && (
+                <div className={`cred-test-result ${testResult[cred.id].success ? 'cred-test-success' : 'cred-test-fail'}`}>
+                  {testResult[cred.id].success ? <Check size={12} /> : <X size={12} />}
+                  <span>{testResult[cred.id].message}</span>
+                </div>
+              )}
+
+              {/* Edit form inline */}
+              {editingId === cred.id && (
+                <div className="cred-edit-inline">
+                  <div className="cred-field-row">
+                    <label className="cred-field-label">Nombre</label>
+                    <input
+                      className="cred-input"
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                    />
+                  </div>
+                  <div className="cred-field-row">
+                    <label className="cred-field-label" style={{ fontSize: '11px', opacity: 0.6 }}>
+                      Deja en blanco los campos que no quieras cambiar
+                    </label>
+                  </div>
+                  {FIELD_MAP[editType].map((f) => (
+                    <div key={f.key} className="cred-field-row">
+                      <label className="cred-field-label">{f.label}</label>
+                      <input
+                        className="cred-input"
+                        type={f.type}
+                        placeholder={f.placeholder}
+                        value={editData[f.key] ?? ''}
+                        onChange={(e) => setEditData((prev) => ({ ...prev, [f.key]: e.target.value }))}
+                      />
+                    </div>
+                  ))}
+                  <div className="cred-form-actions">
+                    <button className="cred-cancel-btn" onClick={() => setEditingId(null)}>Cancelar</button>
+                    <button className="cred-save-btn" onClick={handleSaveEdit} disabled={saving}>
+                      {saving ? 'Guardando...' : 'Guardar'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="cred-card-id-row">
                 <code className="cred-card-id">{cred.id}</code>
                 <button
@@ -328,10 +445,6 @@ const CredentialsList = () => {
                   {copiedId === cred.id ? <Check size={13} /> : <Copy size={13} />}
                 </button>
               </div>
-
-              <p className="cred-card-hint">
-                Usa este ID en el campo <code>credential_id</code> de la config del nodo.
-              </p>
             </div>
           ))}
         </div>
