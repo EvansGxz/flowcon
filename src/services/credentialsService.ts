@@ -60,5 +60,5 @@ export async function deleteCredential(
 export async function testCredential(
   credentialId: string
 ): Promise<{ success: boolean; message: string }> {
-  return apiPost<{ success: boolean; message: string }>(`/credentials/${credentialId}/test`, {});
+  return apiPost<{ success: boolean; message: string }>(`/credentials/test/${credentialId}`, {});
 }
