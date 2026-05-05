@@ -304,7 +304,7 @@ const TraceView = ({ trace, executionMode }: TraceViewProps) => {
               
               return (
                 <div 
-                  key={nodeId || index} 
+                  key={`${nodeId}-${index}`} 
                   className={`trace-view-entry ${isTimeout ? 'trace-view-entry-timeout' : ''} ${entry.invokedByAgent ? 'trace-view-entry-invoked' : ''}`}
                 >
                   {entry.invokedByAgent && (

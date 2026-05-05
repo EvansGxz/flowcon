@@ -324,15 +324,8 @@ export function validateGraph(graph: unknown): ValidationResult {
   // ============================================================================
   const agentCoreErrors: Array<{ code: string; message: string; path: string }> = [];
   
-  // 1. Validar que haya máximo 1 agent.core por grafo
+  // 1. Multiples agent.core permitidos (secuencial o paralelo)
   const agentCores = (validatedGraph.nodes || []).filter(n => n.type === 'agent.core');
-  if (agentCores.length > 1) {
-    agentCoreErrors.push({
-      code: 'MULTIPLE_AGENT_CORES',
-      message: `El grafo tiene ${agentCores.length} nodos agent.core (máximo permitido: 1)`,
-      path: 'nodes'
-    });
-  }
   
   // 2. Validar que las capabilities estén conectadas al agent.core
   if (agentCores.length === 1) {
