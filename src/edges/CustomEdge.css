@@ -13,6 +13,8 @@
 /* ============================================================ */
 
 /* Running: amber + dash rapido animado */
+/* Selectores desde React Flow wrapper (.react-flow__edge) Y desde nuestro g */
+.react-flow__edge.edge-status-running .react-flow__edge-path,
 .edge-status-running .react-flow__edge-path {
   stroke: #f59e0b !important;
   stroke-width: 2.5 !important;
@@ -20,19 +22,28 @@
   animation: edge-flow 0.4s linear infinite !important;
 }
 
-/* Success: verde + linea continua (datos ya pasaron) */
+/* Success: verde + punteado estatico (datos ya pasaron) */
+.react-flow__edge.edge-status-success .react-flow__edge-path,
 .edge-status-success .react-flow__edge-path {
   stroke: #10b981 !important;
   stroke-width: 2 !important;
-  stroke-dasharray: none !important;
-  transition: stroke 0.3s ease, stroke-dasharray 0.3s ease;
+  stroke-dasharray: 6 3 !important;
+  animation: none !important;
 }
 
-/* Error: rojo */
+/* Error: rojo punteado */
+.react-flow__edge.edge-status-error .react-flow__edge-path,
 .edge-status-error .react-flow__edge-path {
   stroke: #ef4444 !important;
   stroke-width: 2 !important;
   stroke-dasharray: 4 4 !important;
+  animation: none !important;
+}
+
+/* Idle: punteado gris por defecto (definido en ReactFlowTheme.css) */
+.react-flow__edge.edge-status-idle .react-flow__edge-path,
+.edge-status-idle .react-flow__edge-path {
+  animation: none !important;
 }
 
 @keyframes edge-flow {

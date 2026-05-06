@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   BaseEdge,
   EdgeLabelRenderer,
-  getBezierPath,
+  getSmoothStepPath,
   useReactFlow,
   type EdgeProps,
 } from '@xyflow/react';
@@ -36,14 +36,32 @@ export default function CustomEdge({
   const { deleteElements, getNode, setNodes, setEdges } = useReactFlow();
   const [isHovered, setIsHovered] = useState(false);
   
-  // edgeStatus viene del className seteado por FlowCanvas useEffect
-  // className = "edge-status-running" | "edge-status-success" | etc.
+  // Extraer status del className (seteado por FlowCanvas useEffect)
+  const edgeStatus = className?.replace('edge-status-', '') || 'idle';
   
-  const [edgePath, labelX, labelY] = getBezierPath({
+  // Estilos inline por status
+  const edgeStyle: React.CSSProperties = {};
+  if (edgeStatus === 'running') {
+    edgeStyle.stroke = '#f59e0b';
+    edgeStyle.strokeWidth = 2.5;
+    edgeStyle.strokeDasharray = '8 4';
+    edgeStyle.animation = 'edge-flow 0.4s linear infinite';
+  } else if (edgeStatus === 'success') {
+    edgeStyle.stroke = '#10b981';
+    edgeStyle.strokeWidth = 2;
+    edgeStyle.strokeDasharray = '6 3';
+  } else if (edgeStatus === 'error') {
+    edgeStyle.stroke = '#ef4444';
+    edgeStyle.strokeWidth = 2;
+    edgeStyle.strokeDasharray = '4 4';
+  }
+  
+  const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
     sourceY,
     targetX,
     targetY,
+    borderRadius: 8,
   });
 
   const onDelete = () => {
@@ -101,7 +119,7 @@ export default function CustomEdge({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <BaseEdge id={id} path={edgePath} />
+        <BaseEdge id={id} path={edgePath} style={Object.keys(edgeStyle).length > 0 ? edgeStyle : undefined} />
         {/* Path invisible más grueso para facilitar el hover */}
         <path
           d={edgePath}
