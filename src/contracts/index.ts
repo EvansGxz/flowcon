@@ -36,68 +36,73 @@ export const EdgeIdSchema = z.string().min(1);
 // ============================================================================
 
 export const TriggerManualConfigSchema = z.object({
-  message: z.string(),
-});
+  message: z.string().optional().default(''),
+}).passthrough();
 
 export const TriggerWebhookConfigSchema = z.object({
-  path: z.string().regex(/^\//), // Debe empezar con /
-  method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
-});
+  path: z.string().optional().default('/'),
+  method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).optional().default('POST'),
+}).passthrough();
 
 export const AgentCoreConfigSchema = z.object({
-  strategy: z.literal('reactive'),
-  instructions: z.string(),
-});
+  strategy: z.string().optional().default('reactive'),
+  instructions: z.string().optional().default(''),
+  max_iterations: z.number().optional(),
+}).passthrough();
+
+export const ParallelForkConfigSchema = z.object({
+  merge_strategy: z.enum(['all', 'first']).optional().default('all'),
+}).passthrough();
+
+export const ParallelJoinConfigSchema = z.object({
+  merge_strategy: z.enum(['all', 'first']).optional().default('all'),
+  output_key: z.string().optional(),
+}).passthrough();
 
 export const ConditionExprConfigSchema = z.object({
-  engine: z.enum(['jexl', 'jmespath']),
-  rules: z.array(
-    z.object({
-      if: z.string().min(1),
-      to: z.string().min(1), // NodeIdSchema
-    })
-  ).min(1), // minItems: 1 según JSON Schema
-});
+  engine: z.enum(['jexl', 'jmespath']).optional(),
+  rules: z.array(z.object({ if: z.string(), to: z.string() })).optional(),
+  default: z.string().optional(),
+}).passthrough();
 
 export const MemoryKvConfigSchema = z.object({
-  mode: z.enum(['load', 'save']),
-  scope: z.enum(['conversation', 'run']),
-  backend: z.enum(['postgres', 'memory']),
-});
+  mode: z.enum(['load', 'save']).optional(),
+  scope: z.enum(['conversation', 'run']).optional(),
+  backend: z.enum(['postgres', 'memory']).optional().default('memory'),
+}).passthrough();
 
 export const ModelLlmConfigSchema = z.object({
-  provider: z.enum(['azure', 'openai', 'local']),
-  model: z.string(),
+  provider: z.enum(['azure', 'openai']).optional(),
+  model: z.string().optional(),
   temperature: z.number().min(0).max(2).optional(),
-  prompt: z.string().optional(),
-});
+}).passthrough();
 
 export const ToolHttpConfigSchema = z.object({
-  method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
-  url: z.string().url(),
+  method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).optional(),
+  url: z.string().optional(),
   headers: z.record(z.string(), z.string()).optional(),
   body: z.any().optional(),
-});
+}).passthrough();
 
 export const ToolPostgresConfigSchema = z.object({
-  connectionRef: z.string(),
-  query: z.string(),
-});
+  connectionRef: z.string().optional(),
+  query: z.string().optional(),
+}).passthrough();
 
 export const ResponseChatConfigSchema = z.object({
-  format: z.enum(['text', 'json']),
+  format: z.enum(['text', 'json']).optional().default('text'),
   template: z.string().optional(),
-});
+}).passthrough();
 
 export const TriggerInputConfigSchema = z.object({
   schema: z.object({
     required: z.array(z.string()).optional(),
   }).optional(),
-});
+}).passthrough();
 
 export const ResponseEndConfigSchema = z.object({
   output: z.any().optional(),
-});
+}).passthrough();
 
 // ============================================================================
 // Schema de configuración unificado (discriminated union)
@@ -212,6 +217,12 @@ export function validateNode(node: unknown): ValidationResult {
       break;
     case 'response.end':
       configSchema = ResponseEndConfigSchema;
+      break;
+    case 'parallel.fork':
+      configSchema = ParallelForkConfigSchema;
+      break;
+    case 'parallel.join':
+      configSchema = ParallelJoinConfigSchema;
       break;
     default:
       return { valid: false, errors: [`Tipo de nodo desconocido: ${(typedNode as { type: string }).type}`] };
