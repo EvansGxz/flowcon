@@ -3,50 +3,9 @@
   cursor: pointer;
 }
 
-.edge-path-group.hovered .react-flow__edge-path {
-  stroke-width: 3;
-  transition: stroke-width 0.2s ease;
-}
-
-/* ============================================================ */
-/* Edge execution states (clases directas en <path>)             */
-/* ============================================================ */
-
-/* Base: punteado gris */
-.edge-animated-path {
-  stroke: var(--node-description-color, #9ca3af);
-  stroke-width: 1.5;
-  stroke-dasharray: 6 3;
-  fill: none;
-}
-
-/* Running: amber + dash animado rapido */
-.edge-path-running {
-  stroke: #f59e0b !important;
-  stroke-width: 2.5 !important;
-  stroke-dasharray: 8 4 !important;
-  animation: edge-flow 0.4s linear infinite !important;
-}
-
-/* Success: verde punteado estatico */
-.edge-path-success {
-  stroke: #10b981 !important;
-  stroke-width: 2 !important;
-  stroke-dasharray: 6 3 !important;
-  animation: none !important;
-}
-
-/* Error: rojo punteado */
-.edge-path-error {
-  stroke: #ef4444 !important;
-  stroke-width: 2 !important;
-  stroke-dasharray: 4 4 !important;
-  animation: none !important;
-}
-
-/* Idle: hereda de .edge-animated-path */
-.edge-path-idle {
-  animation: none !important;
+/* Animacion de dash para edges running */
+.edge-dash-animated {
+  animation: edge-flow 0.4s linear infinite;
 }
 
 @keyframes edge-flow {

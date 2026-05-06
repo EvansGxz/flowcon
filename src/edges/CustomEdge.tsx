@@ -23,6 +23,14 @@ interface CustomEdgeProps extends EdgeProps {
   className?: string;
 }
 
+// Estilos por estado
+const EDGE_STYLES: Record<string, { stroke: string; strokeWidth: number; dasharray: string; animated: boolean }> = {
+  idle:    { stroke: '#9ca3af', strokeWidth: 1.5, dasharray: '6 3', animated: false },
+  running: { stroke: '#f59e0b', strokeWidth: 2.5, dasharray: '8 4', animated: true },
+  success: { stroke: '#10b981', strokeWidth: 2,   dasharray: '6 3', animated: false },
+  error:   { stroke: '#ef4444', strokeWidth: 2,   dasharray: '4 4', animated: false },
+};
+
 export default function CustomEdge({ 
   id, 
   sourceX, 
@@ -38,10 +46,8 @@ export default function CustomEdge({
   const { deleteElements, getNode, setNodes, setEdges } = useReactFlow();
   const [isHovered, setIsHovered] = useState(false);
   
-  // Extraer status del className (seteado por FlowCanvas useEffect)
   const edgeStatus = className?.replace('edge-status-', '') || 'idle';
-  
-  // No usar BaseEdge style -- usamos path manual con CSS class para animaciones
+  const style = EDGE_STYLES[edgeStatus] || EDGE_STYLES.idle;
   
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
@@ -64,20 +70,17 @@ export default function CustomEdge({
     
     if (!sourceNode || !targetNode) return;
 
-    // Calcular posición del nuevo nodo en el medio
     const midX = (sourceNode.position.x + targetNode.position.x) / 2;
     const midY = (sourceNode.position.y + targetNode.position.y) / 2;
 
-    // Crear nuevo nodo usando createNodeInstance con ULID (prefijo "n_")
     const newNode = createNodeInstance('ap.agent.core', { x: midX, y: midY });
 
-    // Crear nuevos edges con ULID y prefijo "e_"
     const newEdge1: ReactFlowEdge = {
       id: `e_${ulid()}`,
       source: source,
       target: newNode.id,
       type: 'custom',
-      animated: true,
+      animated: false,
       sourceHandle: 'out',
       targetHandle: 'in',
     };
@@ -87,17 +90,14 @@ export default function CustomEdge({
       source: newNode.id,
       target: target,
       type: 'custom',
-      animated: true,
+      animated: false,
       sourceHandle: 'out',
       targetHandle: 'in',
     };
 
-    // Actualizar estado
     setNodes((nds) => [...nds, newNode]);
     setEdges((eds) => {
-      // Eliminar el edge actual
       const filtered = eds.filter((edge) => edge.id !== id);
-      // Agregar los dos nuevos edges
       return [...filtered, newEdge1, newEdge2];
     });
   };
@@ -109,15 +109,16 @@ export default function CustomEdge({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Path visible con clase CSS para animación */}
+        {/* Edge path con estilos inline para garantizar que funcionen */}
         <path
-          id={id}
           d={edgePath}
           fill="none"
-          className={`react-flow__edge-path edge-animated-path edge-path-${edgeStatus}`}
-          markerEnd={`url(#${id})`}
+          stroke={isHovered ? '#a78bfa' : style.stroke}
+          strokeWidth={isHovered ? 3 : style.strokeWidth}
+          strokeDasharray={style.dasharray}
+          className={style.animated ? 'edge-dash-animated' : ''}
         />
-        {/* Path invisible más grueso para facilitar el hover */}
+        {/* Hit area invisible */}
         <path
           d={edgePath}
           fill="none"
