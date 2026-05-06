@@ -33,7 +33,18 @@
   border: 2px solid var(--handle-border);
 }
 
-/* Nodos seleccionados */
+/* Quitar contorno cuadrado del wrapper de React Flow */
+.react-flow__node {
+  outline: none !important;
+}
+.react-flow__node:focus {
+  outline: none !important;
+}
+.react-flow__node.selected {
+  outline: none !important;
+}
+
+/* Nodos seleccionados - solo el container interno cambia borde */
 .react-flow__node.selected .node-container {
   border-color: var(--node-border-selected);
 }
