@@ -18,8 +18,6 @@ interface CustomEdgeProps extends EdgeProps {
   sourceY: number;
   targetX: number;
   targetY: number;
-  sourcePosition?: Position;
-  targetPosition?: Position;
   source: string;
   target: string;
   className?: string;
