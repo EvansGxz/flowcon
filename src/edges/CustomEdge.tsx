@@ -20,6 +20,7 @@ interface CustomEdgeProps extends EdgeProps {
   targetY: number;
   source: string;
   target: string;
+  data?: { edgeStatus?: string };
 }
 
 export default function CustomEdge({ 
@@ -32,11 +33,13 @@ export default function CustomEdge({
   targetPosition,
   source,
   target,
+  data,
   style,
-  markerEnd,
 }: CustomEdgeProps) {
   const { deleteElements, getNode, setNodes, setEdges } = useReactFlow();
   const [isHovered, setIsHovered] = useState(false);
+  
+  const edgeStatus = data?.edgeStatus || 'idle';
   
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
@@ -91,7 +94,17 @@ export default function CustomEdge({
     });
   };
 
-  const hoverStyle = isHovered ? { stroke: '#a78bfa', strokeWidth: 3 } : {};
+  // Color del edge segun status
+  const strokeColor = edgeStatus === 'running' ? '#f59e0b' 
+    : edgeStatus === 'success' ? '#10b981'
+    : edgeStatus === 'error' ? '#ef4444'
+    : undefined; // default del tema
+
+  const mergedStyle = {
+    ...style,
+    ...(strokeColor ? { stroke: strokeColor } : {}),
+    ...(isHovered ? { stroke: '#a78bfa', strokeWidth: 3 } : {}),
+  };
 
   return (
     <>
@@ -99,13 +112,13 @@ export default function CustomEdge({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* BaseEdge maneja animated nativo de React Flow */}
-        <BaseEdge 
-          id={id} 
-          path={edgePath} 
-          style={{ ...style, ...hoverStyle }}
-          markerEnd={markerEnd}
-        />
+        <BaseEdge id={id} path={edgePath} style={mergedStyle} />
+        {/* Circulo animado que recorre el path cuando esta en running */}
+        {edgeStatus === 'running' && (
+          <circle r="4" fill="#f59e0b">
+            <animateMotion dur="1.5s" repeatCount="indefinite" path={edgePath} />
+          </circle>
+        )}
         {/* Hit area */}
         <path
           d={edgePath}
