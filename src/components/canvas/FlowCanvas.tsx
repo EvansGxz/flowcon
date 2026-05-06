@@ -174,7 +174,7 @@ function FlowCanvasInner() {
       setEdges((currentEdges) =>
         currentEdges.map((edge) => ({
           ...edge,
-          animated: false,
+          animated: true,
           style: undefined,
           data: { ...((edge.data || {}) as Record<string, unknown>), edgeStatus: 'idle' },
         }))
@@ -249,9 +249,13 @@ function FlowCanvasInner() {
         if (currentStatus !== edgeStatus) {
           return {
             ...edge,
-            animated: edgeStatus === 'running',
-            style: edgeStatus === 'success' ? { stroke: '#10b981' } : 
-                   edgeStatus === 'error' ? { stroke: '#ef4444' } :
+            // Running: animado (punteado moviéndose) + amber
+            // Success: sin animación (línea sólida) + verde
+            // Error: sin animación (línea sólida) + rojo
+            // Idle: animado (punteado moviéndose, default)
+            animated: edgeStatus === 'running' || edgeStatus === 'idle',
+            style: edgeStatus === 'success' ? { stroke: '#10b981', strokeDasharray: 'none' } : 
+                   edgeStatus === 'error' ? { stroke: '#ef4444', strokeDasharray: 'none' } :
                    edgeStatus === 'running' ? { stroke: '#f59e0b' } : undefined,
             data: { ...((edge.data || {}) as Record<string, unknown>), edgeStatus },
           };
@@ -444,7 +448,7 @@ function FlowCanvasInner() {
         ...params,
         id: `e_${ulid()}`,
         type: 'smoothstep',
-        animated: false,
+        animated: true,
         sourceHandle: params.sourceHandle ?? 'out',
         targetHandle: params.targetHandle ?? 'in',
       };
