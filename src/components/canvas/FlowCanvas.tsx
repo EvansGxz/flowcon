@@ -163,7 +163,7 @@ function FlowCanvasInner() {
   // Actualizar estados de los nodos desde el trace durante la ejecución
   useEffect(() => {
     if (!trace || trace.length === 0) {
-      // Si no hay trace, resetear todos los nodos a IDLE
+      // Si no hay trace, resetear todos los nodos a IDLE y edges
       setNodes((currentNodes) =>
         currentNodes.map((node) => ({
           ...node,
@@ -171,6 +171,13 @@ function FlowCanvasInner() {
             ...node.data,
             status: NodeStatus.IDLE,
           },
+        }))
+      );
+      setEdges((currentEdges) =>
+        currentEdges.map((edge) => ({
+          ...edge,
+          className: 'edge-status-idle',
+          data: { ...((edge.data || {}) as Record<string, unknown>), edgeStatus: 'idle' },
         }))
       );
       return;
@@ -227,7 +234,30 @@ function FlowCanvasInner() {
         return node;
       })
     );
-  }, [trace, setNodes]);
+    // Actualizar edges con status basado en nodos conectados
+    setEdges((currentEdges) =>
+      currentEdges.map((edge) => {
+        const srcStatus = traceStatusMap.get(String(edge.source)) || NodeStatus.IDLE;
+        const tgtStatus = traceStatusMap.get(String(edge.target)) || NodeStatus.IDLE;
+        
+        let edgeStatus = 'idle';
+        if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.RUNNING) edgeStatus = 'running';
+        else if (srcStatus === NodeStatus.RUNNING) edgeStatus = 'running';
+        else if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.SUCCESS) edgeStatus = 'success';
+        else if (srcStatus === NodeStatus.ERROR || tgtStatus === NodeStatus.ERROR) edgeStatus = 'error';
+        
+        const currentStatus = (edge.data as Record<string, unknown>)?.edgeStatus;
+        if (currentStatus !== edgeStatus) {
+          return {
+            ...edge,
+            className: `edge-status-${edgeStatus}`,
+            data: { ...((edge.data || {}) as Record<string, unknown>), edgeStatus },
+          };
+        }
+        return edge;
+      })
+    );
+  }, [trace, setNodes, setEdges]);
   
   // Identificar nodo activo desde el trace
   const getActiveNodeId = (): string | null => {
