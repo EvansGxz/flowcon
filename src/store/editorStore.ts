@@ -874,7 +874,7 @@ export const useEditorStore = create<StoreState>((set, get) => ({
         clearInterval(interval);
         set({ pollingInterval: null });
       }
-    }, 1500); // 1.5 segundos
+    }, 500); // 500ms para capturar estados intermedios
     
     set({ pollingInterval: interval as unknown as NodeJS.Timeout });
   },

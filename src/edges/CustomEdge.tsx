@@ -4,6 +4,7 @@ import {
   EdgeLabelRenderer,
   getBezierPath,
   useReactFlow,
+  useNodes,
   type EdgeProps,
 } from '@xyflow/react';
 import { ulid } from 'ulid';
@@ -43,10 +44,13 @@ export default function CustomEdge({
   const { deleteElements, getNode, setNodes, setEdges } = useReactFlow();
   const [isHovered, setIsHovered] = useState(false);
   
-  // Determinar color del edge basado en estado del source node
+  // useNodes() para reactividad -- se re-renderiza cuando cambia data.status de cualquier nodo
+  const allNodes = useNodes();
+  
+  // Determinar color del edge basado en estado de los nodos conectados
   const edgeStatus = useMemo(() => {
-    const sourceNode = getNode(source);
-    const targetNode = getNode(target);
+    const sourceNode = allNodes.find(n => n.id === source);
+    const targetNode = allNodes.find(n => n.id === target);
     const srcStatus = (sourceNode?.data?.status as string) || 'idle';
     const tgtStatus = (targetNode?.data?.status as string) || 'idle';
     
@@ -59,7 +63,7 @@ export default function CustomEdge({
     // Si alguno tiene error → edge error
     if (srcStatus === NodeStatus.ERROR || tgtStatus === NodeStatus.ERROR) return 'error';
     return 'idle';
-  }, [source, target, getNode]);
+  }, [allNodes, source, target]);
   
   const edgeColor = EDGE_COLORS[edgeStatus] || '';
   

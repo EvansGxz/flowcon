@@ -38,9 +38,11 @@
   border-color: var(--node-border-selected);
 }
 
-/* Edges (conexiones) */
+/* Edges (conexiones) - punteadas por defecto estilo n8n */
 .react-flow__edge-path {
   stroke: var(--node-description-color);
+  stroke-dasharray: 6 3;
+  stroke-width: 1.5;
 }
 
 [data-theme='abyss'] .react-flow__edge-path,

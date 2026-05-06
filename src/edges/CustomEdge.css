@@ -12,27 +12,27 @@
 /* Edge execution states                                         */
 /* ============================================================ */
 
-/* Running: amber + animated dash */
+/* Running: amber + dash rapido animado */
 .edge-status-running .react-flow__edge-path {
   stroke: #f59e0b !important;
   stroke-width: 2.5 !important;
-  stroke-dasharray: 8 4;
-  animation: edge-flow 0.6s linear infinite;
+  stroke-dasharray: 8 4 !important;
+  animation: edge-flow 0.4s linear infinite !important;
 }
 
-/* Success: green solid */
+/* Success: verde + linea continua (datos ya pasaron) */
 .edge-status-success .react-flow__edge-path {
   stroke: #10b981 !important;
   stroke-width: 2 !important;
-  stroke-dasharray: none;
-  transition: stroke 0.3s ease;
+  stroke-dasharray: none !important;
+  transition: stroke 0.3s ease, stroke-dasharray 0.3s ease;
 }
 
-/* Error: red */
+/* Error: rojo */
 .edge-status-error .react-flow__edge-path {
   stroke: #ef4444 !important;
   stroke-width: 2 !important;
-  stroke-dasharray: none;
+  stroke-dasharray: 4 4 !important;
 }
 
 @keyframes edge-flow {
