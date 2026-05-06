@@ -234,25 +234,46 @@ function FlowCanvasInner() {
       })
     );
     // Actualizar edges con status basado en nodos conectados
+    // Un edge se anima cuando los datos están fluyendo por él:
+    // - source completó o está running Y target está running → datos fluyendo
+    // - ambos completados → datos ya pasaron (success)
+    // - cualquiera con error → error
     setEdges((currentEdges) =>
       currentEdges.map((edge) => {
         const srcStatus = traceStatusMap.get(String(edge.source)) || NodeStatus.IDLE;
         const tgtStatus = traceStatusMap.get(String(edge.target)) || NodeStatus.IDLE;
         
         let edgeStatus = 'idle';
-        if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.RUNNING) edgeStatus = 'running';
-        else if (srcStatus === NodeStatus.RUNNING) edgeStatus = 'running';
-        else if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.SUCCESS) edgeStatus = 'success';
-        else if (srcStatus === NodeStatus.ERROR || tgtStatus === NodeStatus.ERROR) edgeStatus = 'error';
+        
+        // Error en cualquier extremo
+        if (srcStatus === NodeStatus.ERROR || tgtStatus === NodeStatus.ERROR) {
+          edgeStatus = 'error';
+        }
+        // Ambos completados → datos ya pasaron
+        else if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.SUCCESS) {
+          edgeStatus = 'success';
+        }
+        // Source completó y target running → datos fluyendo hacia target
+        else if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.RUNNING) {
+          edgeStatus = 'running';
+        }
+        // Source running → datos saliendo del source
+        else if (srcStatus === NodeStatus.RUNNING) {
+          edgeStatus = 'running';
+        }
+        // Target running pero source idle → edge AI de vuelta (capability→agent)
+        else if (tgtStatus === NodeStatus.RUNNING && srcStatus !== NodeStatus.IDLE) {
+          edgeStatus = 'running';
+        }
+        // Source completó pero target aún idle → datos esperando
+        else if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.IDLE) {
+          edgeStatus = 'running';
+        }
         
         const currentStatus = (edge.data as Record<string, unknown>)?.edgeStatus;
         if (currentStatus !== edgeStatus) {
           return {
             ...edge,
-            // Running: punteado animado + amber (datos fluyendo)
-            // Success: linea solida verde (ya paso)
-            // Error: linea solida roja
-            // Idle: punteado estatico (default)
             animated: edgeStatus === 'running',
             style: edgeStatus === 'success' ? { stroke: '#10b981', strokeDasharray: 'none' } : 
                    edgeStatus === 'error' ? { stroke: '#ef4444', strokeDasharray: 'none' } :
