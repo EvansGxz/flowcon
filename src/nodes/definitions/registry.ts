@@ -810,3 +810,53 @@ nodeRegistry.register(
     },
   })
 );
+
+// ============================================================================
+// Parallel Fork
+// ============================================================================
+nodeRegistry.register(
+  createNodeDefinition({
+    typeId: 'ap.parallel.fork',
+    backendType: 'parallel.fork',
+    displayName: 'Parallel Fork',
+    category: 'logic',
+    description: 'Distribuye la ejecucion en branches paralelas',
+    icon: 'GitFork',
+    color: 'orange',
+    inputs: [
+      { id: 'in', type: PortType.MAIN, label: 'Input', multiple: false, required: true, dataType: 'json' },
+    ],
+    outputs: [
+      { id: 'out', type: PortType.MAIN, label: 'Branch', multiple: true, dataType: 'json' },
+    ],
+    properties: [
+      { name: 'merge_strategy', label: 'Merge Strategy', type: 'enum', required: false, default: 'all', options: ['all', 'first'], ui: { widget: 'select', placeholder: '', rows: 1 } },
+    ],
+    defaults: { merge_strategy: 'all' },
+  })
+);
+
+// ============================================================================
+// Parallel Join
+// ============================================================================
+nodeRegistry.register(
+  createNodeDefinition({
+    typeId: 'ap.parallel.join',
+    backendType: 'parallel.join',
+    displayName: 'Parallel Join',
+    category: 'logic',
+    description: 'Espera y mergea resultados de branches paralelas',
+    icon: 'GitMerge',
+    color: 'orange',
+    inputs: [
+      { id: 'in', type: PortType.MAIN, label: 'Branch', multiple: true, required: true, dataType: 'json' },
+    ],
+    outputs: [
+      { id: 'out', type: PortType.MAIN, label: 'Output', multiple: false, dataType: 'json' },
+    ],
+    properties: [
+      { name: 'merge_strategy', label: 'Merge Strategy', type: 'enum', required: false, default: 'all', options: ['all', 'first'], ui: { widget: 'select', placeholder: '', rows: 1 } },
+    ],
+    defaults: { merge_strategy: 'all' },
+  })
+);

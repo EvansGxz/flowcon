@@ -57,6 +57,8 @@ const nodeTypes: NodeTypes = {
   trigger_input: TriggerNode, // Nuevo en v1.0.2
   agent_core: AgentNode,
   condition_expr: ConditionNode,
+  parallel_fork: ConditionNode,
+  parallel_join: ConditionNode,
   memory_kv: MemoryNode,
   model_llm: ModelLlmNode,
   tool_http: ActionNode,

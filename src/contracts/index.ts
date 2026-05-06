@@ -16,6 +16,8 @@ export const NodeTypeSchema = z.enum([
   'trigger.input',
   'agent.core',
   'condition.expr',
+  'parallel.fork',
+  'parallel.join',
   'memory.kv',
   'model.llm',
   'tool.http',
