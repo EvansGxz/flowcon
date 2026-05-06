@@ -239,33 +239,31 @@
   opacity: 1;
 }
 
-/* RUNNING: borde amber animado + glow */
+/* RUNNING: solo borde amber */
 .node-status-running {
   border-color: #f59e0b !important;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4), 0 0 24px rgba(245, 158, 11, 0.15) !important;
-  animation: node-glow-running 1.5s ease-in-out infinite !important;
+  box-shadow: none !important;
 }
 
 .node-status-running .node-indicator {
-  animation: pulse 1.5s ease-in-out infinite;
   background-color: #f59e0b;
 }
 
-/* SUCCESS: borde verde + flash */
+/* SUCCESS: solo borde verde */
 .node-status-success {
   border-color: #10b981 !important;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3) !important;
-  transition: border-color 0.3s, box-shadow 0.3s !important;
+  box-shadow: none !important;
+  transition: border-color 0.3s !important;
 }
 
 .node-status-success .node-indicator {
   background-color: #10b981;
 }
 
-/* ERROR: borde rojo + glow */
+/* ERROR: solo borde rojo */
 .node-status-error {
   border-color: #ef4444 !important;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.3) !important;
+  box-shadow: none !important;
 }
 
 .node-status-error .node-indicator {

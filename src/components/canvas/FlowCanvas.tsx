@@ -233,40 +233,49 @@ function FlowCanvasInner() {
         return node;
       })
     );
-    // Actualizar edges con status basado en nodos conectados
-    // Un edge se anima cuando los datos están fluyendo por él:
-    // - source completó o está running Y target está running → datos fluyendo
-    // - ambos completados → datos ya pasaron (success)
-    // - cualquiera con error → error
+    // Construir set de nodos que aparecen en el trace (en orden)
+    const traceNodeIds = trace.map(e => String(e.nodeId || (e as unknown as {node_id?: string}).node_id || ''));
+    const activeNodeIds = new Set(traceNodeIds);
+    const runningNodeIds = new Set<string>();
+    traceNodeIds.forEach((nid, i) => {
+      const entry = trace[i];
+      if (entry && entry.status === 'running') runningNodeIds.add(nid);
+    });
+    
+    // Actualizar edges: solo animar si ambos extremos participan en el trace
     setEdges((currentEdges) =>
       currentEdges.map((edge) => {
-        const srcStatus = traceStatusMap.get(String(edge.source)) || NodeStatus.IDLE;
-        const tgtStatus = traceStatusMap.get(String(edge.target)) || NodeStatus.IDLE;
+        const srcId = String(edge.source);
+        const tgtId = String(edge.target);
+        const srcStatus = traceStatusMap.get(srcId) || NodeStatus.IDLE;
+        const tgtStatus = traceStatusMap.get(tgtId) || NodeStatus.IDLE;
+        
+        // Solo considerar este edge si al menos un extremo participa en el trace
+        const srcInTrace = activeNodeIds.has(srcId);
+        const tgtInTrace = activeNodeIds.has(tgtId);
         
         let edgeStatus = 'idle';
         
-        // Error en cualquier extremo
-        if (srcStatus === NodeStatus.ERROR || tgtStatus === NodeStatus.ERROR) {
+        if (!srcInTrace && !tgtInTrace) {
+          edgeStatus = 'idle';
+        }
+        else if (srcStatus === NodeStatus.ERROR || tgtStatus === NodeStatus.ERROR) {
           edgeStatus = 'error';
         }
-        // Ambos completados → datos ya pasaron
         else if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.SUCCESS) {
           edgeStatus = 'success';
         }
-        // Source completó y target running → datos fluyendo hacia target
         else if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.RUNNING) {
           edgeStatus = 'running';
         }
-        // Source running → datos saliendo del source
-        else if (srcStatus === NodeStatus.RUNNING) {
+        else if (srcStatus === NodeStatus.RUNNING && tgtInTrace) {
           edgeStatus = 'running';
         }
-        // Target running pero source idle → edge AI de vuelta (capability→agent)
-        else if (tgtStatus === NodeStatus.RUNNING && srcStatus !== NodeStatus.IDLE) {
+        else if (tgtStatus === NodeStatus.RUNNING && srcStatus === NodeStatus.SUCCESS) {
           edgeStatus = 'running';
         }
-        // Source completó pero target aún idle → datos esperando
-        else if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.IDLE) {
+        else if (srcStatus === NodeStatus.SUCCESS && !tgtInTrace) {
+          // Source completó pero target no ha empezado -- datos esperando
           edgeStatus = 'running';
         }
         
