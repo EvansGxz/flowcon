@@ -817,7 +817,6 @@ nodeRegistry.register(
 nodeRegistry.register(
   new NodeDefinition({
     typeId: 'ap.parallel.fork',
-    backendType: 'parallel.fork',
     displayName: 'Parallel Fork',
     category: NodeCategory.ROUTER,
     description: 'Distribuye la ejecucion en branches paralelas',
@@ -842,7 +841,6 @@ nodeRegistry.register(
 nodeRegistry.register(
   new NodeDefinition({
     typeId: 'ap.parallel.join',
-    backendType: 'parallel.join',
     displayName: 'Parallel Join',
     category: NodeCategory.ROUTER,
     description: 'Espera y mergea resultados de branches paralelas',
