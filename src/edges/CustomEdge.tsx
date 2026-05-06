@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   BaseEdge,
   EdgeLabelRenderer,
@@ -10,6 +10,7 @@ import { ulid } from 'ulid';
 import { createNodeInstance } from '../utils/nodeInstance';
 import type { ReactFlowNode, ReactFlowEdge } from '../types/reactflow';
 import EdgeControls from './EdgeControls';
+import { NodeStatus } from '../nodes/definitions/types';
 import './CustomEdge.css';
 
 interface CustomEdgeProps extends EdgeProps {
@@ -22,6 +23,14 @@ interface CustomEdgeProps extends EdgeProps {
   target: string;
 }
 
+// Colores de edge según estado de ejecución
+const EDGE_COLORS: Record<string, string> = {
+  running: '#f59e0b',   // amber
+  success: '#10b981',   // green
+  error: '#ef4444',     // red
+  idle: '',             // default (theme)
+};
+
 export default function CustomEdge({ 
   id, 
   sourceX, 
@@ -33,6 +42,26 @@ export default function CustomEdge({
 }: CustomEdgeProps) {
   const { deleteElements, getNode, setNodes, setEdges } = useReactFlow();
   const [isHovered, setIsHovered] = useState(false);
+  
+  // Determinar color del edge basado en estado del source node
+  const edgeStatus = useMemo(() => {
+    const sourceNode = getNode(source);
+    const targetNode = getNode(target);
+    const srcStatus = (sourceNode?.data?.status as string) || 'idle';
+    const tgtStatus = (targetNode?.data?.status as string) || 'idle';
+    
+    // Si el source completó y el target está running → edge activo
+    if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.RUNNING) return 'running';
+    // Si el source está running → edge alimentando
+    if (srcStatus === NodeStatus.RUNNING) return 'running';
+    // Si ambos completaron → edge completado
+    if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.SUCCESS) return 'success';
+    // Si alguno tiene error → edge error
+    if (srcStatus === NodeStatus.ERROR || tgtStatus === NodeStatus.ERROR) return 'error';
+    return 'idle';
+  }, [source, target, getNode]);
+  
+  const edgeColor = EDGE_COLORS[edgeStatus] || '';
   
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -92,11 +121,11 @@ export default function CustomEdge({
   return (
     <>
       <g
-        className={`edge-path-group ${isHovered ? 'hovered' : ''}`}
+        className={`edge-path-group ${isHovered ? 'hovered' : ''} edge-status-${edgeStatus}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <BaseEdge id={id} path={edgePath} />
+        <BaseEdge id={id} path={edgePath} style={edgeColor ? { stroke: edgeColor, strokeWidth: 2.5 } : undefined} />
         {/* Path invisible más grueso para facilitar el hover */}
         <path
           d={edgePath}

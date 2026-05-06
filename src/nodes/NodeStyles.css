@@ -230,9 +230,20 @@
   background-color: #ec4899;
 }
 
-/* Estados de ejecución */
+/* ============================================================ */
+/* Estados de ejecución - Nodos                                  */
+/* ============================================================ */
+
+/* IDLE: estado normal */
 .node-status-idle .node-indicator {
   opacity: 1;
+}
+
+/* RUNNING: borde amber animado + glow */
+.node-status-running {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4), 0 0 24px rgba(245, 158, 11, 0.15) !important;
+  animation: node-glow-running 1.5s ease-in-out infinite !important;
 }
 
 .node-status-running .node-indicator {
@@ -240,12 +251,35 @@
   background-color: #f59e0b;
 }
 
+/* SUCCESS: borde verde + flash */
+.node-status-success {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.3) !important;
+  transition: border-color 0.3s, box-shadow 0.3s !important;
+}
+
 .node-status-success .node-indicator {
   background-color: #10b981;
 }
 
+/* ERROR: borde rojo + glow */
+.node-status-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.3) !important;
+}
+
 .node-status-error .node-indicator {
   background-color: #ef4444;
+}
+
+/* SKIPPED: tenue, gris */
+.node-status-skipped {
+  opacity: 0.5 !important;
+  border-color: var(--node-border) !important;
+}
+
+.node-status-skipped .node-indicator {
+  background-color: #6b7280;
 }
 
 .node-status-spinner {
@@ -259,27 +293,23 @@
   color: white;
 }
 
-.node-status-error {
-  font-size: 10px;
-  color: white;
-}
+/* ============================================================ */
+/* Animations                                                     */
+/* ============================================================ */
 
 @keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes node-glow-running {
+  0%, 100% { box-shadow: 0 0 12px rgba(245, 158, 11, 0.4), 0 0 24px rgba(245, 158, 11, 0.15); }
+  50% { box-shadow: 0 0 18px rgba(245, 158, 11, 0.6), 0 0 36px rgba(245, 158, 11, 0.25); }
 }
 
 /* Badge de versión */
