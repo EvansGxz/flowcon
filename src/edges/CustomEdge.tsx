@@ -20,7 +20,7 @@ interface CustomEdgeProps extends EdgeProps {
   targetY: number;
   source: string;
   target: string;
-  className?: string;
+  data?: { edgeStatus?: string };
 }
 
 // Estilos por estado
@@ -41,12 +41,12 @@ export default function CustomEdge({
   targetPosition,
   source,
   target,
-  className,
+  data,
 }: CustomEdgeProps) {
   const { deleteElements, getNode, setNodes, setEdges } = useReactFlow();
   const [isHovered, setIsHovered] = useState(false);
   
-  const edgeStatus = className?.replace('edge-status-', '') || 'idle';
+  const edgeStatus = data?.edgeStatus || 'idle';
   const style = EDGE_STYLES[edgeStatus] || EDGE_STYLES.idle;
   
   const [edgePath, labelX, labelY] = getSmoothStepPath({
