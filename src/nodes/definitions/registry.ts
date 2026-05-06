@@ -815,7 +815,7 @@ nodeRegistry.register(
 // Parallel Fork
 // ============================================================================
 nodeRegistry.register(
-  createNodeDefinition({
+  new NodeDefinition({
     typeId: 'ap.parallel.fork',
     backendType: 'parallel.fork',
     displayName: 'Parallel Fork',
@@ -840,7 +840,7 @@ nodeRegistry.register(
 // Parallel Join
 // ============================================================================
 nodeRegistry.register(
-  createNodeDefinition({
+  new NodeDefinition({
     typeId: 'ap.parallel.join',
     backendType: 'parallel.join',
     displayName: 'Parallel Join',
