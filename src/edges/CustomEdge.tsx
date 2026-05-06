@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import {
-  BaseEdge,
   EdgeLabelRenderer,
   getSmoothStepPath,
   useReactFlow,
   type EdgeProps,
+  Position,
 } from '@xyflow/react';
 import { ulid } from 'ulid';
 import { createNodeInstance } from '../utils/nodeInstance';
@@ -18,6 +18,8 @@ interface CustomEdgeProps extends EdgeProps {
   sourceY: number;
   targetX: number;
   targetY: number;
+  sourcePosition?: Position;
+  targetPosition?: Position;
   source: string;
   target: string;
   className?: string;
@@ -29,6 +31,8 @@ export default function CustomEdge({
   sourceY, 
   targetX, 
   targetY,
+  sourcePosition,
+  targetPosition,
   source,
   target,
   className,
@@ -39,29 +43,17 @@ export default function CustomEdge({
   // Extraer status del className (seteado por FlowCanvas useEffect)
   const edgeStatus = className?.replace('edge-status-', '') || 'idle';
   
-  // Estilos inline por status
-  const edgeStyle: React.CSSProperties = {};
-  if (edgeStatus === 'running') {
-    edgeStyle.stroke = '#f59e0b';
-    edgeStyle.strokeWidth = 2.5;
-    edgeStyle.strokeDasharray = '8 4';
-    edgeStyle.animation = 'edge-flow 0.4s linear infinite';
-  } else if (edgeStatus === 'success') {
-    edgeStyle.stroke = '#10b981';
-    edgeStyle.strokeWidth = 2;
-    edgeStyle.strokeDasharray = '6 3';
-  } else if (edgeStatus === 'error') {
-    edgeStyle.stroke = '#ef4444';
-    edgeStyle.strokeWidth = 2;
-    edgeStyle.strokeDasharray = '4 4';
-  }
+  // No usar BaseEdge style -- usamos path manual con CSS class para animaciones
   
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
     sourceY,
+    sourcePosition: sourcePosition || Position.Right,
     targetX,
     targetY,
+    targetPosition: targetPosition || Position.Left,
     borderRadius: 8,
+    offset: 30,
   });
 
   const onDelete = () => {
@@ -115,11 +107,18 @@ export default function CustomEdge({
   return (
     <>
       <g
-        className={`edge-path-group ${isHovered ? 'hovered' : ''} ${className || ''}`}
+        className={`edge-path-group ${isHovered ? 'hovered' : ''}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <BaseEdge id={id} path={edgePath} style={Object.keys(edgeStyle).length > 0 ? edgeStyle : undefined} />
+        {/* Path visible con clase CSS para animación */}
+        <path
+          id={id}
+          d={edgePath}
+          fill="none"
+          className={`react-flow__edge-path edge-animated-path edge-path-${edgeStatus}`}
+          markerEnd={`url(#${id})`}
+        />
         {/* Path invisible más grueso para facilitar el hover */}
         <path
           d={edgePath}
