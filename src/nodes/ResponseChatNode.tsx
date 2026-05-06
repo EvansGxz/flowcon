@@ -1,6 +1,6 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { useEffect, useRef } from 'react';
-import { MessageSquare, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { MessageSquare, Loader2 } from 'lucide-react';
 import { NodeStatus, type NodeStatusValue } from './definitions/types';
 import { nodeRegistry } from './definitions/registry';
 import { useEditorStore } from '../store/editorStore';
@@ -98,10 +98,6 @@ const ResponseChatNode = ({ data, selected, id }: ResponseChatNodeProps) => {
         <div className={`node-indicator node-indicator-emerald ${statusClass}`} style={{ width: '100%', height: '100%', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' }}>
           {status === NodeStatus.RUNNING ? (
             <Loader2 size={32} className="animate-spin" />
-          ) : status === NodeStatus.SUCCESS ? (
-            <CheckCircle2 size={32} />
-          ) : status === NodeStatus.ERROR ? (
-            <XCircle size={32} />
           ) : (
             <MessageSquare size={32} />
           )}
@@ -136,10 +132,6 @@ const ResponseChatNode = ({ data, selected, id }: ResponseChatNodeProps) => {
           <div className={`node-indicator node-indicator-emerald ${statusClass}`}>
             {status === NodeStatus.RUNNING ? (
               <Loader2 size={22} className="animate-spin" />
-            ) : status === NodeStatus.SUCCESS ? (
-              <CheckCircle2 size={22} />
-            ) : status === NodeStatus.ERROR ? (
-              <XCircle size={22} />
             ) : (
               <MessageSquare size={22} />
             )}
@@ -176,15 +168,11 @@ const ResponseChatNode = ({ data, selected, id }: ResponseChatNodeProps) => {
     >
       <div className="node-header">
         <div className={`node-indicator node-indicator-emerald ${statusClass}`}>
-          {status === NodeStatus.RUNNING ? (
-            <Loader2 size={16} className="animate-spin" />
-          ) : status === NodeStatus.SUCCESS ? (
-            <CheckCircle2 size={16} />
-          ) : status === NodeStatus.ERROR ? (
-            <XCircle size={16} />
-          ) : (
-            <MessageSquare size={16} />
-          )}
+            {status === NodeStatus.RUNNING ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <MessageSquare size={16} />
+            )}
         </div>
         <div className="node-title">{displayName}</div>
         {version > 1 && (

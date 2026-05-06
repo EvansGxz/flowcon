@@ -1,6 +1,6 @@
 import { Handle, Position, useEdges, type NodeProps } from '@xyflow/react';
 import { useEffect, useRef, useMemo } from 'react';
-import { Brain, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Brain, Loader2 } from 'lucide-react';
 import { NodeStatus, type NodeStatusValue } from './definitions/types';
 import { nodeRegistry } from './definitions/registry';
 import { useEditorStore } from '../store/editorStore';
@@ -67,8 +67,6 @@ const ModelLlmNode = ({ data, selected, id }: ModelLlmNodeProps) => {
   // Render status icon helper
   const renderIcon = (size: number) => {
     if (status === NodeStatus.RUNNING) return <Loader2 size={size} className="animate-spin" />;
-    if (status === NodeStatus.SUCCESS) return <CheckCircle2 size={size} />;
-    if (status === NodeStatus.ERROR) return <XCircle size={size} />;
     return <Brain size={size} />;
   };
 

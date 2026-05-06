@@ -1,6 +1,6 @@
 import { Handle, Position, useEdges, type NodeProps } from '@xyflow/react';
 import { useEffect, useRef, useMemo } from 'react';
-import { Database, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Database, Loader2 } from 'lucide-react';
 import { NodeStatus, type NodeStatusValue } from './definitions/types';
 import { nodeRegistry } from './definitions/registry';
 import { useEditorStore } from '../store/editorStore';
@@ -66,8 +66,6 @@ const ToolPostgresNode = ({ data, selected, id }: ToolPostgresNodeProps) => {
   // Render status icon helper
   const renderIcon = (size: number) => {
     if (status === NodeStatus.RUNNING) return <Loader2 size={size} className="animate-spin" />;
-    if (status === NodeStatus.SUCCESS) return <CheckCircle2 size={size} />;
-    if (status === NodeStatus.ERROR) return <XCircle size={size} />;
     return <Database size={size} />;
   };
 
