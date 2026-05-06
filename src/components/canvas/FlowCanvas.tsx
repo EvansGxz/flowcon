@@ -34,7 +34,7 @@ import MemoryNode from '../../nodes/MemoryNode';
 import ModelLlmNode from '../../nodes/ModelLlmNode';
 import ToolPostgresNode from '../../nodes/ToolPostgresNode';
 import ResponseChatNode from '../../nodes/ResponseChatNode';
-// Edge type: smoothstep built-in de React Flow (no custom edge)
+import CustomEdge from '../../edges/CustomEdge';
 import CustomControls from '../controls/CustomControls';
 import TopRightControls from '../controls/TopRightControls';
 import NodePalette from '../palette/NodePalette';
@@ -72,7 +72,7 @@ const nodeTypes: NodeTypes = {
   action: ActionNode,
 };
 
-// Edge types: usamos smoothstep built-in de React Flow (animated funciona nativo)
+const edgeTypes = { custom: CustomEdge };
 
 interface ConnectionFilter {
   nodeId: string;
@@ -174,8 +174,6 @@ function FlowCanvasInner() {
       setEdges((currentEdges) =>
         currentEdges.map((edge) => ({
           ...edge,
-          animated: false,
-          style: undefined,
           data: { ...((edge.data || {}) as Record<string, unknown>), edgeStatus: 'idle' },
         }))
       );
@@ -280,10 +278,6 @@ function FlowCanvasInner() {
         if (currentStatus !== edgeStatus) {
           return {
             ...edge,
-            animated: edgeStatus === 'running',
-            style: edgeStatus === 'success' ? { stroke: '#10b981', strokeDasharray: 'none' } : 
-                   edgeStatus === 'error' ? { stroke: '#ef4444', strokeDasharray: 'none' } :
-                   edgeStatus === 'running' ? { stroke: '#f59e0b' } : undefined,
             data: { ...((edge.data || {}) as Record<string, unknown>), edgeStatus },
           };
         }
@@ -474,8 +468,7 @@ function FlowCanvasInner() {
       const newEdge: Edge = {
         ...params,
         id: `e_${ulid()}`,
-        type: 'smoothstep',
-        animated: false,
+        type: 'custom',
         sourceHandle: params.sourceHandle ?? 'out',
         targetHandle: params.targetHandle ?? 'in',
       };
@@ -594,7 +587,8 @@ function FlowCanvasInner() {
         }}
         deleteKeyCode={['Backspace', 'Delete']}
         nodeTypes={nodeTypes}
-        defaultEdgeOptions={{ type: 'smoothstep' }}
+        edgeTypes={edgeTypes}
+        defaultEdgeOptions={{ type: 'custom' }}
         fitView
       >
         <Background color={backgroundColor} gap={16} />
