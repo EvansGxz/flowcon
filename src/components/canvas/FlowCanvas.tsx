@@ -412,7 +412,7 @@ function FlowCanvasInner() {
         ...params,
         id: `e_${ulid()}`,
         type: 'custom',
-        animated: true,
+        animated: false,
         sourceHandle: params.sourceHandle ?? 'out',
         targetHandle: params.targetHandle ?? 'in',
       };

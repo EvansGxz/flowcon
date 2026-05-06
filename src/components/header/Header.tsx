@@ -246,13 +246,8 @@ const Header = () => {
     try {
       const result = await executeFlow(timeoutSeconds);
       if (result.success) {
-        // Navegar a runs con flowId si está disponible
-        const { selectedFlowId } = useEditorStore.getState();
-        if (selectedFlowId) {
-          window.location.href = `/runs?flowId=${selectedFlowId}`;
-        } else if (window.location.pathname !== '/runs') {
-          window.location.href = '/runs';
-        }
+        // Quedarse en el canvas -- polling actualiza nodos en tiempo real
+        console.log('[Header] Ejecucion iniciada, polling activo');
       } else {
         setAlertModal({ isOpen: true, message: `Error al ejecutar: ${result.error}`, type: 'error' });
       }

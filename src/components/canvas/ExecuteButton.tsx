@@ -61,24 +61,9 @@ const ExecuteButton = () => {
       console.log('[ExecuteButton] Resultado de ejecución:', result);
       
       if (result.success) {
-        // Para flows persistidos, el backend retorna inmediatamente y el polling se inicia automáticamente
-        // Navegar a la vista de runs para ver el progreso en tiempo real
-        if (selectedFlowId && result.run?.id) {
-          // Navegar directamente al detalle del run para ver el progreso
-          setTimeout(() => {
-            window.location.href = `/runs/${result.run!.id}`;
-          }, 500);
-        } else if (selectedFlowId) {
-          // Si no hay runId pero hay flowId, navegar a la lista de runs
-          setTimeout(() => {
-            window.location.href = `/runs?flowId=${selectedFlowId}`;
-          }, 500);
-        } else if (window.location.pathname !== '/runs') {
-          // Para flows de prueba (in-memory), navegar a runs
-          setTimeout(() => {
-            window.location.href = '/runs';
-          }, 500);
-        }
+        // Quedarse en el canvas -- el polling actualiza los nodos en tiempo real
+        // El usuario puede ver el progreso directamente en el canvas
+        console.log('[ExecuteButton] Ejecucion iniciada, polling activo en canvas');
       } else {
         setAlertModal({ 
           isOpen: true, 
