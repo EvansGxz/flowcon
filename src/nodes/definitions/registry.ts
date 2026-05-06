@@ -217,7 +217,7 @@ nodeRegistry.register(
         id: 'ai_model',
         type: PortType.TOOL,
         label: 'Model',
-        multiple: false,
+        multiple: true,
         required: true,
         dataType: 'any',
       },
