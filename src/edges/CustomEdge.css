@@ -1,18 +1,3 @@
-/* Estilos para el grupo del edge path */
-.edge-path-group {
-  cursor: pointer;
-}
-
-/* Animacion de dash para edges running */
-.edge-dash-animated {
-  animation: edge-flow 0.4s linear infinite;
-}
-
-@keyframes edge-flow {
-  0% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: -12; }
-}
-
 /* Wrapper para mantener el hover cuando el mouse está sobre los controles */
 .edge-controls-wrapper {
   pointer-events: all;

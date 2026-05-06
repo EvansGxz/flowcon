@@ -10,7 +10,6 @@ import { ulid } from 'ulid';
 import { createNodeInstance } from '../utils/nodeInstance';
 import type { ReactFlowNode, ReactFlowEdge } from '../types/reactflow';
 import EdgeControls from './EdgeControls';
-import './CustomEdge.css';
 
 interface CustomEdgeProps extends EdgeProps {
   id: string;
@@ -20,16 +19,7 @@ interface CustomEdgeProps extends EdgeProps {
   targetY: number;
   source: string;
   target: string;
-  data?: { edgeStatus?: string };
 }
-
-// Estilos por estado
-const EDGE_STYLES: Record<string, { stroke: string; strokeWidth: number; dasharray: string; animated: boolean }> = {
-  idle:    { stroke: '#9ca3af', strokeWidth: 1.5, dasharray: '6 3', animated: false },
-  running: { stroke: '#f59e0b', strokeWidth: 2.5, dasharray: '8 4', animated: true },
-  success: { stroke: '#10b981', strokeWidth: 2,   dasharray: '6 3', animated: false },
-  error:   { stroke: '#ef4444', strokeWidth: 2,   dasharray: '4 4', animated: false },
-};
 
 export default function CustomEdge({ 
   id, 
@@ -41,13 +31,10 @@ export default function CustomEdge({
   targetPosition,
   source,
   target,
-  data,
+  style,
 }: CustomEdgeProps) {
   const { deleteElements, getNode, setNodes, setEdges } = useReactFlow();
   const [isHovered, setIsHovered] = useState(false);
-  
-  const edgeStatus = data?.edgeStatus || 'idle';
-  const style = EDGE_STYLES[edgeStatus] || EDGE_STYLES.idle;
   
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
@@ -102,31 +89,25 @@ export default function CustomEdge({
     });
   };
 
+  // Merge hover style con el style del edge (que viene de React Flow con colores de status)
+  const pathStyle = {
+    ...style,
+    ...(isHovered ? { stroke: '#a78bfa', strokeWidth: 3 } : {}),
+  };
+
   return (
     <>
       <g
-        className={`edge-path-group ${isHovered ? 'hovered' : ''}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Edge path con estilos inline */}
+        {/* Edge path - React Flow maneja animated y style */}
         <path
           d={edgePath}
           fill="none"
-          stroke={isHovered ? '#a78bfa' : style.stroke}
-          strokeWidth={isHovered ? 3 : style.strokeWidth}
-          strokeDasharray={style.dasharray}
-        >
-          {style.animated && (
-            <animate
-              attributeName="stroke-dashoffset"
-              from="0"
-              to="-12"
-              dur="0.4s"
-              repeatCount="indefinite"
-            />
-          )}
-        </path>
+          className="react-flow__edge-path"
+          style={pathStyle}
+        />
         {/* Hit area invisible */}
         <path
           d={edgePath}
@@ -134,8 +115,6 @@ export default function CustomEdge({
           stroke="transparent"
           strokeWidth={20}
           style={{ cursor: 'pointer' }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
         />
       </g>
       <EdgeLabelRenderer>

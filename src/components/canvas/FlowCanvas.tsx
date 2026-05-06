@@ -176,7 +176,8 @@ function FlowCanvasInner() {
       setEdges((currentEdges) =>
         currentEdges.map((edge) => ({
           ...edge,
-          className: 'edge-status-idle',
+          animated: false,
+          style: undefined,
           data: { ...((edge.data || {}) as Record<string, unknown>), edgeStatus: 'idle' },
         }))
       );
@@ -250,7 +251,10 @@ function FlowCanvasInner() {
         if (currentStatus !== edgeStatus) {
           return {
             ...edge,
-            className: `edge-status-${edgeStatus}`,
+            animated: edgeStatus === 'running',
+            style: edgeStatus === 'success' ? { stroke: '#10b981' } : 
+                   edgeStatus === 'error' ? { stroke: '#ef4444' } :
+                   edgeStatus === 'running' ? { stroke: '#f59e0b' } : undefined,
             data: { ...((edge.data || {}) as Record<string, unknown>), edgeStatus },
           };
         }
