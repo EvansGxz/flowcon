@@ -38,11 +38,15 @@
   border-color: var(--node-border-selected);
 }
 
-/* Edges (conexiones) */
+/* Edges (conexiones) - punteado estatico por defecto */
 .react-flow__edge-path {
   stroke: var(--node-description-color);
   stroke-width: 1.5;
+  stroke-dasharray: 5;
 }
+
+/* Cuando animated=true, React Flow agrega .animated y su propia animacion */
+/* Cuando success/error, el inline style pone strokeDasharray: none (solida) */
 
 [data-theme='abyss'] .react-flow__edge-path,
 [data-theme='dark'] .react-flow__edge-path,
