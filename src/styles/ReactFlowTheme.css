@@ -44,11 +44,6 @@
   stroke-width: 1.5;
 }
 
-/* Punteadas por defecto cuando NO estan animadas */
-.react-flow__edge:not(.animated) .react-flow__edge-path {
-  stroke-dasharray: 6 3;
-}
-
 [data-theme='abyss'] .react-flow__edge-path,
 [data-theme='dark'] .react-flow__edge-path,
 [data-theme='midnight-sakura'] .react-flow__edge-path {

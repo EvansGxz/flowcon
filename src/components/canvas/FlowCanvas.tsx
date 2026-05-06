@@ -19,7 +19,7 @@ import {
   type EdgeChange,
   type Connection,
   type NodeTypes,
-  type EdgeTypes,
+
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import '../../styles/ReactFlowTheme.css';
@@ -34,7 +34,7 @@ import MemoryNode from '../../nodes/MemoryNode';
 import ModelLlmNode from '../../nodes/ModelLlmNode';
 import ToolPostgresNode from '../../nodes/ToolPostgresNode';
 import ResponseChatNode from '../../nodes/ResponseChatNode';
-import CustomEdge from '../../edges/CustomEdge';
+// Edge type: smoothstep built-in de React Flow (no custom edge)
 import CustomControls from '../controls/CustomControls';
 import TopRightControls from '../controls/TopRightControls';
 import NodePalette from '../palette/NodePalette';
@@ -72,9 +72,7 @@ const nodeTypes: NodeTypes = {
   action: ActionNode,
 };
 
-const edgeTypes: EdgeTypes = {
-  custom: CustomEdge,
-};
+// Edge types: usamos smoothstep built-in de React Flow (animated funciona nativo)
 
 interface ConnectionFilter {
   nodeId: string;
@@ -445,7 +443,7 @@ function FlowCanvasInner() {
       const newEdge: Edge = {
         ...params,
         id: `e_${ulid()}`,
-        type: 'custom',
+        type: 'smoothstep',
         animated: false,
         sourceHandle: params.sourceHandle ?? 'out',
         targetHandle: params.targetHandle ?? 'in',
@@ -565,7 +563,7 @@ function FlowCanvasInner() {
         }}
         deleteKeyCode={['Backspace', 'Delete']}
         nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
+        defaultEdgeOptions={{ type: 'smoothstep' }}
         fitView
       >
         <Background color={backgroundColor} gap={16} />

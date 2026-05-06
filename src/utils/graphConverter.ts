@@ -108,7 +108,7 @@ export function edgesToReactFlow(edges: Edge[]): ReactFlowEdge[] {
     id: String(edge.id),
     source: String(edge.source),
     target: String(edge.target),
-    type: 'custom',
+    type: 'smoothstep',
     animated: false,
     sourceHandle: (edge as Record<string, unknown>).sourceHandle as string || 'out',
     targetHandle: (edge as Record<string, unknown>).targetHandle as string || 'in',
