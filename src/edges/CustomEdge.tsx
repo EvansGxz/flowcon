@@ -109,15 +109,24 @@ export default function CustomEdge({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Edge path con estilos inline para garantizar que funcionen */}
+        {/* Edge path con estilos inline */}
         <path
           d={edgePath}
           fill="none"
           stroke={isHovered ? '#a78bfa' : style.stroke}
           strokeWidth={isHovered ? 3 : style.strokeWidth}
           strokeDasharray={style.dasharray}
-          className={style.animated ? 'edge-dash-animated' : ''}
-        />
+        >
+          {style.animated && (
+            <animate
+              attributeName="stroke-dashoffset"
+              from="0"
+              to="-12"
+              dur="0.4s"
+              repeatCount="indefinite"
+            />
+          )}
+        </path>
         {/* Hit area invisible */}
         <path
           d={edgePath}
