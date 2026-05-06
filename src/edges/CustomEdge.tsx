@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  BaseEdge,
   EdgeLabelRenderer,
   getSmoothStepPath,
   useReactFlow,
@@ -32,6 +33,7 @@ export default function CustomEdge({
   source,
   target,
   style,
+  markerEnd,
 }: CustomEdgeProps) {
   const { deleteElements, getNode, setNodes, setEdges } = useReactFlow();
   const [isHovered, setIsHovered] = useState(false);
@@ -89,11 +91,7 @@ export default function CustomEdge({
     });
   };
 
-  // Merge hover style con el style del edge (que viene de React Flow con colores de status)
-  const pathStyle = {
-    ...style,
-    ...(isHovered ? { stroke: '#a78bfa', strokeWidth: 3 } : {}),
-  };
+  const hoverStyle = isHovered ? { stroke: '#a78bfa', strokeWidth: 3 } : {};
 
   return (
     <>
@@ -101,14 +99,14 @@ export default function CustomEdge({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Edge path - React Flow maneja animated y style */}
-        <path
-          d={edgePath}
-          fill="none"
-          className="react-flow__edge-path"
-          style={pathStyle}
+        {/* BaseEdge maneja animated nativo de React Flow */}
+        <BaseEdge 
+          id={id} 
+          path={edgePath} 
+          style={{ ...style, ...hoverStyle }}
+          markerEnd={markerEnd}
         />
-        {/* Hit area invisible */}
+        {/* Hit area */}
         <path
           d={edgePath}
           fill="none"
