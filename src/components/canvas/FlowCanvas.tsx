@@ -257,25 +257,22 @@ function FlowCanvasInner() {
         let edgeStatus = 'idle';
         
         if (!srcInTrace && !tgtInTrace) {
+          // Ninguno participó en el trace
           edgeStatus = 'idle';
         }
         else if (srcStatus === NodeStatus.ERROR || tgtStatus === NodeStatus.ERROR) {
           edgeStatus = 'error';
         }
         else if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.SUCCESS) {
+          // Ambos completados
           edgeStatus = 'success';
         }
         else if (srcStatus === NodeStatus.SUCCESS && tgtStatus === NodeStatus.RUNNING) {
+          // Source completó, target ejecutándose -- datos fluyendo
           edgeStatus = 'running';
         }
-        else if (srcStatus === NodeStatus.RUNNING && tgtInTrace) {
-          edgeStatus = 'running';
-        }
-        else if (tgtStatus === NodeStatus.RUNNING && srcStatus === NodeStatus.SUCCESS) {
-          edgeStatus = 'running';
-        }
-        else if (srcStatus === NodeStatus.SUCCESS && !tgtInTrace) {
-          // Source completó pero target no ha empezado -- datos esperando
+        else if (srcStatus === NodeStatus.RUNNING && tgtStatus === NodeStatus.RUNNING) {
+          // Ambos running (edge AI ida/vuelta)
           edgeStatus = 'running';
         }
         

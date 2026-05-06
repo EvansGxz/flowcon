@@ -33,14 +33,23 @@
   border: 2px solid var(--handle-border);
 }
 
-/* Quitar contorno cuadrado del wrapper de React Flow */
+/* Quitar contorno/fondo/borde del wrapper de React Flow */
 .react-flow__node {
   outline: none !important;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 .react-flow__node:focus {
   outline: none !important;
+  box-shadow: none !important;
 }
 .react-flow__node.selected {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.react-flow__node:focus-visible {
   outline: none !important;
 }
 
